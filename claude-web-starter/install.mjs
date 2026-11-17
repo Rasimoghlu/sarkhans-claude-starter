@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFi
 import { join, resolve, dirname, relative } from "node:path";
 import { homedir, tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -36,7 +37,8 @@ and your personal rules in ~/.claude (CLAUDE.md section + no AI attribution).
   --no-recommended       don't add the recommended skills/MCP on a first install
   --register-skill <src> add your own skill to the catalog (GitHub owner/repo, GitHub URL or local folder)
   --pick <name>          with --register-skill: which skill to take when the source has several
-  --unregister-skill <id> remove one of your own skills from the catalog`;
+  --unregister-skill <id> remove one of your own skills from the catalog
+  --rules-hash           print the fingerprint of the rules this starter installs`;
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(USAGE);
@@ -85,6 +87,25 @@ function installGlobal() {
   log(notes.length ? `✔ Global: ${notes.join("; ")}` : "✔ Global: personal rules already up to date");
 }
 
+function rulesHash() {
+  const hash = createHash("sha256");
+  const sources = ["template", "packs", "global"]
+    .flatMap((dir) => listFiles(join(here, dir)).map((file) => join(dir, file)))
+    .filter((file) => !file.endsWith(".DS_Store"));
+  for (const file of [...sources, "install.mjs"].sort()) {
+    hash.update(file.split("\\").join("/"));
+    hash.update("\0");
+    hash.update(readFileSync(join(here, file)));
+    hash.update("\0");
+  }
+  return hash.digest("hex").slice(0, 16);
+}
+
+if (args.includes("--rules-hash")) {
+  console.log(rulesHash());
+  process.exit(0);
+}
+
 if (globalOnly) {
   installGlobal();
   if (!target) process.exit(0);
@@ -127,7 +148,7 @@ function runUninstall() {
   }
   const claudeDir = join(root, ".claude");
   const packRules = ["node", "go", "php", "python", "docker"].flatMap((stack) => listFiles(join(here, "packs", stack, "rules")).map((f) => join("rules", f)));
-  const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "hooks/stop-typecheck.mjs"])];
+  const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "starter-hash", "hooks/stop-typecheck.mjs"])];
   const removed = managed.filter((file) => existsSync(join(claudeDir, file)));
   removed.forEach((file) => rmSync(join(claudeDir, file), { force: true }));
   for (const id of installedCatalogIds(root)) {
@@ -685,6 +706,7 @@ for (const obsolete of [".claude/hooks/stop-typecheck.mjs"]) {
   if (existsSync(join(root, obsolete))) rmSync(join(root, obsolete), { force: true });
 }
 writeFileSync(join(root, ".claude", "starter-version"), VERSION + "\n");
+writeFileSync(join(root, ".claude", "starter-hash"), rulesHash() + "\n");
 const projectConfigPath = join(root, ".claude", "hooks", "config.json");
 let phaseNote = "";
 try {
