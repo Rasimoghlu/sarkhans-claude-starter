@@ -68,7 +68,7 @@ App-level files: `~/claude-web-starter/VERSION`, `~/claude-web-starter/skills-ca
 - Settings in UserDefaults: `projectsFolder`, `responseLanguage`, `showInstalled` (default off). The app warns when the projects folder has no projects and until a folder has been chosen.
 
 ## Self-update (macOS app)
-- **Source:** `Contents/Resources/update-repo.txt` (`owner/repo`). Written at build time from `UPDATE_REPO` (the release workflow sets it to the public `sarkhandigitech/sarkhans-claude-starter-releases`), `GITHUB_REPOSITORY` or `macos-app/update-repo.txt`. Without it, updates are off.
+- **Source:** `Contents/Resources/update-repo.txt` (`owner/repo`). Written at build time from `UPDATE_REPO` (the release workflow sets it to this repository), `GITHUB_REPOSITORY` or `macos-app/update-repo.txt`. Without it, updates are off.
 - **Check:** when the app opens, or via Check for Updates in the menu or Settings, the app calls `GET https://api.github.com/repos/<repo>/releases/latest`.
   - The release version is the tag without the `v`. It's compared numerically with `CFBundleShortVersionString`.
   - On 401/403/404 it retries with a token: first one saved in the Keychain (service `SarkhansClaudeStarter.github`), otherwise `gh auth token`.
