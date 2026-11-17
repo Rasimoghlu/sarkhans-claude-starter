@@ -634,8 +634,18 @@ final class StarterModel: ObservableObject {
         hasLoaded = true
         if !checkedForUpdates {
             checkedForUpdates = true
+            announceUpdateIfNeeded()
             Task { await checkForUpdates(userInitiated: false) }
         }
+    }
+
+    private func announceUpdateIfNeeded() {
+        let defaults = UserDefaults.standard
+        if let previous = defaults.string(forKey: "lastRunVersion"), Self.isOlder(previous, than: AppInfo.version) {
+            log += "✔ Updated from \(previous) to \(AppInfo.version)\n\n"
+            showNotice("Updated to \(AppInfo.version)", isError: false)
+        }
+        defaults.set(AppInfo.version, forKey: "lastRunVersion")
     }
 
     func checkForUpdates(userInitiated: Bool) async {
