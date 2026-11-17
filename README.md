@@ -5,30 +5,40 @@ An Agentic Development Environment for Claude Code: one install adds an orchestr
 - What it does and how it works: [`claude-web-starter/README.md`](claude-web-starter/README.md)
 - Internals, CLI contract, Windows porting notes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
+## Download
+**[Download Sarkhans Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter-releases/releases/latest/download/Sarkhans-Claude-Starter.dmg)** (always the latest version)
+
 ## Requirements
 - To use: macOS 13+, Claude Code. Node.js and Git can be installed from inside the app.
 - To build the app: Xcode Command Line Tools (`xcode-select --install`).
 
 ## For colleagues: install the app
-1. Open the repository's **Releases** page and download `Sarkhans-Claude-Starter.dmg` from the latest release.
-2. Drag the app to Applications and open it.
+1. Download: https://github.com/sarkhandigitech/sarkhans-claude-starter-releases/releases/latest/download/Sarkhans-Claude-Starter.dmg
+2. Open the DMG and drag the app to **Applications**. Without admin rights, use `~/Applications`, the Applications folder in your home folder (create it if it's missing).
 3. First open only (the app isn't notarized):
    - macOS 15+: System Settings → Privacy & Security → **Open Anyway**;
    - macOS 13–14: right-click → Open.
 4. Follow the setup screen (Node.js, Git, projects folder), select projects and press **Set up**.
 
-From then on the app checks for new releases when it opens. When there's one, an **Update to x.y.z** button appears in the toolbar: it downloads the release, replaces the app and restarts. For a **private** repository each person needs read access. Either they're signed in with GitHub CLI (`gh auth login`), or they paste a fine-grained token (Contents: read) into Settings → Updates; it's stored in the Keychain.
+No GitHub account or Terminal is needed. The app checks for new versions when it opens. When there's one, an **Update to x.y.z** button appears: it downloads the new version, replaces the app and restarts. If the app's folder needs admin rights, macOS asks for the password.
 
 ## Publishing an update
-1. Change what you need. Bump `claude-web-starter/VERSION`, e.g. `4.5.0` → `4.6.0`; the app version is the same number.
-2. Commit and push (through a pull request if `main` is protected).
-3. Tag the release: `git tag v4.6.0 && git push origin v4.6.0`.
+The code stays in this **private** repository. Built apps are published to the **public** repository `sarkhandigitech/sarkhans-claude-starter-releases`, which holds only releases. The download link and the in-app updates point there, so colleagues need no GitHub access.
 
-GitHub Actions (`.github/workflows/release.yml`) builds the universal app on macOS and publishes a release with:
-- `Sarkhans-Claude-Starter.dmg`, the installer for new people;
-- `Sarkhans-Claude-Starter.zip`, the package the app updates itself from.
+Releases are automatic. Every merge to `main` that changes `claude-web-starter/VERSION` builds the app on GitHub (Actions → **Release**) and publishes it to the releases repository. Merges that don't change the version publish nothing.
 
-The update source is filled in automatically from the repository name. Everyone sees the update the next time they open the app. Their projects then show "Update available" for the new rules.
+1. Make the change on a branch and bump `claude-web-starter/VERSION`, e.g. `4.5.1` → `4.5.2`.
+2. Open a pull request and **Merge** it on GitHub. The commit message becomes the release notes.
+3. Wait about 5 minutes. The new version is behind the download link and in everyone's app.
+
+One-time setup, already needed for the first release:
+1. Create the public repository `sarkhans-claude-starter-releases` and tick **Add a README file**. Its README is replaced from `releases-repo/README.md` on every release; edit it here, not there.
+2. Create a fine-grained personal access token:
+   - Repository access: only `sarkhans-claude-starter-releases`;
+   - Permissions: **Contents → Read and write**.
+3. In this repository, go to Settings → Secrets and variables → Actions → **New repository secret**. Name it `RELEASES_TOKEN` and paste the token. Renew it before it expires.
+
+To retry a release by hand: Actions → Release → **Run workflow** (it publishes only if that version doesn't exist yet).
 
 ## Building locally (optional)
 Needs Xcode Command Line Tools (`xcode-select --install`):
@@ -53,9 +63,10 @@ node claude-web-starter/install.mjs --help
 |---|---|
 | `claude-web-starter/` | installer (Node), project template, rules, skills, agents, hooks, stack packs, skill catalog |
 | `macos-app/` | SwiftUI app source, launcher, Info.plist, icon, `build-app.sh`, `make-shareable.sh`, `update-repo.txt` |
-| `.github/workflows/` | release build on every `v*` tag |
+| `.github/workflows/` | automatic release to the public releases repository when `VERSION` changes on `main` |
 | `scripts/` | helper scripts |
 | `docs/` | architecture and porting guide |
+| `releases-repo/` | README of the public download page (`{{VERSION}}`/`{{REPO}}` are filled in on release) |
 
 ## Contributing
 - Every release bumps `claude-web-starter/VERSION` (app and rules share one version number).

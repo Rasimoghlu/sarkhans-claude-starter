@@ -302,7 +302,9 @@ enum UpdateError: LocalizedError {
     case http(Int)
     case noAsset
     case invalidBundle(String)
-    case notWritable(String)
+    case translocated
+    case cancelled
+    case adminFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -311,7 +313,9 @@ enum UpdateError: LocalizedError {
         case .http(let code): return "GitHub answered with HTTP \(code). Try again later."
         case .noAsset: return "The latest release has no app download (.zip)."
         case .invalidBundle(let reason): return "The downloaded app didn’t pass a check: \(reason)."
-        case .notWritable(let path): return "The app can’t replace itself in \(path). Download it from the release page instead."
+        case .translocated: return "Open the app from your Applications folder, not from the downloaded installer, then update."
+        case .cancelled: return "Update cancelled."
+        case .adminFailed(let reason): return "The update couldn’t be installed: \(reason)"
         }
     }
 }
@@ -365,6 +369,11 @@ private final class StripAuthorizationOnRedirect: NSObject, URLSessionTaskDelega
         }
         completionHandler(next)
     }
+}
+
+struct PreparedUpdate: Sendable {
+    let script: URL
+    let adminCommand: String?
 }
 
 enum Updater {
@@ -450,7 +459,7 @@ enum Updater {
         return target
     }
 
-    static func prepareInstall(zip: URL) throws -> URL {
+    static func prepareInstall(zip: URL) throws -> PreparedUpdate {
         let fileManager = FileManager.default
         let work = fileManager.temporaryDirectory.appendingPathComponent("SarkhansUpdate-\(UUID().uuidString)")
         try fileManager.createDirectory(at: work, withIntermediateDirectories: true)
@@ -468,28 +477,45 @@ enum Updater {
             throw UpdateError.invalidBundle("its signature is broken")
         }
         let current = Bundle.main.bundleURL
-        let parent = current.deletingLastPathComponent()
-        guard fileManager.isWritableFile(atPath: parent.path), fileManager.isWritableFile(atPath: current.path) else {
-            throw UpdateError.notWritable(parent.path)
+        if current.path.contains("/AppTranslocation/") {
+            throw UpdateError.translocated
         }
         _ = Shell.run("/usr/bin/xattr", ["-dr", "com.apple.quarantine", newApp.path], timeout: 30)
+        let target = shellQuote(current.path)
+        let backup = shellQuote(current.path + ".old")
+        let replacement = shellQuote(newApp.path)
+        let swap = "/bin/rm -rf \(backup); /bin/mv \(target) \(backup) && { /bin/mv \(replacement) \(target) || { /bin/mv \(backup) \(target); exit 1; }; } && /bin/rm -rf \(backup)"
+        let parent = current.deletingLastPathComponent()
+        let writable = fileManager.isWritableFile(atPath: parent.path) && fileManager.isWritableFile(atPath: current.path)
         let script = work.appendingPathComponent("install.sh")
         let text = """
         #!/bin/bash
         while /bin/kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do /bin/sleep 0.2; done
-        TARGET=\(shellQuote(current.path))
-        NEW=\(shellQuote(newApp.path))
-        if /bin/mv "$TARGET" "$TARGET.old"; then
-          if /bin/mv "$NEW" "$TARGET"; then
-            /bin/rm -rf "$TARGET.old"
-          else
-            /bin/mv "$TARGET.old" "$TARGET"
-          fi
-        fi
-        /usr/bin/open "$TARGET"
+        \(writable ? swap : ":")
+        /usr/bin/open \(target)
         """
         try text.write(to: script, atomically: true, encoding: .utf8)
-        return script
+        return PreparedUpdate(script: script, adminCommand: writable ? nil : swap)
+    }
+
+    @MainActor
+    static func runWithAdministratorPrivileges(_ command: String) throws {
+        let escaped = command
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        let prompt = "\(AppInfo.name) needs your password to install the update."
+        let source = "do shell script \"\(escaped)\" with prompt \"\(prompt)\" with administrator privileges"
+        guard let script = NSAppleScript(source: source) else {
+            throw UpdateError.adminFailed("couldn’t ask for permission")
+        }
+        var error: NSDictionary?
+        _ = script.executeAndReturnError(&error)
+        if let error {
+            if (error[NSAppleScript.errorNumber] as? Int) == -128 {
+                throw UpdateError.cancelled
+            }
+            throw UpdateError.adminFailed(error[NSAppleScript.errorMessage] as? String ?? "unknown error")
+        }
     }
 
     static func launch(_ script: URL) throws {
@@ -638,9 +664,15 @@ final class StarterModel: ObservableObject {
         log += "… Downloading \(AppInfo.name) \(release.version)\n\n"
         do {
             let zip = try await Updater.download(release)
-            let script = try await Task.detached(priority: .userInitiated) { try Updater.prepareInstall(zip: zip) }.value
-            try Updater.launch(script)
+            let prepared = try await Task.detached(priority: .userInitiated) { try Updater.prepareInstall(zip: zip) }.value
+            if let command = prepared.adminCommand {
+                try Updater.runWithAdministratorPrivileges(command)
+            }
+            try Updater.launch(prepared.script)
             NSApp.terminate(nil)
+        } catch UpdateError.cancelled {
+            isUpdating = false
+            showNotice("Update cancelled", isError: false)
         } catch {
             isUpdating = false
             log += "✖ Update failed: \(error.localizedDescription)\n\n"

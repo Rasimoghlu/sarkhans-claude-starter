@@ -1,2 +1,2 @@
-# GitHub repository the app checks for updates (owner/repo).
-# Builds made by GitHub Actions fill this in automatically; set it here only for local builds.
+# Public repository the app checks for updates (owner/repo). Release builds set this automatically.
+sarkhandigitech/sarkhans-claude-starter-releases

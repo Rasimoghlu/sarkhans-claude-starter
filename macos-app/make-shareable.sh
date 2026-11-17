@@ -97,6 +97,8 @@ write_readme() {
     echo "$APP_NAME $VERSION — INSTALL"
     echo
     echo "1. Drag \"$APP_NAME\" into the Applications folder."
+    echo "   No admin rights on this Mac? Use the Applications folder in your home folder instead"
+    echo "   (Finder → Go → Home; create a folder named Applications if it isn't there)."
     echo "2. Open it from Applications."
     if ! $NOTARIZED; then
       echo
