@@ -1124,9 +1124,24 @@ final class StarterModel: ObservableObject {
         let names = (try? fileManager.contentsOfDirectory(atPath: directory)) ?? []
         builtinSkills = names.sorted().compactMap { name in
             guard let text = try? String(contentsOfFile: "\(directory)/\(name)/SKILL.md", encoding: .utf8) else { return nil }
-            return BuiltinSkill(id: name, summary: Self.firstSentence(Self.frontmatterValue(text, key: "description")))
+            let summary = Self.builtinSummaries[name] ?? Self.firstSentence(Self.frontmatterValue(text, key: "description"))
+            return BuiltinSkill(id: name, summary: summary)
         }
     }
+
+    private static let builtinSummaries: [String: String] = [
+        "add-api-route": "Add an API endpoint with auth, validation, error handling and tests.",
+        "db-change": "Change the database schema safely: migration, models and tests.",
+        "kickoff": "Plan a new project with you before any code is written.",
+        "new-feature": "Build a feature end to end: plan, data, server, UI and tests.",
+        "orchestrate": "Split a task across specialist agents and check every result.",
+        "project-health": "Scan the whole project for problems and fix the safe ones.",
+        "security-audit": "Security audit (OWASP Top 10) with evidence and fixes.",
+        "ship": "Commit, push and open a pull request, only when you ask.",
+        "ui-review": "Check the UI for accessibility, responsiveness and consistency.",
+        "verify": "Run types, lint, tests and build for every stack in the project.",
+        "write-tests": "Write behaviour-focused tests with the project's test framework.",
+    ]
 
     nonisolated static func frontmatterValue(_ text: String, key: String) -> String {
         for line in text.split(separator: "\n", omittingEmptySubsequences: false).prefix(40) where line.hasPrefix("\(key):") {
@@ -2029,17 +2044,15 @@ struct SkillSections: View {
 
         Section {
             DisclosureGroup(isExpanded: $showingBuiltin) {
-                ForEach(model.builtinSkills) { skill in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("/\(skill.id)")
-                            .font(.body.monospaced())
-                        Text(skill.summary)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(model.builtinSkills.enumerated()), id: \.element.id) { index, skill in
+                        if index > 0 {
+                            Divider()
+                        }
+                        BuiltinSkillRow(skill: skill)
                     }
-                    .padding(.vertical, 2)
                 }
+                .padding(.top, 6)
             } label: {
                 Label("\(model.builtinSkills.count) built-in skills, always on", systemImage: "checkmark.seal.fill")
                     .foregroundStyle(.primary)
@@ -2047,7 +2060,7 @@ struct SkillSections: View {
         } header: {
             Text("Skills")
         } footer: {
-            Text("Built-in skills come with \(AppInfo.name): planning, agents, tests, security, reviews. Claude uses them on its own, or type one in Claude Code, e.g. /kickoff.")
+            Text("Built-in skills come with \(AppInfo.name). Claude uses them on its own; you can also type one in Claude Code, for example /kickoff.")
         }
 
         if !recommended.isEmpty {
@@ -2118,6 +2131,27 @@ struct SkillSections: View {
             return "New project: during the kickoff conversation Claude suggests one design skill that fits and turns it on. Switch one on yourself if you already know the style. Use one at a time — several give Claude conflicting directions."
         }
         return "The design is \(project.isDesignLocked ? "protected" : "open"), so these only matter when you ask Claude for design work. Use one at a time — several give Claude conflicting directions."
+    }
+}
+
+@MainActor
+struct BuiltinSkillRow: View {
+    let skill: BuiltinSkill
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 14) {
+            Text("/\(skill.id)")
+                .font(.system(.callout, design: .monospaced).weight(.medium))
+                .foregroundStyle(.primary)
+                .frame(width: 150, alignment: .leading)
+            Text(skill.summary)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
