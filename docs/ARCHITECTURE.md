@@ -42,6 +42,7 @@ The desktop app is a thin UI over `install.mjs`. **All logic lives in the Node i
 | `--register-skill <src> [--pick <name>]` | Add the user's own skill to `~/.claude-starter/my-skills.json`. `src` = local folder, `owner/repo`, or GitHub URL (`/tree/<branch>/<path>` allowed). Exit code **3** + JSON `{"choices":[{name,description}]}` on stdout when the source has several skills → call again with `--pick`. |
 | `--unregister-skill <id>` | Remove one of the user's own skills from the list (project copies stay). |
 | `--list-skills` | Print catalog with ✔ for installed items. |
+| `--rules-hash` | Print the 16-character fingerprint of the rules (template, packs, global rules, installer). |
 | `--shared`, `--no-global`, `--overwrite-claude-md`, `--global`, `--help` | See `--help`. |
 
 Exit code `0` = success, non-zero = failure (message on stderr). Run installs **sequentially** — several processes updating `~/.claude/CLAUDE.md` at once can race.
@@ -52,6 +53,7 @@ Exit code `0` = success, non-zero = failure (message on stderr). Run installs **
 |---|---|
 | marker files: `package.json`, `go.mod`, `composer.json`, `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `manage.py` | project + stack detection |
 | `.claude/starter-version` | installed starter version (missing → not installed; `.claude/hooks/guard-bash.mjs` present → legacy "1.0") |
+| `.claude/starter-hash` | fingerprint of the rules it was installed with (`install.mjs --rules-hash`). The project is "Update available" only when it differs from the current starter's fingerprint; without it the app falls back to comparing versions. |
 | `.claude/hooks/config.json` | `responseLanguage`, `projectPhase` (`new`/`existing`), `designMode` (`locked`/`open`; missing → `locked` unless phase `new`) |
 | `.claude/KICKOFF.md` | kickoff done (new projects) |
 | `.claude/skills/<skill>/.catalog-source` | catalog skill installed |
@@ -69,7 +71,7 @@ App-level files: `~/claude-web-starter/VERSION`, `~/claude-web-starter/skills-ca
 
 ## Self-update (macOS app)
 - **Source:** `Contents/Resources/update-repo.txt` (`owner/repo`). Written at build time from `UPDATE_REPO` (the release workflow sets it to this repository), `GITHUB_REPOSITORY` or `macos-app/update-repo.txt`. Without it, updates are off.
-- **Check:** when the app opens, or via Check for Updates in the menu or Settings, the app calls `GET https://api.github.com/repos/<repo>/releases/latest`.
+- **Check:** when the app opens, every 30 minutes, when it becomes active again (at most every 10 minutes), or via Check for Updates in the menu or Settings, the app calls `GET https://api.github.com/repos/<repo>/releases/latest`.
   - The release version is the tag without the `v`. It's compared numerically with `CFBundleShortVersionString`.
   - On 401/403/404 it retries with a token: first one saved in the Keychain (service `SarkhansClaudeStarter.github`), otherwise `gh auth token`.
 - **Download:** the release's `.zip` asset; for a private repository, through the API asset URL with `Accept: application/octet-stream`. The `Authorization` header is dropped on the redirect to storage.
@@ -78,6 +80,7 @@ App-level files: `~/claude-web-starter/VERSION`, `~/claude-web-starter/skills-ca
   2. Verify that the bundle id matches and that `codesign --verify --deep --strict` passes, and remove quarantine.
   3. A helper script waits for the app to quit, swaps the bundle (and rolls back if the move fails), then reopens it.
   4. If the app's folder isn't writable, the swap runs through `do shell script … with administrator privileges`, so macOS asks for the password. Running from App Translocation (straight from the DMG) is refused with a hint to move the app first.
+- **After an update:** set-up projects whose rules fingerprint differs are updated automatically (`--force`, one serial job queue), unless Settings → Projects → "Update project rules automatically" is off.
 - **Windows equivalent:** same endpoints, with a `.zip`/`.msix` asset per platform. Pick the asset by name suffix, e.g. `-windows.zip`.
 
 ## Porting the app to Windows — checklist

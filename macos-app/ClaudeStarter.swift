@@ -14,6 +14,7 @@ struct Project: Identifiable, Hashable, Sendable {
     var responseLanguage: String?
     var hasFrontend: Bool
     var usesReact: Bool
+    var rulesHash: String?
 
     var id: String { path }
     var isInstalled: Bool { installedVersion != nil }
@@ -251,6 +252,7 @@ enum DisplayStatus {
 
 enum JobKind {
     case setUp
+    case autoUpdate
     case repair
     case remove
     case setting
@@ -557,6 +559,10 @@ final class StarterModel: ObservableObject {
     @Published private(set) var updateStatus: String?
     @Published private(set) var isUpdating = false
     @Published private(set) var updatePhase = ""
+    @Published private(set) var currentRulesHash: String?
+    @Published var autoUpdateRules: Bool = UserDefaults.standard.object(forKey: "autoUpdateRules") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(autoUpdateRules, forKey: "autoUpdateRules") }
+    }
     @Published var showingUpdate = false
     @Published private(set) var pendingKeys: Set<String> = []
     @Published private(set) var hasChosenFolder = UserDefaults.standard.string(forKey: "projectsFolder") != nil
@@ -582,6 +588,9 @@ final class StarterModel: ObservableObject {
     private var noticeTask: Task<Void, Never>?
     private var queue: [Job] = []
     private var checkedForUpdates = false
+    private var didAutoUpdateRules = false
+    private var lastUpdateCheck: Date?
+    private var announcedUpdateVersion: String?
 
     init() {
         home = FileManager.default.homeDirectoryForCurrentUser.path
@@ -625,10 +634,11 @@ final class StarterModel: ObservableObject {
         loadCatalog()
         nodePath = await Task.detached(priority: .userInitiated) { NodeLocator.find() }.value
         gitAvailable = await Task.detached(priority: .userInitiated) { GitLocator.isAvailable() }.value
+        currentRulesHash = await readRulesHash()
         refresh()
         if !didApplyInitialFilter {
             didApplyInitialFilter = true
-            filter = needsSetupProjects.isEmpty ? .all : .needsSetup
+            filter = projects.contains { status(of: $0) == .notSetUp } ? .needsSetup : .all
         }
         isLoading = false
         hasLoaded = true
@@ -637,6 +647,30 @@ final class StarterModel: ObservableObject {
             announceUpdateIfNeeded()
             Task { await checkForUpdates(userInitiated: false) }
         }
+        updateOutdatedRulesIfNeeded()
+    }
+
+    private func readRulesHash() async -> String? {
+        guard let node = nodePath, starterVersion != nil else { return nil }
+        let result = await Shell.runAsync(node, [installerPath, "--rules-hash"], timeout: 20, extraPath: (node as NSString).deletingLastPathComponent)
+        guard result.succeeded,
+              let line = result.output.split(separator: "\n").last?.trimmingCharacters(in: .whitespaces),
+              line.count == 16, line.allSatisfy(\.isHexDigit)
+        else { return nil }
+        return line
+    }
+
+    private func updateOutdatedRulesIfNeeded() {
+        guard !didAutoUpdateRules, autoUpdateRules, canRun else { return }
+        didAutoUpdateRules = true
+        let outdated = projects.filter { status(of: $0) == .updateAvailable && !isRunning($0) }
+        guard !outdated.isEmpty else { return }
+        enqueue(outdated.map { ($0, [installArguments(for: $0)]) }, kind: .autoUpdate)
+    }
+
+    func checkForUpdatesIfDue() async {
+        if let last = lastUpdateCheck, Date().timeIntervalSince(last) < 600 { return }
+        await checkForUpdates(userInitiated: false)
     }
 
     private func announceUpdateIfNeeded() {
@@ -653,15 +687,23 @@ final class StarterModel: ObservableObject {
             updateStatus = UpdateError.notConfigured.errorDescription
             return
         }
+        lastUpdateCheck = Date()
         if userInitiated { updateStatus = "Checking…" }
         do {
             let release = try await Updater.latestRelease()
             if Self.isOlder(AppInfo.version, than: release.version) {
                 availableUpdate = release
                 updateStatus = "Version \(release.version) is available."
-                if userInitiated { showingUpdate = true }
+                NSApp.dockTile.badgeLabel = "1"
+                if userInitiated {
+                    showingUpdate = true
+                } else if announcedUpdateVersion != release.version {
+                    showNotice("Version \(release.version) is available. Press “Update” in the toolbar.", isError: false)
+                }
+                announcedUpdateVersion = release.version
             } else {
                 availableUpdate = nil
+                NSApp.dockTile.badgeLabel = nil
                 updateStatus = "You’re up to date (\(AppInfo.version))."
                 if userInitiated { showNotice("You’re up to date", isError: false) }
             }
@@ -726,6 +768,9 @@ final class StarterModel: ObservableObject {
 
     func status(of project: Project) -> ProjectStatus {
         guard let installed = project.installedVersion else { return .notSetUp }
+        if let current = currentRulesHash, let installedHash = project.rulesHash {
+            return installedHash == current ? .ready : .updateAvailable
+        }
         if let latest = starterVersion, Self.isOlder(installed, than: latest) { return .updateAvailable }
         return .ready
     }
@@ -1070,6 +1115,7 @@ final class StarterModel: ObservableObject {
         let text: String
         switch kind {
         case .setUp: text = single.map { "\($0) is ready" } ?? "\(targets.count) projects are ready"
+        case .autoUpdate: text = single.map { "New rules installed in \($0)" } ?? "New rules installed in \(targets.count) projects"
         case .repair: text = single.map { "\($0) repaired" } ?? "\(targets.count) projects repaired"
         case .remove: text = single.map { "Removed from \($0)" } ?? "Removed from \(targets.count) projects"
         case .setting: return
@@ -1229,7 +1275,8 @@ final class StarterModel: ObservableObject {
             kickoffDone: fileManager.fileExists(atPath: path + "/.claude/KICKOFF.md"),
             responseLanguage: config?["responseLanguage"] as? String,
             hasFrontend: packageJSON != nil,
-            usesReact: dependencies["react"] != nil || dependencies["next"] != nil
+            usesReact: dependencies["react"] != nil || dependencies["next"] != nil,
+            rulesHash: Self.readTrimmed(path + "/.claude/starter-hash")
         )
     }
 
@@ -1323,6 +1370,11 @@ struct RootView: View {
             if !model.canFinishSetup || !model.gitAvailable {
                 Task { await model.start() }
             }
+            Task { await model.checkForUpdatesIfDue() }
+        }
+        .onReceive(Timer.publish(every: 1800, on: .main, in: .common).autoconnect()) { _ in
+            guard model.hasLoaded, !model.isUpdating else { return }
+            Task { await model.checkForUpdates(userInitiated: false) }
         }
         .sheet(isPresented: $model.showingActivity) {
             ActivityView()
@@ -2545,8 +2597,11 @@ struct SettingsView: View {
                         Button("Change…") { model.chooseProjectsFolder() }
                     }
                 }
+                Toggle("Update project rules automatically", isOn: $model.autoUpdateRules)
             } header: {
                 Text("Projects")
+            } footer: {
+                Text("When a new version brings new rules, set-up projects get them as soon as the app opens. Your project settings and skills stay as they are.")
             }
             Section {
                 Picker("Claude replies in", selection: $model.defaultLanguage) {

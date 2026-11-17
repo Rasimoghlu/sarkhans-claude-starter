@@ -24,10 +24,10 @@ Always the latest version · macOS 13 or newer · Apple Silicon and Intel · ins
 No GitHub account or Terminal is needed. The app checks for new versions when it opens. When there's one, an **Update to x.y.z** button appears: it downloads the new version, replaces the app and restarts. If the app's folder needs admin rights, macOS asks for the password.
 
 ## Publishing an update
-Releases are automatic. Every merge to `main` that changes `claude-web-starter/VERSION` builds the app on GitHub (Actions → **Release**) and publishes it on this repository's Releases page. The download link and everyone's **Update** button then point to it. Merges that don't change the version publish nothing.
+Releases are automatic. Every merge to `main` that changes `claude-web-starter/VERSION` builds the app on GitHub (Actions → **Release**) and publishes it on this repository's Releases page. The download link and everyone's **Update** button then point to it. The app checks for new versions when it opens, every 30 minutes, and when you switch back to it. After an update, set-up projects get the new rules automatically, but only when the rules actually changed. Merges that don't change the version publish nothing.
 
-1. Make the change on a branch and bump `claude-web-starter/VERSION`, e.g. `4.5.1` → `4.5.2`.
-2. Open a pull request and **Merge** it on GitHub. The pull request's description becomes the release notes that people see in the app, so write it for users.
+1. Make the change on a branch, bump `claude-web-starter/VERSION` (e.g. `4.5.4` → `4.5.5`) and add a `## 4.5.5` section to `CHANGELOG.md`. That section becomes the release notes people see in the app, so write it for users.
+2. Open a pull request and **Merge** it on GitHub.
 3. Wait about 5 minutes. The new version is behind the download link and in everyone's app.
 
 Only the owner and invited collaborators can push. Visitors can read and download, nothing else. Never commit secrets.
