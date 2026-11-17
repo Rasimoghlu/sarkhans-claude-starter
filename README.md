@@ -27,7 +27,7 @@ No GitHub account or Terminal is needed. The app checks for new versions when it
 Releases are automatic. Every merge to `main` that changes `claude-web-starter/VERSION` builds the app on GitHub (Actions → **Release**) and publishes it on this repository's Releases page. The download link and everyone's **Update** button then point to it. Merges that don't change the version publish nothing.
 
 1. Make the change on a branch and bump `claude-web-starter/VERSION`, e.g. `4.5.1` → `4.5.2`.
-2. Open a pull request and **Merge** it on GitHub. The commit message becomes the release notes.
+2. Open a pull request and **Merge** it on GitHub. The pull request's description becomes the release notes that people see in the app, so write it for users.
 3. Wait about 5 minutes. The new version is behind the download link and in everyone's app.
 
 Only the owner and invited collaborators can push. Visitors can read and download, nothing else. Never commit secrets.
