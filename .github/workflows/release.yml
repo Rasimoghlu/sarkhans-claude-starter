@@ -42,7 +42,10 @@ jobs:
         if: steps.version.outputs.exists == 'false'
         run: |
           version="${{ steps.version.outputs.version }}"
-          git log -1 --format=%B > "$RUNNER_TEMP/notes.md"
+          gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[0] | if . == null then "" else (.body // .title) end' > "$RUNNER_TEMP/notes.md" || true
+          if [ ! -s "$RUNNER_TEMP/notes.md" ] || [ "$(tr -d '[:space:]' < "$RUNNER_TEMP/notes.md")" = "" ]; then
+            git log -1 --format=%B > "$RUNNER_TEMP/notes.md"
+          fi
           gh release create "v$version" \
             "$RUNNER_TEMP/dist/Sarkhans-Claude-Starter.dmg" \
             "$RUNNER_TEMP/dist/Sarkhans-Claude-Starter.zip" \
