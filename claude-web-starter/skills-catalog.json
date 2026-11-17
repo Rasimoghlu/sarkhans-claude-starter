@@ -1,0 +1,106 @@
+[
+  {
+    "id": "frontend-design",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "Frontend Design (Anthropic)",
+    "repo": "anthropics/skills",
+    "skill": "frontend-design",
+    "description": "New pages: moves Claude off the generic 'AI look' and picks a clear aesthetic direction before coding. The most installed design skill.",
+    "url": "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+  },
+  {
+    "id": "impeccable",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "Impeccable (Paul Bakaus)",
+    "repo": "pbakaus/impeccable",
+    "skill": "impeccable",
+    "description": "Audit and polish an existing UI: finds and fixes UX, typography, layout and responsive issues. Many sub-commands (audit, polish, critique…).",
+    "url": "https://github.com/pbakaus/impeccable"
+  },
+  {
+    "id": "ui-ux-pro-max",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "UI/UX Pro Max",
+    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+    "skill": "ui-ux-pro-max",
+    "description": "Design system from scratch: searchable database of styles, palettes, typography and UX rules. Runs a Python script (needs python3).",
+    "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
+  },
+  {
+    "id": "design-taste-frontend",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "Taste Skill (design-taste-frontend)",
+    "repo": "leonxlnx/taste-skill",
+    "skill": "design-taste-frontend",
+    "description": "A more distinctive, tasteful visual direction and rules to avoid generic templates.",
+    "url": "https://github.com/leonxlnx/taste-skill"
+  },
+  {
+    "id": "web-design-guidelines",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "Web Design Guidelines (Vercel)",
+    "repo": "vercel-labs/agent-skills",
+    "skill": "web-design-guidelines",
+    "description": "UI/UX and accessibility audit against 100+ rules. Doesn't design — reviews existing UI code.",
+    "url": "https://github.com/vercel-labs/agent-skills",
+    "recommended": "frontend"
+  },
+  {
+    "id": "emil-design-eng",
+    "type": "skill",
+    "category": "UI/UX",
+    "name": "Emil Kowalski — design engineering",
+    "repo": "emilkowalski/skills",
+    "skill": "emil-design-eng",
+    "description": "Animation, interaction and 'feel' polish: small, well-reasoned improvements.",
+    "url": "https://github.com/emilkowalski/skills"
+  },
+  {
+    "id": "vercel-react-best-practices",
+    "type": "skill",
+    "category": "Frontend",
+    "name": "React & Next.js best practices (Vercel)",
+    "repo": "vercel-labs/agent-skills",
+    "skill": "vercel-react-best-practices",
+    "description": "React/Next.js performance rules: rendering, data fetching, bundle size.",
+    "url": "https://github.com/vercel-labs/agent-skills",
+    "recommended": "react"
+  },
+  {
+    "id": "playwright",
+    "type": "mcp",
+    "category": "MCP",
+    "name": "Playwright MCP (Microsoft)",
+    "server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "description": "Lets Claude open the UI in a real browser: screenshots, clicks, console errors. Most useful together with the design skills.",
+    "url": "https://github.com/microsoft/playwright-mcp",
+    "recommended": "frontend"
+  },
+  {
+    "id": "context7",
+    "type": "mcp",
+    "category": "MCP",
+    "name": "Context7 (Upstash)",
+    "server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "description": "Up-to-date, version-specific library docs — reduces outdated or invented API usage.",
+    "url": "https://github.com/upstash/context7",
+    "recommended": "all"
+  }
+]

@@ -1,0 +1,2 @@
+# GitHub repository the app checks for updates (owner/repo).
+# Builds made by GitHub Actions fill this in automatically; set it here only for local builds.
