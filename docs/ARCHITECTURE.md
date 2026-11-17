@@ -68,7 +68,7 @@ App-level files: `~/claude-web-starter/VERSION`, `~/claude-web-starter/skills-ca
 - Settings in UserDefaults: `projectsFolder`, `responseLanguage`, `showInstalled` (default off). The app warns when the projects folder has no projects and until a folder has been chosen.
 
 ## Self-update (macOS app)
-- **Source:** `Contents/Resources/update-repo.txt` (`owner/repo`). Written at build time from `UPDATE_REPO`, `GITHUB_REPOSITORY` (GitHub Actions) or `macos-app/update-repo.txt`. Without it, updates are off.
+- **Source:** `Contents/Resources/update-repo.txt` (`owner/repo`). Written at build time from `UPDATE_REPO` (the release workflow sets it to the public `sarkhandigitech/sarkhans-claude-starter-releases`), `GITHUB_REPOSITORY` or `macos-app/update-repo.txt`. Without it, updates are off.
 - **Check:** when the app opens, or via Check for Updates in the menu or Settings, the app calls `GET https://api.github.com/repos/<repo>/releases/latest`.
   - The release version is the tag without the `v`. It's compared numerically with `CFBundleShortVersionString`.
   - On 401/403/404 it retries with a token: first one saved in the Keychain (service `SarkhansClaudeStarter.github`), otherwise `gh auth token`.
@@ -77,7 +77,7 @@ App-level files: `~/claude-web-starter/VERSION`, `~/claude-web-starter/skills-ca
   1. Unzip with `ditto`.
   2. Verify that the bundle id matches and that `codesign --verify --deep --strict` passes, and remove quarantine.
   3. A helper script waits for the app to quit, swaps the bundle (and rolls back if the move fails), then reopens it.
-  4. If the app's folder isn't writable, the release page is offered instead.
+  4. If the app's folder isn't writable, the swap runs through `do shell script … with administrator privileges`, so macOS asks for the password. Running from App Translocation (straight from the DMG) is refused with a hint to move the app first.
 - **Windows equivalent:** same endpoints, with a `.zip`/`.msix` asset per platform. Pick the asset by name suffix, e.g. `-windows.zip`.
 
 ## Porting the app to Windows — checklist
