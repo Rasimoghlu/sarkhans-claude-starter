@@ -1,6 +1,6 @@
 # Sarkhans Claude Starter — rules, agents and hooks
 
-This folder is the part of Sarkhans Claude Starter that goes into your projects; the app installs it for you. One install turns any project (TypeScript/Next.js, Go, PHP/Laravel/Symfony, Python/Django/FastAPI, Docker) into an Agentic Development Environment for Claude Code: an orchestrator that plans and delegates to specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
+This folder is the part of Sarkhans Claude Starter that goes into your projects; the app installs it for you. One install turns any project (any language; extra support for TypeScript/Next.js, Go, PHP, Python, Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker) (TypeScript/Next.js, Go, PHP/Laravel/Symfony, Python/Django/FastAPI, Docker) into an Agentic Development Environment for Claude Code: an orchestrator that plans and delegates to specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
 
 ## Install
 

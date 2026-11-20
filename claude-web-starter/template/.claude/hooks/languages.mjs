@@ -11,6 +11,8 @@ export function languageOf(filePath) {
   if (name.endsWith(".go")) return "go";
   if (name.endsWith(".php")) return "php";
   if (name.endsWith(".py")) return "python";
+  if (/\.(rs|java|kt|kts|cs|swift|dart|scala|c|h|cc|cpp|cxx|hpp|m|mm)$/.test(name)) return "clike";
+  if (/\.(rb|sh|bash|zsh)$/.test(name)) return "hash";
   return null;
 }
 
@@ -18,7 +20,8 @@ export function fileContext(rel, lang, fileText) {
   const name = basename(rel);
   const isTest =
     /\.(test|spec)\.[cm]?[jt]sx?$/.test(name) || /_test\.go$/.test(name) || /^test_.*\.py$|_test\.py$|^conftest\.py$/.test(name) ||
-    /Test\.php$/.test(name) || /(^|\/)(tests?|e2e|__tests__|spec)\//.test(rel);
+    /Test\.php$/.test(name) || /(^|\/)(tests?|e2e|__tests__|spec)\//.test(rel) ||
+    /Tests?\.(java|kt|cs|swift)$/.test(name) || /_(spec|test)\.(rb|dart|rs)$/.test(name) || /(^|\/)src\/test\//.test(rel);
   const isScript = /(^|\/)(scripts|bin|tools)\//.test(rel) || /\.config\.[cm]?[jt]s$/.test(name) ||
     /^(manage|setup|__main__|cli|wsgi|asgi)\.py$/.test(name) || /(^|\/)management\/commands\//.test(rel);
   const isGoMain = lang === "go" && /^\s*package\s+main\b/m.test(fileText);
@@ -33,6 +36,8 @@ const DIRECTIVES = {
   go: /^\s*(go:|\+build|nolint|export\s|line\s|#cgo|lint:)/,
   php: /^\s*(phpcs:|@phpstan-|@psalm-|@codeCoverageIgnore|@noinspection|@php-cs-fixer)/,
   python: /^\s*(type:\s*ignore|noqa|pragma:|fmt:|isort:|pyright:|mypy:|ruff:|-\*-|!)/,
+  clike: /^\s*(swiftlint:|swift-format-ignore|ignore(_for_file)?:|NOLINT|clang-format|#?pragma|#?region|#?endregion|ReSharper|noinspection|@formatter|ktlint-disable|detekt|spotless:|rustfmt::)/,
+  hash: /^\s*(!|frozen_string_literal|rubocop:|shellcheck|-\*-|encoding:|typed:|@|noqa)/,
 };
 const PHP_TYPE_TAGS = /^@(param|return|var|template(-covariant)?|throws|property(-read|-write)?|method|mixin|extends|implements|use|phpstan-[\w-]+|psalm-[\w-]+|codeCoverageIgnore\w*|internal|deprecated|api|readonly|immutable|final)\b/;
 const CODE_LIKE = /^(const|let|var|function|func|def|class|return|import|from|export|if|elif|else|for|while|await|async|interface|type|switch|case|throw|raise|try|echo|public|private|protected|namespace|use)\b|^[\w.$>-]+\(.*\)\s*;?$|^\$\w+\s*=|^<\/?[A-Za-z]|^[}{)\]]|;\s*$|=>|^\w+\s*:?=\s*\S/;
@@ -91,7 +96,8 @@ function analyzeCStyle(text, lang) {
   return out;
 }
 
-function analyzePython(text) {
+function analyzePython(text, lang = "python") {
+  const directive = DIRECTIVES[lang] || DIRECTIVES.python;
   const lines = text.split(/\r?\n/);
   const out = [];
   let triple = null;
@@ -125,13 +131,13 @@ function analyzePython(text) {
     if (stripped.trim().startsWith("#")) {
       const body = stripped.trim().replace(/^#+/, "").trim();
       const isHeader = index < 2 && /^(!|.*coding[:=])/.test(body);
-      out.push({ raw, code: "", comment: body, kind: isHeader || DIRECTIVES.python.test(body) ? "directive" : "line" });
+      out.push({ raw, code: "", comment: body, kind: isHeader || directive.test(body) ? "directive" : "line" });
       return;
     }
     const trailing = stripped.match(/^(.*?\S.*?)\s#\s?(.*)$/);
     if (trailing) {
       const body = trailing[2].trim();
-      out.push({ raw, code: trailing[1], comment: body, kind: DIRECTIVES.python.test(body) ? "directive" : "trailing" });
+      out.push({ raw, code: trailing[1], comment: body, kind: directive.test(body) ? "directive" : "trailing" });
       return;
     }
     out.push({ raw, code: stripped, comment: null, kind: trimmed ? "code" : "blank" });
@@ -140,7 +146,7 @@ function analyzePython(text) {
 }
 
 export function analyze(text, lang) {
-  return lang === "python" ? analyzePython(text) : analyzeCStyle(text, lang);
+  return lang === "python" || lang === "hash" ? analyzePython(text, lang) : analyzeCStyle(text, lang);
 }
 
 export function commentProblems(writtenLines, fileLines) {

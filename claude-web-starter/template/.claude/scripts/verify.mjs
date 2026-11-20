@@ -4,6 +4,7 @@ import {
   projectDir, readPackageJson, readJson, readText, detectPackageManager, detectStacks,
   findTool, pythonInterpreter, runStack, containerFor, dockerSettings,
 } from "../hooks/lib.mjs";
+import { detectOtherStacks, commandText } from "../hooks/stacks.mjs";
 
 const quick = process.argv.includes("--quick");
 const stacks = detectStacks();
@@ -101,9 +102,21 @@ if (stacks.includes("python")) {
   }
 }
 
-if (!stacks.length) {
-  console.log("verify: no supported stack detected (package.json, go.mod, composer.json, pyproject.toml/requirements.txt).");
-  process.exit(1);
+const otherStacks = detectOtherStacks(projectDir);
+for (const other of otherStacks) {
+  if (!other.commands.length) skip(other.id, "all", "no build or test setup found");
+  for (const command of other.commands) {
+    const host = /[\\/]/.test(command.tool) ? command.tool : findTool(command.tool);
+    if (!host) skip(other.id, command.name, `${command.tool} not installed`);
+    else if (command.requires && !findTool(command.requires)) skip(other.id, command.name, `${command.requires} not installed`);
+    else add(other.id, command.name, { host, container: null, preferHost: true }, command.args, { slow: command.slow });
+  }
+}
+const allStacks = [...stacks, ...otherStacks.map((other) => other.id)];
+
+if (!allStacks.length) {
+  console.log("verify: no build or test toolchain detected in this project, so there is nothing to run automatically.\nCheck the change by reading and running it yourself, and say in the report that no automated checks exist.");
+  process.exit(0);
 }
 
 const docker = dockerSettings();
@@ -143,5 +156,5 @@ for (const step of steps) {
   }
 }
 
-console.log(`\n==== VERIFY SUMMARY (${stacks.join(", ")}) ====\n${results.join("\n")}${notes.length ? `\n\n${notes.join("\n")}` : ""}`);
+console.log(`\n==== VERIFY SUMMARY (${allStacks.join(", ")}) ====\n${results.join("\n")}${notes.length ? `\n\n${notes.join("\n")}` : ""}`);
 process.exit(failed ? 1 : 0);

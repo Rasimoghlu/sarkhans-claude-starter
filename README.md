@@ -1,6 +1,6 @@
 # Sarkhans Claude Starter
 
-An Agentic Development Environment for Claude Code: one install adds an orchestrator with specialist agents, strict quality/security/design/database rules enforced by hooks, and a catalog of design skills — for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI) and Docker projects.
+An Agentic Development Environment for Claude Code: one install adds an orchestrator with specialist agents, strict quality/security/design/database rules enforced by hooks, and a catalog of design skills — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.
 
 ## ⬇️ Download
 ### [Download Sarkhans Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)

@@ -4,6 +4,7 @@ import { join, resolve, dirname, relative } from "node:path";
 import { homedir, tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { detectOtherStacks, isStaticSite, commandText } from "./template/.claude/hooks/stacks.mjs";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -639,9 +640,18 @@ if (composeFile) {
   stackLines.push("- **Docker**: Dockerfile (no compose file)");
 }
 
-if (!stacks.some((s) => s !== "docker")) {
-  console.error(`No supported project found in ${root} (expected package.json, go.mod, composer.json, pyproject.toml/requirements.txt).`);
-  process.exit(1);
+const otherStacks = detectOtherStacks(root);
+for (const other of otherStacks) {
+  stackLines.push(`- **${other.label}**`);
+  if (other.commands.length) commandLines.push(`- ${other.commands.map(commandText).join(" · ")}`);
+}
+if (!stacks.some((s) => s !== "docker") && !otherStacks.length) {
+  if (isStaticSite(root)) {
+    stackLines.push("- **Static site** (HTML/CSS/JS)");
+  } else {
+    stackLines.push("- Not detected automatically. Read the project (README, build files, entry points) before changing code, then write the real stack here.");
+  }
+  commandLines.push("- No build or test commands detected. Find the project's own commands and add them here.");
 }
 
 const projectStacks = stacks.filter((s) => s !== "docker");

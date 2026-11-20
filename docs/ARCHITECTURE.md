@@ -51,7 +51,8 @@ Exit code `0` = success, non-zero = failure (message on stderr). Run installs **
 
 | Path | Meaning |
 |---|---|
-| marker files: `package.json`, `go.mod`, `composer.json`, `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `manage.py` | project + stack detection |
+| every non-hidden folder in the projects folder | a project (except `node_modules`, `vendor`, virtualenvs, `*.app`) |
+| marker files: `package.json`, `go.mod`, `composer.json`, `pyproject.toml`/`requirements.txt`/…, `Cargo.toml`, `pom.xml`/`build.gradle*`, `*.sln`/`*.csproj`, `Gemfile`, `pubspec.yaml`, `Package.swift`, `Dockerfile`/compose | stack tags; none → "Static site" (has `index.html`) or "Other" |
 | `.claude/starter-version` | installed starter version (missing → not installed; `.claude/hooks/guard-bash.mjs` present → legacy "1.0") |
 | `.claude/starter-hash` | fingerprint of the rules it was installed with (`install.mjs --rules-hash`). The project is "Update available" only when it differs from the current starter's fingerprint; without it the app falls back to comparing versions. |
 | `.claude/hooks/config.json` | `responseLanguage`, `projectPhase` (`new`/`existing`), `designMode` (`locked`/`open`; missing → `locked` unless phase `new`) |

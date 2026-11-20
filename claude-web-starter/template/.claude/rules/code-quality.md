@@ -8,6 +8,18 @@ paths:
   - "**/*.go"
   - "**/*.php"
   - "**/*.py"
+  - "**/*.rs"
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.cs"
+  - "**/*.swift"
+  - "**/*.dart"
+  - "**/*.rb"
+  - "**/*.scala"
+  - "**/*.c"
+  - "**/*.cpp"
+  - "**/*.h"
+  - "**/*.hpp"
 ---
 # Professional code standard (all languages)
 
