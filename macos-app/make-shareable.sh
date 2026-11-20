@@ -102,12 +102,15 @@ write_readme() {
     echo "2. Open it from Applications."
     if ! $NOTARIZED; then
       echo
-      echo "   macOS blocks apps from outside the App Store the first time:"
-      echo "   • macOS 15 or newer: double-click → \"Done\" → System Settings → Privacy & Security"
-      echo "     → scroll down → \"Open Anyway\" → enter your password."
+      echo "   The first time, macOS says it can't verify the app. Click \"Done\", then:"
+      echo "   • macOS 15 Sequoia / macOS 26 Tahoe: Apple menu → System Settings → Privacy & Security"
+      echo "     → scroll down to Security → \"Open Anyway\" next to $APP_NAME → \"Open Anyway\" again → your Mac password."
+      echo "     The button is shown for about an hour after you tried to open the app."
       echo "   • macOS 13–14: right-click the app → Open → Open."
-      echo "   • Or in Terminal: xattr -dr com.apple.quarantine \"/Applications/$APP_NAME.app\""
-      echo "   This is needed only once. Later versions install themselves from inside the app."
+      echo "   This is needed only once. Updates install themselves from inside the app."
+      echo
+      echo "   No approval at all: paste this line into Terminal instead of using this installer:"
+      echo "   curl -fsSL https://raw.githubusercontent.com/sarkhandigitech/sarkhans-claude-starter/main/install.sh | bash"
     fi
     echo
     echo "3. In the app:"
