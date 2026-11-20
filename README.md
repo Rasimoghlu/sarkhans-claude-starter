@@ -22,7 +22,7 @@ If your Mac account has no admin rights, drag it into the **Applications** folde
 ### 2. Allow it once
 The app isn't notarized by Apple (that needs a paid Apple developer account). That's why macOS asks you to confirm it **once**, the first time you open it. Apps from developers who pay Apple for notarization show a simple **Open** button instead.
 
-**macOS 15 Sequoia and macOS 26 Tahoe**
+**macOS 15 Sequoia, macOS 26 Tahoe and macOS 27 Golden Gate (the current version)**
 1. Double-click **Sarkhans Claude Starter** in Applications. macOS shows *"Sarkhans Claude Starter" Not Opened*. Click **Done**, not Move to Trash.
 2. Open the **Apple menu** → **System Settings** → **Privacy & Security**.
 3. Scroll all the way down to **Security**. Next to *"Sarkhans Claude Starter" was blocked to protect your Mac* click **Open Anyway**.

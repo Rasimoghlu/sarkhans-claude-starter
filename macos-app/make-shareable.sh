@@ -103,7 +103,7 @@ write_readme() {
     if ! $NOTARIZED; then
       echo
       echo "   The app isn't notarized by Apple, so macOS asks you to confirm it once:"
-      echo "   macOS 15 Sequoia / macOS 26 Tahoe:"
+      echo "   macOS 15 Sequoia / 26 Tahoe / 27 Golden Gate:"
       echo "   a) Double-click the app. In \"Not Opened\" click Done (not Move to Trash)."
       echo "   b) Apple menu → System Settings → Privacy & Security → scroll down to Security."
       echo "   c) Next to \"$APP_NAME was blocked to protect your Mac\" click Open Anyway."
