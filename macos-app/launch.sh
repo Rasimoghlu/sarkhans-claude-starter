@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 RESOURCES="$(cd "$(dirname "$0")" && pwd)"
-SOURCE="$RESOURCES/ClaudeStarter.swift"
+SOURCES="$RESOURCES/Sources"
 TARGET_DIR="$RESOURCES/../MacOS"
 if [ ! -w "$TARGET_DIR" ]; then
   TARGET_DIR="$HOME/Library/Application Support/ClaudeStarter"
@@ -15,7 +15,7 @@ alert() {
   /usr/bin/osascript -e "display alert \"Sarkhans Claude Starter\" message \"$1\"" >/dev/null 2>&1
 }
 
-SOURCE_HASH="$(/usr/bin/shasum -a 256 "$SOURCE" | cut -d' ' -f1)"
+SOURCE_HASH="$(cat "$SOURCES"/*.swift | /usr/bin/shasum -a 256 | cut -d' ' -f1)"
 BUILT_HASH="$(cat "$HASH_FILE" 2>/dev/null || true)"
 
 if [ ! -x "$BINARY" ] || [ "$SOURCE_HASH" != "$BUILT_HASH" ]; then
@@ -25,7 +25,7 @@ if [ ! -x "$BINARY" ] || [ "$SOURCE_HASH" != "$BUILT_HASH" ]; then
   fi
   /usr/bin/osascript -e 'display notification "Updating the app (~30 seconds)…" with title "Sarkhans Claude Starter"' >/dev/null 2>&1 &
   mkdir -p "$(dirname "$BUILD_LOG")"
-  if ! /usr/bin/xcrun swiftc -O -parse-as-library "$SOURCE" -o "$BINARY.tmp" >"$BUILD_LOG" 2>&1; then
+  if ! /usr/bin/xcrun swiftc -O -parse-as-library "$SOURCES"/*.swift -o "$BINARY.tmp" >"$BUILD_LOG" 2>&1; then
     alert "The app could not be built. Details: ~/Library/Logs/ClaudeStarter-build.log"
     exit 1
   fi

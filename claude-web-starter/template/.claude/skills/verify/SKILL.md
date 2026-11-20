@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Run the project's full quality gate for every stack in the repo (TS: typecheck/lint/test/build; Go: build/vet/lint/test; PHP: style/PHPStan/tests; Python: ruff/format/mypy/pytest) and report results. Use before saying any coding task is done, before every commit, and whenever the user asks to check, verify or test the project.
+description: Run the full quality gate for every stack in the repo (typecheck, lint, tests, build). Required before saying a task is done.
 allowed-tools: Bash(node ${CLAUDE_PROJECT_DIR}/.claude/scripts/verify.mjs *), Bash(node ${CLAUDE_PROJECT_DIR}/.claude/scripts/verify.mjs)
 ---
 # Verify

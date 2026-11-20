@@ -1,15 +1,13 @@
 ---
 name: new-feature
-description: End-to-end workflow for building a new feature, page, endpoint set or user flow in any stack (verify facts → plan with principles/patterns → data → server → UI → tests → verify → third-eye report). Use when the user asks to add, build or implement a feature, page, form, module or CRUD flow.
+description: 'Build a feature, page, form, module or CRUD flow end to end: verify facts, plan, data, server, UI, tests, verify, third-eye report.'
 argument-hint: "[feature description]"
 ---
 # New feature workflow
 
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (architect, db-engineer, backend-dev, frontend-dev, test-writer) inside their briefs. The main session never edits code itself.
-
 Feature request: $ARGUMENTS
 
-Run it inside the `/orchestrate` pipeline: steps 1–3 are yours + Explore/architect, step 4 is split into specialist slices, step 5 is supervision + verifier.
+Size it first. One area and a few files → do it yourself, step by step. Several areas (data + server + UI) or many files → run it inside `/orchestrate`: steps 1–3 feed the `architect`, step 4 becomes specialist slices, step 5 is supervision + `reviewer`.
 
 ## 1. Understand — no code yet
 - Restate the feature in 2–3 sentences and list acceptance criteria.
@@ -40,6 +38,6 @@ Run it inside the `/orchestrate` pipeline: steps 1–3 are yours + Explore/archi
 Self-explanatory code, no comments. While working, note every problem you see in code you read (third eye) and fix the safe ones.
 
 ## 5. Finish
-- `/verify` (full) until green. For non-trivial changes run the `verifier` agent on the diff.
+- `/verify` (full) until green. For non-trivial changes run the `reviewer` agent on the diff.
 - Summarize in the response language: what was built, files changed, how to try it, what is left open.
 - End with `### Third eye`.

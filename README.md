@@ -85,7 +85,7 @@ node claude-web-starter/install.mjs --help
 | Folder | Content |
 |---|---|
 | `claude-web-starter/` | installer (Node), project template, rules, skills, agents, hooks, stack packs, skill catalog |
-| `macos-app/` | SwiftUI app source, launcher, Info.plist, icon, `build-app.sh`, `make-shareable.sh`, `update-repo.txt` |
+| `macos-app/` | SwiftUI app source (`Sources/`), launcher, Info.plist, icon, `build-app.sh`, `make-shareable.sh`, `update-repo.txt` |
 | `.github/workflows/` | automatic release when `VERSION` changes on `main` |
 | `docs/` | architecture and porting guide |
 

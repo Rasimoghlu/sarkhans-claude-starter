@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Use ONLY when the user asks to commit, push, open a pull request or ship. Creates a feature branch if on main/master, runs the full quality gate and review, makes clean conventional commits, pushes the branch and opens a PR. Never pushes to main, never merges, never mentions AI or Claude.
+description: 'Use when the user asks to commit, push, open a PR or ship: branch off main, run /verify and the reviewer, clean commits, push, open a PR. Never merges.'
 argument-hint: "[optional: short description of the change]"
 ---
 # Ship
@@ -18,8 +18,8 @@ Follow every step in order. Stop and report if any step fails — never skip one
 - If already on a feature branch, stay on it.
 
 ## 3. Quality gate
-- Run `/verify` (full, without `--quick`). Everything must pass. Failures go to the owning specialist agent to fix at the root cause; never weaken checks.
-- Use the `code-reviewer` subagent on the diff. Every `blocker` and `major` finding goes to the owning specialist; re-run `/verify` after fixes.
+- Run `/verify` (full, without `--quick`). Everything must pass. Fix failures at the root cause — directly when small, otherwise through the owning specialist; never weaken checks.
+- Run the `reviewer` agent in review mode on the whole diff. Fix every `blocker` and `major` finding (directly or through the owning specialist), then re-run `/verify`.
 
 ## 4. Commit
 - Group changes into logical commits. Third-eye side-fixes get their own commit (`fix:` / `perf:` / `security:` / `refactor:`).
@@ -31,8 +31,8 @@ Follow every step in order. Stop and report if any step fails — never skip one
 - `git push -u origin <current-branch>`. Never push to `main`/`master`, never force-push.
 
 ## 6. Pull request
-- If `gh` is available and authenticated: `gh pr create --base main --head <branch> --title "<conventional title>" --body "<body>"`.
-  Body sections: `## Summary`, `## Changes`, `## How to test`, `## Risks / notes`. No AI/tool mentions.
+- If `gh` is available and authenticated: `gh pr create --head <branch> --title "<conventional title>" --body "<body>"`.
+  The base is the repository's default branch. Body sections: `## Summary`, `## Changes`, `## How to test`, `## Risks / notes`. No AI/tool mentions.
 - If `gh` is not available, print the compare URL from the push output instead.
 - Never merge the PR.
 

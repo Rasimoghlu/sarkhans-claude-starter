@@ -1,11 +1,9 @@
 ---
 name: ui-review
-description: Review UI code and rendered pages for accessibility (WCAG 2.2 AA), responsive layout, UI states, design consistency and front-end performance. Use when the user asks to review, polish or audit the UI/UX of a page or component.
+description: Review UI code and pages for accessibility (WCAG 2.2 AA), responsive layout, UI states, design consistency and front-end performance.
 argument-hint: "[page route or component path]"
 ---
 # UI review
-
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (frontend-dev for fixes) inside their briefs. The main session never edits code itself.
 
 Target: $ARGUMENTS
 

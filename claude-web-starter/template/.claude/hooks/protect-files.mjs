@@ -53,6 +53,7 @@ const protectedPrefixes = [
   [".claude/hooks/", "Enforcement hooks can only be changed by the user."],
   [".claude/settings.json", "Claude Code settings (permissions/hooks) can only be changed by the user."],
   [".claude/starter-version", "Managed by the installer."],
+  [".claude/starter-hash", "Managed by the installer."],
   ...(config.extraProtectedPaths || []).map((p) => [p, "Protected by .claude/hooks/config.json."]),
 ];
 

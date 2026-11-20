@@ -1,13 +1,13 @@
 ---
 name: kickoff
-description: Kickoff for a NEW project — discuss the product with the user before any code (goal, users, features, platforms, look & feel, constraints), agree scope and design direction, pick and install the fitting frontend/design skill, and record decisions in .claude/KICKOFF.md. Use first in every new project and whenever the user wants to plan a new product.
+description: 'Plan a NEW project with the user before any code: goal, users, features, look & feel, constraints, design skill; writes .claude/KICKOFF.md.'
 argument-hint: "[short idea of the project]"
 ---
 # Project kickoff (new project — no code yet)
 
 Idea: $ARGUMENTS
 
-You are the Orchestrator. This is a conversation with the user, not a build. Ask in the project's response language, a few questions at a time, and summarize what you understood after each round.
+This is a conversation with the user, not a build. Ask in the project's response language, a few questions at a time, and summarize what you understood after each round.
 
 ## 1. Product
 - What problem does it solve, for whom? What does success look like?
@@ -35,6 +35,6 @@ Ask for confirmation or changes. Iterate until the user agrees.
 1. Install the chosen skill(s): `node ~/claude-web-starter/install.mjs . --add-skill <id>` (and `--add-skill playwright` if agreed). Tell the user to restart Claude Code if a new MCP must be approved.
 2. Write `.claude/KICKOFF.md` with: product summary, MVP scope, out of scope, users/roles, design direction (palette, typography, spacing, component library, references, mood), chosen design skill(s), data model sketch, main screens, phased plan, open questions. (This file unlocks code edits — a hook checks it.)
 3. If the design skill expects its own brief (e.g. `DESIGN.md`/`PRODUCT.md`), create it from the same decisions.
-4. Propose the first task (usually the app shell + design tokens + one core screen) and start it with `/orchestrate` when the user says go.
+4. Propose the first task (usually the app shell + design tokens + one core screen) and start it when the user says go (with `/orchestrate` if it spans several areas).
 
 End with a short summary and `### Third eye` (risks, open questions).

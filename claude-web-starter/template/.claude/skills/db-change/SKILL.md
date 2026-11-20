@@ -1,11 +1,9 @@
 ---
 name: db-change
-description: Safely change the database schema (tables, columns, indexes, relations, constraints) with a new migration, updated models/types and tests, in any stack (Drizzle/Prisma, Go migrate/goose, Laravel/Doctrine, Django/Alembic).
+description: 'Change the database schema (tables, columns, indexes, relations) safely: new migration, updated models, data-architect review and tests.'
 argument-hint: "[what to change]"
 ---
 # Database schema change
-
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (db-engineer) inside their briefs. The main session never edits code itself.
 
 Change requested: $ARGUMENTS
 
@@ -19,5 +17,5 @@ Change requested: $ARGUMENTS
 5. **Update dependent code:** models, validation schemas/DTOs, services, queries, factories/seeders/fixtures, tests.
 6. Run `/verify`. If the project has a local test DB, run the migration there and the tests.
 7. Give the user the exact command to apply it in each environment — never apply it to any non-local database yourself.
-8. **`data-architect` review is mandatory** — run it on the diff; every blocker/major goes back to db-engineer; repeat until APPROVE (a hook blocks finishing without it).
+8. **`data-architect` review is mandatory** — run it on the diff; fix every blocker/major (yourself or through db-engineer) and repeat until APPROVE (a hook blocks finishing without it).
 9. End with `### Agents` and `### Third eye`.

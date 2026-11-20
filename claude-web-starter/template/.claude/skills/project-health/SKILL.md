@@ -1,11 +1,9 @@
 ---
 name: project-health
-description: Full "third eye" health scan of the whole project — types, lint, tests, build, dependencies, security smells, performance smells, code-quality violations — with a prioritized report, then fixing the safe items. Run manually when opening a project, before a release, or periodically.
+description: Full third-eye scan of the whole project (checks, dependencies, security, performance, code quality) with a prioritized report, then safe fixes.
 argument-hint: "[optional: area to focus on]"
 ---
 # Project health scan (third eye)
-
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (fixes go to the owning specialists) inside their briefs. The main session never edits code itself.
 
 Focus: $ARGUMENTS (empty = whole project)
 

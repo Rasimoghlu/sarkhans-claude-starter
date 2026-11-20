@@ -6,7 +6,7 @@ ARTIFACT="Sarkhans-Claude-Starter"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="${1:-}"
 if [ -z "$SRC" ]; then
-  if [ -f "$HERE/ClaudeStarter.swift" ] && [ -f "$HERE/claude-web-starter.zip" ]; then
+  if [ -d "$HERE/Sources" ] && [ -f "$HERE/claude-web-starter.zip" ]; then
     SRC="$HERE"
   elif [ -d "$HOME/Desktop/$APP_NAME.app/Contents/Resources" ]; then
     SRC="$HOME/Desktop/$APP_NAME.app/Contents/Resources"
@@ -30,7 +30,8 @@ fail() {
   exit 1
 }
 
-for file in ClaudeStarter.swift AppIcon.icns claude-web-starter.zip starter-version.txt; do
+compgen -G "$SRC/Sources/*.swift" >/dev/null || fail "Missing Swift sources in $SRC/Sources"
+for file in AppIcon.icns claude-web-starter.zip starter-version.txt; do
   [ -f "$SRC/$file" ] || fail "Missing $SRC/$file"
 done
 PLIST="$SRC/Info.plist"
@@ -56,9 +57,9 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$OUT"
 
 echo "→ $APP_NAME $VERSION"
 echo "→ Compiling for Apple Silicon…"
-xcrun swiftc -O -parse-as-library -target arm64-apple-macos13.0 "$SRC/ClaudeStarter.swift" -o "$WORK/ui-arm64"
+xcrun swiftc -O -parse-as-library -target arm64-apple-macos13.0 "$SRC"/Sources/*.swift -o "$WORK/ui-arm64"
 echo "→ Compiling for Intel…"
-xcrun swiftc -O -parse-as-library -target x86_64-apple-macos13.0 "$SRC/ClaudeStarter.swift" -o "$WORK/ui-x86_64"
+xcrun swiftc -O -parse-as-library -target x86_64-apple-macos13.0 "$SRC"/Sources/*.swift -o "$WORK/ui-x86_64"
 xcrun lipo -create "$WORK/ui-arm64" "$WORK/ui-x86_64" -output "$APP/Contents/MacOS/ClaudeStarter"
 
 cp "$PLIST" "$APP/Contents/Info.plist"

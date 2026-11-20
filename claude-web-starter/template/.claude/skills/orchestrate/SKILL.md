@@ -1,44 +1,65 @@
 ---
 name: orchestrate
-description: The full ADE pipeline for a task — intake, explore, architect plan, parallel specialist slices (backend-dev, frontend-dev, db-engineer, implementer, test-writer), supervision of every result, verifier, code review, fix loop and report. Use for every non-trivial coding task, and always for multi-area features, refactors and migrations.
+description: 'Run a big task through the agent team: architect plan, parallel specialist slices, reviewer checks, review, fix loop, report. For multi-area features, refactors, migrations.'
 argument-hint: "[the task]"
 ---
-# ADE pipeline (you are the Orchestrator)
+# Agent pipeline (you plan, delegate, supervise, verify and report)
 
 Task: $ARGUMENTS
 
-You do not edit code. You plan, delegate, supervise, verify and report. Rules: `.claude/rules/agents.md`.
+## The team
+| Agent | Role | Writes |
+|---|---|---|
+| `Explore` (built-in) | find code, map how things work | nothing |
+| `architect` | design + slice plan: scopes, contracts, acceptance criteria | nothing (keeps project memory) |
+| `backend-dev` | APIs, handlers, services, domain logic, jobs | server code + tests |
+| `frontend-dev` | pages, components, templates, client state, a11y | UI code + tests |
+| `db-engineer` | schema, migrations, models, queries, indexes | data code + tests |
+| `implementer` | scripts, config, CLI, infra, glue | its scope |
+| `test-writer` | tests only | test files |
+| `data-architect` | reviews every schema change | nothing (keeps project memory) |
+| `reviewer` | checks a slice, or reviews the whole diff | nothing (keeps project memory) |
+| `security-auditor` | security review | nothing |
 
 ## 1. Intake
-Restate the goal and acceptance criteria in 2–4 lines. Ask the user (max 3 questions) only if something important is ambiguous.
+Restate the goal and acceptance criteria in 2–4 lines. Ask (max 3 questions) only if something important is ambiguous.
 
 ## 2. Explore
-Launch `Explore` agents in parallel (one per area: data model, server, UI, tests…). Ask each for `path:line` evidence. Open the most important cited files yourself to confirm.
+Launch `Explore` agents in parallel, one per area, asking for `path:line` evidence. Open the most important cited files yourself. Skip this when you already know the code.
 
 ## 3. Design
-Launch `architect` with the goal, the acceptance criteria and the Explore findings. Review its plan critically:
-- contracts exact and consistent; slices don't share files; schema/contracts first; parallelism maximized;
-- design follows SOLID/KISS/YAGNI; pattern only where justified; security and performance covered; tests per slice.
-- schema changes: Mermaid ERD, normal-form reasoning, FKs with ON DELETE, constraints and indexes per `database.md`. For big data-model work you may have `data-architect` review the design before db-engineer builds it.
-Fix the plan (re-run architect if needed). For non-trivial work show the plan to the user and continue unless they object.
+Launch `architect` with the goal, the criteria and the findings. Check its plan: contracts exact; slices never share files; schema and contracts first; parallelism maximized; SOLID/KISS/YAGNI; patterns only where justified; security, performance and tests per slice. Schema changes need a Mermaid ERD and normal-form reasoning (`database.md`). Show the plan to the user for non-trivial work and continue unless they object.
 
 ## 4. Build
-Delegate each slice to its specialist with a full brief (goal, acceptance, exact scope, contracts verbatim, patterns with `path:line`, rules, required `### Evidence`). Run independent slices in parallel in one turn; dependent slices after their dependencies are verified.
+Every brief (agents start with zero context):
+1. Goal + testable acceptance criteria.
+2. Exact scope: the files/directories it may change.
+3. What it can't know: decisions, contracts verbatim, patterns to copy (`path:line`), relevant rule files.
+4. Constraints: no comments, no invented APIs, tests required, no new dependencies, no git operations.
+5. It must end with `### Evidence` (a hook rejects reports without it).
 
-## 5. Supervise each slice as it returns
-1. `git status` / `git diff --stat` → out-of-scope changes reverted (`git restore <file>`) and re-briefed.
-2. Evidence: open cited lines, re-run cited commands. Unreproducible → rejected.
-3. New imports/APIs/config/env/routes/tables exist or are created in this change.
-4. `verifier` on the slice → FAIL goes back to the owner with exact findings.
+Run independent slices in parallel in one turn; dependent slices after their dependencies are checked.
+
+## 5. Supervise each slice
+1. `git status` / `git diff --stat`: out-of-scope changes → `git restore <file>` and re-brief.
+2. Open cited lines, re-run cited commands. Can't reproduce → rejected.
+3. New imports, APIs, config keys, env vars, routes, tables exist or are created in this change.
+4. `reviewer` in check mode on the slice; FAIL → back to the owner with the exact findings.
+Never accept "should work" or "tests pass" without output.
 
 ## 6. Integrate and verify
-Integration gaps (wiring, contract mismatches) go to the owning specialist as a new small slice. Then run `/verify` yourself (full). Failures → owner → re-verify.
+Wiring gaps and contract mismatches go to the owner as a small new slice. Then run `/verify` yourself; failures → owner → re-verify.
 
 ## 7. Review
-`data-architect` first if schema/migrations/models changed (mandatory — normalization, FKs, indexes, constraints, types; findings go to db-engineer). Then `code-reviewer` on the whole diff; `security-auditor` if auth, input handling, data access, uploads, payments or secrets changed. Every blocker/major → owner → re-verify. Max 3 rounds, then escalate to the user with the open findings.
+`data-architect` first when schema, migrations or models changed (findings → `db-engineer`). Then `reviewer` in review mode on the whole diff; `security-auditor` when auth, input handling, data access, uploads, payments or secrets changed. Blockers and majors → owner → re-verify. Max 3 rounds, then escalate to the user with the open findings.
 
 ## 8. Report (in the response language)
-What was built and how to try it, then:
-- `### Agents` table: agent, slice, result (✅ / ❌ redone), how it was verified (verifier verdict, commands + real output).
-- What you rejected or redid and why.
-- `### Third eye`.
+What was built and how to try it, what you rejected or redid and why, then:
+
+```
+### Agents
+| Agent | Task | Result | How it was verified |
+|---|---|---|---|
+| backend-dev | ... | ✅ / ❌ redone | reviewer PASS, `go test ./...` 24 passed |
+```
+and `### Third eye`.

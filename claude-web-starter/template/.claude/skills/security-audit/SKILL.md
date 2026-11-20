@@ -1,15 +1,16 @@
 ---
 name: security-audit
-description: Full security audit of this codebase (any stack: TypeScript/Next.js, Go, PHP, Python) (OWASP Top 10 focused) producing a prioritized report with file:line evidence and fixes. Run manually before releases or after big changes.
+description: 'Full OWASP-focused security audit of the codebase with a prioritized report (file:line evidence, exploit scenario, fix). Runs in its own context.'
 argument-hint: "[optional: path or area to focus on]"
+context: fork
+agent: security-auditor
+background: false
 ---
 # Security audit
 
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (security-auditor; fixes go to the owning specialists) inside their briefs. The main session never edits code itself.
-
 Scope: $ARGUMENTS (empty = whole project)
 
-Use the `security-auditor` subagent for the deep code read if it is available, so the audit runs with fresh context. Do NOT modify code during the audit — report first, fix only after the user picks what to fix.
+This audit runs in its own agent context so the main conversation stays small. Do NOT modify code — report first; fixes happen only after the user picks them.
 
 ## 1. Map the attack surface
 - List every Route Handler (`app/**/route.ts`), Server Action (`"use server"`), middleware, webhook, file upload, and external integration.
@@ -37,7 +38,5 @@ Write `reports/security-audit-<YYYY-MM-DD>.md`:
 - Severity: Critical / High / Medium / Low / Info. Only include findings with concrete evidence; mark uncertain ones as "Needs manual check".
 - End with: top 3 fixes to do first, and what was out of scope.
 
-## 4. Then
-Show the summary to the user and ask which findings to fix. Also suggest running Claude Code's built-in `/security-review` on the current branch as a second pass.
-
-End with the `### Third eye` section if any code changed.
+## 4. Return
+Return the summary table, the top 3 fixes and the report path. End with: "Which findings should be fixed?" Also suggest Claude Code's built-in `/security-review` on the current branch as a second pass.
