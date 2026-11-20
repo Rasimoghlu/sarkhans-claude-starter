@@ -1,12 +1,24 @@
 # Sarkhans Claude Starter
 
-An Agentic Development Environment for Claude Code: one install adds an orchestrator with specialist agents, strict quality/security/design/database rules enforced by hooks, and a catalog of design skills — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.
+Rules Claude Code can't skip, a team of specialist agents, and a report on every change — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.
 
-## ⬇️ Download
+Project site: **https://sarkhandigitech.github.io/sarkhans-claude-starter/**
+
+## Get it
+
+### Option 1: Claude Code plugin (Windows, Linux, macOS)
+Run these two commands in a terminal, then start Claude Code:
+```bash
+claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin install sarkhans-starter@sarkhans-claude-starter
+```
+The rules, agents, skills and guardrails then work in every project. Skills are named like `/sarkhans-starter:verify`. [More about the plugin](#claude-code-plugin-windows-linux-macos)
+
+### Option 2: Mac app
 ### [Download Sarkhans Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
-macOS 13 or newer · Apple Silicon and Intel · always the latest version · [how to install](#install-on-a-mac)
+macOS 13 or newer, Apple Silicon and Intel, always the latest version. [How to install](#install-on-a-mac).
 
-Project site: **https://sarkhandigitech.github.io/sarkhans-claude-starter/** · Not on a Mac? Use the [Claude Code plugin](#claude-code-plugin-windows-linux-macos).
+The app adds what the plugin can't: one-click setup for all your projects with the right rules for each stack, a work mode per project, shared team rules, a weekly report of what the guardrails stopped, and automatic updates.
 
 ## What's inside
 - **Guardrails that block**, not just instructions: hooks stop comments in code, invented imports, pushes to main, AI mentions in commits, secret files and unsafe code.

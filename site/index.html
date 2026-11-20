@@ -3,143 +3,466 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sarkhans Claude Starter — guardrails, agents and rules for Claude Code</title>
-<meta name="description" content="A free Mac app that sets up Claude Code in all your projects: rules that are enforced, specialist agents, a third-eye report, design lock, database review and team rules.">
-<link rel="icon" href="icon.png">
+<title>Sarkhans Claude Starter — Claude writes the code. The starter checks it.</title>
+<meta name="description" content="Rules Claude Code can't skip, specialist agents and a report on every change. A Claude Code plugin for any system and a free Mac app.">
 <meta property="og:title" content="Sarkhans Claude Starter">
-<meta property="og:description" content="Guardrails, agents and rules for Claude Code — set up every project with one click.">
-<meta property="og:image" content="icon.png">
+<meta property="og:description" content="Claude writes the code. The starter checks it.">
+<meta property="og:image" content="https://sarkhandigitech.github.io/sarkhans-claude-starter/icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f8fb; --surface: #ffffff; --text: #141a26; --muted: #5b6577; --line: #e3e7ef;
-    --accent: #3b6fe0; --accent-text: #ffffff; --code: #eef1f7; --ok: #1f8a4c;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f1a2b; --surface: #16233a; --text: #e8eef7; --muted: #9aa8bf; --line: #24344f;
-      --accent: #4f8ef7; --accent-text: #0b1322; --code: #0c1524; --ok: #4cc38a;
-    }
+    --paper: #f7f7fa;
+    --white: #ffffff;
+    --ink: #1d1530;
+    --plum: #2b1f45;
+    --plum-soft: #3a2c5a;
+    --amber: #f2a33a;
+    --amber-deep: #a8620a;
+    --slate: #5e5873;
+    --faint: #9a94ab;
+    --line: #e2dfea;
+    --lilac: #ece8f5;
+    --radius-panel: 18px;
+    --radius-control: 12px;
+    --control-height: 52px;
+    --gap: 24px;
+    --sans: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
-  a { color: var(--accent); }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
-  header.hero { padding: 72px 0 48px; text-align: center; }
-  .hero img { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 12px 40px rgba(20, 40, 90, .25); }
-  h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 24px 0 12px; letter-spacing: -0.02em; }
-  .lead { font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 auto 32px; }
-  .button { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 12px; background: var(--accent); color: var(--accent-text); font-weight: 600; font-size: 18px; text-decoration: none; }
-  .button:hover { filter: brightness(1.08); }
-  .meta { color: var(--muted); font-size: 14px; margin-top: 14px; }
-  .meta a { color: var(--muted); }
-  section { padding: 48px 0; border-top: 1px solid var(--line); }
-  h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
-  .sub { color: var(--muted); margin: 0 0 28px; }
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
-  .card h3 { margin: 0 0 6px; font-size: 17px; }
-  .card p { margin: 0; color: var(--muted); font-size: 15px; }
-  ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
-  ol.steps > li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px 20px 72px; position: relative; }
-  ol.steps > li::before { content: counter(step); position: absolute; left: 22px; top: 18px; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; font-weight: 700; }
-  ol.steps h3 { margin: 0 0 6px; font-size: 17px; }
-  ol.steps p, ol.steps li li { color: var(--muted); font-size: 15px; }
-  ol.steps ol { margin: 8px 0 0; padding-left: 20px; }
-  code, pre { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
-  pre { white-space: pre-wrap; word-break: break-word; background: var(--code); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 12px 0 0; }
-  code { background: var(--code); padding: 1px 6px; border-radius: 6px; }
-  pre code { background: none; padding: 0; }
-  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
-  summary { cursor: pointer; font-weight: 600; }
-  details p { color: var(--muted); margin: 10px 0 0; }
-  .two { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
-  footer { padding: 32px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
-  footer a { color: var(--muted); margin-right: 18px; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1160px, 100% - 48px); margin-inline: auto; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  nav.top { display: flex; align-items: center; justify-content: space-between; height: 80px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  .navlinks { display: flex; gap: 28px; font-weight: 500; font-size: 15px; }
+  .navlinks a { text-decoration: none; color: var(--slate); }
+  .navlinks a:hover { color: var(--ink); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: var(--control-height); padding: 0 24px; border-radius: var(--radius-control); border: 0; font: 700 17px var(--sans); text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .btn-dark { background: var(--ink); color: var(--white); }
+  .btn-dark:hover { background: var(--plum-soft); }
+  .btn-amber { background: var(--amber); color: var(--ink); }
+  .btn-amber:hover { background: #f5b257; }
+
+  .hero { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center; padding: 48px 0 72px; }
+  h1 { font-size: clamp(42px, 5.4vw, 68px); line-height: 1; letter-spacing: -0.04em; font-weight: 800; margin: 0 0 24px; }
+  h1 span { display: block; color: var(--slate); font-weight: 600; }
+  .lead { font-size: 20px; line-height: 1.5; color: var(--slate); max-width: 38ch; margin: 0; }
+
+  .session { background: var(--plum); color: #e9e4f5; border-radius: var(--radius-panel); padding: 30px 28px 24px; font: 400 14px/1.55 var(--mono); box-shadow: 0 40px 80px -40px rgba(43,31,69,.55); position: relative; overflow: hidden; }
+  .session::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: repeating-linear-gradient(135deg, var(--amber) 0 14px, var(--plum) 14px 28px); }
+  .session header { display: flex; justify-content: space-between; color: #a99bc9; font-size: 12.5px; margin-bottom: 14px; }
+  .event { padding: 12px 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .event:first-of-type { border-top: 0; }
+  .tried { color: #cfc6e6; }
+  .tried b { color: #fff; font-weight: 500; }
+  .stop { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: baseline; margin-top: 6px; color: #f7d9ad; }
+  .stop i { font-style: normal; text-align: center; background: var(--amber); color: var(--plum); font-weight: 500; font-size: 12px; padding: 1px 0; border-radius: 5px; }
+  .report { margin-top: 12px; padding: 14px 16px; border-radius: var(--radius-control); background: rgba(255,255,255,.06); color: #ddd5ef; }
+  .report strong { color: #fff; font-weight: 500; }
+  @media (prefers-reduced-motion: no-preference) {
+    .session .event, .session .report { opacity: 0; transform: translateY(6px); animation: appear .45s ease-out forwards; }
+    .session .event:nth-of-type(1) { animation-delay: .35s; }
+    .session .event:nth-of-type(2) { animation-delay: 1.35s; }
+    .session .event:nth-of-type(3) { animation-delay: 2.35s; }
+    .session .report { animation-delay: 3.35s; }
+    .session .stop { opacity: 0; animation: appear .3s ease-out forwards; }
+    .session .event:nth-of-type(1) .stop { animation-delay: .85s; }
+    .session .event:nth-of-type(2) .stop { animation-delay: 1.85s; }
+    .session .event:nth-of-type(3) .stop { animation-delay: 2.85s; }
+  }
+  @keyframes appear { to { opacity: 1; transform: none; } }
+
+  .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); padding-bottom: 96px; }
+  .option { display: flex; flex-direction: column; background: var(--white); border-radius: var(--radius-panel); box-shadow: 0 0 0 1px var(--line); padding: 28px; }
+  .option h2 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 6px; max-width: none; }
+  .option > p { color: var(--slate); margin: 0 0 20px; }
+  .option > p a { color: var(--ink); }
+  .option .body { flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; }
+  .option .actions { display: flex; align-items: center; gap: 16px; }
+  .commands { margin: 0; background: var(--plum); color: #ece6f8; border-radius: var(--radius-control); padding: 16px 18px; font: 400 13.5px/1.6 var(--mono); }
+  .commands code { white-space: normal; }
+  .commands span { display: block; padding-left: 2ch; text-indent: -2ch; overflow-wrap: anywhere; }
+  .commands span + span { margin-top: 6px; }
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .facts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: var(--ink); }
+  .facts li::before { content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--amber); }
+
+  section { padding: 96px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(32px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 16px; max-width: 20ch; }
+  .intro { color: var(--slate); font-size: 19px; max-width: 60ch; margin: 0 0 44px; }
+
+  .table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius-panel); overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+  .table th, .table td { text-align: left; padding: 17px 24px; border-top: 1px solid var(--line); vertical-align: top; }
+  .table thead th { border-top: 0; background: var(--lilac); font-weight: 600; font-size: 14px; color: var(--slate); }
+  .ledger td:first-child { font-weight: 700; width: 22%; }
+  .ledger td:nth-child(2) { font: 400 14.5px/1.6 var(--mono); color: var(--plum-soft); width: 36%; }
+  .ledger td:last-child { color: var(--slate); }
+  .compare tbody th { font-weight: 500; color: var(--slate); width: 34%; }
+  .compare td { width: 33%; }
+  .compare td.no { color: var(--faint); }
+  .compare thead th:not(:first-child) { color: var(--ink); font-size: 15px; }
+
+  .columns { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); }
+  .column { padding: 28px 28px 8px; border-left: 1px solid var(--line); }
+  .column:first-child { padding-left: 0; border-left: 0; }
+  .column h3 { font-size: 21px; letter-spacing: -0.02em; margin: 0 0 4px; }
+  .column .kind { color: var(--amber-deep); font-weight: 600; margin: 0 0 12px; }
+  .column p, .column li { color: var(--slate); }
+  .column p { margin: 0 0 12px; }
+  .column ol { padding-left: 20px; margin: 0 0 12px; }
+  .column ol li { margin-bottom: 4px; }
+  .step { display: block; font-size: 15px; font-weight: 700; color: var(--amber-deep); margin-bottom: 4px; }
+  .note { margin: 32px 0 0; padding: 18px 24px; border-left: 4px solid var(--amber); background: var(--white); border-radius: 0 var(--radius-control) var(--radius-control) 0; color: var(--slate); }
+  .note strong { color: var(--ink); }
+
+  .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center; }
+  .switch { display: grid; grid-template-columns: repeat(3, 1fr); padding: 5px; background: var(--lilac); border-radius: var(--radius-control); gap: 4px; margin-bottom: 24px; }
+  .switch button { height: 42px; font: 600 16px var(--sans); color: var(--slate); background: none; border: 0; border-radius: 9px; cursor: pointer; }
+  .switch button[aria-selected="true"] { background: var(--white); color: var(--ink); box-shadow: 0 1px 2px rgba(29,21,48,.12), 0 0 0 1px var(--line); }
+  .panels { display: grid; }
+  .mode-panel { grid-area: 1 / 1; background: var(--white); border-radius: var(--radius-panel); box-shadow: 0 0 0 1px var(--line); padding: 26px 28px; }
+  .mode-panel[hidden] { display: block; visibility: hidden; }
+  .mode-panel h3 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .mode-panel p { color: var(--slate); margin: 0; }
+  .mode-panel dl { display: grid; grid-template-columns: 170px 1fr; gap: 8px 16px; margin: 20px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 15px; }
+  .mode-panel dt { color: var(--slate); }
+  .mode-panel dd { margin: 0; font-weight: 600; }
+
+  .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: stretch; }
+  .team > div { display: flex; flex-direction: column; justify-content: center; }
+  .team pre { margin: 0; display: flex; align-items: center; background: var(--plum); color: #ece6f8; border-radius: var(--radius-panel); padding: 28px; font: 400 14.5px/1.7 var(--mono); }
+
+  .faq > * { max-width: 780px; }
+  details { border-top: 1px solid var(--line); padding: 20px 0; }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; font-weight: 700; font-size: 19px; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-weight: 400; font-size: 26px; line-height: 1; color: var(--slate); }
+  details[open] summary::after { content: "−"; }
+  details p { color: var(--slate); margin: 12px 0 0; max-width: 64ch; }
+
+  .closing { text-align: center; }
+  .closing h2, .closing .intro { margin-inline: auto; }
+  .closing .actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--slate); font-size: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 22px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (max-width: 920px) {
+    .hero, .options, .modes, .team { grid-template-columns: 1fr; gap: var(--gap); }
+    .hero { gap: 40px; }
+    .columns { grid-template-columns: 1fr; }
+    .column { padding: 24px 0 8px; border-left: 0; border-top: 1px solid var(--line); }
+    .column:first-child { border-top: 0; }
+    .navlinks { display: none; }
+    section { padding: 72px 0; }
+    .options { padding-bottom: 72px; }
+    .ledger thead, .compare thead { display: none; }
+    .table tr { display: block; padding: 16px 20px; border-top: 1px solid var(--line); }
+    .table tbody tr:first-child { border-top: 0; }
+    .table th, .table td { display: block; padding: 2px 0; border: 0; width: auto !important; }
+    .compare td::before { content: attr(data-label) ": "; color: var(--slate); }
+    .option .actions { flex-direction: column; align-items: stretch; }
+  }
 </style>
 </head>
 <body>
-<header class="hero wrap">
-  <img src="icon.png" alt="Sarkhans Claude Starter icon">
-  <h1>Sarkhans Claude Starter</h1>
-  <p class="lead">Set up Claude Code in all your projects with one click: rules that are actually enforced, specialist agents, a third-eye report on every change, a design lock and database review.</p>
-  <a class="button" href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg">Download for Mac</a>
-  <p class="meta">Free and open source (MIT) · macOS 13 or newer · Apple Silicon and Intel · <a href="#install">how to install</a> · <a href="#plugin">not on a Mac?</a></p>
-</header>
-
-<main class="wrap">
-  <section>
-    <h2>What you get</h2>
-    <p class="sub">Most Claude Code setups only ask the AI to behave. This one checks it.</p>
-    <div class="grid">
-      <div class="card"><h3>Guardrails that block</h3><p>Hooks stop comments in code, invented packages and imports, pushes to main, AI mentions in commits, secret files and unsafe code — in TypeScript, Go, PHP, Python and more.</p></div>
-      <div class="card"><h3>Third eye</h3><p>Claude reports every problem it notices while working, fixes the safe ones and asks before risky changes.</p></div>
-      <div class="card"><h3>Work modes</h3><p>Lite, Standard or Strict per project. Standard: small changes directly, bigger work through a planned and reviewed agent team.</p></div>
-      <div class="card"><h3>Agents that learn</h3><p>Architect, specialists, reviewer, database and security agents. Reviewers keep notes per project and get better over time.</p></div>
-      <div class="card"><h3>Guardrail report</h3><p>See what the rules stopped this week in each project: secrets, invented imports, git mistakes, swallowed errors and more.</p></div>
-      <div class="card"><h3>Team rules</h3><p>Share one folder of rules with your team. Every project gets them and updates when they change.</p></div>
-      <div class="card"><h3>Design lock</h3><p>In existing projects Claude doesn't touch your visual design unless you ask. New projects start with a planning kickoff.</p></div>
-      <div class="card"><h3>Database review</h3><p>Normalized schemas, real foreign keys, safe migrations — checked by a database agent and a migration lint.</p></div>
-      <div class="card"><h3>Light on context</h3><p>About 2,800 tokens per session. Detailed rules load only when Claude works on matching files.</p></div>
+<div class="wrap">
+  <nav class="top" aria-label="Main">
+    <a class="brand" href="#top"><img src="icon.png" alt="">Sarkhans Claude Starter</a>
+    <div class="navlinks">
+      <a href="#stops">What it stops</a>
+      <a href="#modes">Work modes</a>
+      <a href="#choose">Plugin or app</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter">GitHub</a>
     </div>
-  </section>
+  </nav>
 
-  <section id="install">
-    <h2>Install in three steps</h2>
-    <p class="sub">The app isn't notarized by Apple, so macOS asks you to confirm it once. After that it opens normally and updates itself.</p>
-    <ol class="steps">
-      <li>
-        <h3>Drag it into Applications</h3>
-        <p>Open the downloaded <code>Sarkhans-Claude-Starter.dmg</code> and drag the app onto <strong>Applications</strong>. No admin rights? Use the <strong>Applications</strong> folder inside your home folder.</p>
-      </li>
-      <li>
-        <h3>Allow it once</h3>
-        <p><strong>macOS 15, 26 and 27:</strong></p>
-        <ol>
-          <li>Double-click the app. macOS says it was not opened — click <strong>Done</strong>.</li>
-          <li>Apple menu → <strong>System Settings</strong> → <strong>Privacy &amp; Security</strong>.</li>
-          <li>Scroll down to <strong>Security</strong> and click <strong>Open Anyway</strong>, then <strong>Open Anyway</strong> again and confirm with your password or Touch ID.</li>
-        </ol>
-        <p><strong>macOS 13 and 14:</strong> right-click the app → <strong>Open</strong> → <strong>Open</strong>.</p>
-      </li>
-      <li>
-        <h3>Set up your projects</h3>
-        <p>The app installs what's missing (Node.js, Git, Claude Code), asks for your projects folder and the language Claude should explain things in. Select projects, press <strong>Set up</strong>, then <strong>Open in Claude Code</strong>.</p>
-      </li>
-    </ol>
-  </section>
-
-  <section id="plugin">
+  <header class="hero" id="top">
     <div>
-      <div>
-        <h2>Not on a Mac?</h2>
-        <p class="sub">The rules, agents, skills and guardrails are also a Claude Code plugin — on Windows, Linux and macOS, in the terminal and the desktop app.</p>
-        <pre><code>claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
-claude plugin install sarkhans-starter@sarkhans-claude-starter</code></pre>
-        <p class="meta" style="text-align:left">Skills are namespaced, e.g. <code>/sarkhans-starter:verify</code>.</p>
+      <h1>Claude writes<br>the code. <span>The starter<br>checks it.</span></h1>
+      <p class="lead">Rules Claude Code can't skip, a team of specialist agents, and a report on every change. Add it to Claude Code on any system, or set up all your projects at once with the free Mac app.</p>
+    </div>
+    <div class="session" role="img" aria-label="Example: the starter stops Claude from pushing to main, importing a package that isn't installed and reading a secrets file, then Claude reports what it found.">
+      <header><span>your-project</span><span>guardrails on</span></header>
+      <div class="event">
+        <div class="tried">Claude runs <b>git push origin main</b></div>
+        <div class="stop"><i>Stopped</i><span>Never push to main. Push the feature branch and open a PR.</span></div>
       </div>
-      <div style="margin-top:40px">
-        <h2>Requirements</h2>
-        <p class="sub">Claude Code with a Claude Pro, Max, Team or Enterprise plan (the free plan doesn't include Claude Code). The app can install Claude Code, Node.js and Git for you.</p>
+      <div class="event">
+        <div class="tried">Claude writes <b>import pad from "left-pad"</b></div>
+        <div class="stop"><i>Stopped</i><span>"left-pad" isn't in package.json. Check the real name, never guess.</span></div>
+      </div>
+      <div class="event">
+        <div class="tried">Claude opens <b>.env</b></div>
+        <div class="stop"><i>Stopped</i><span>May contain secrets. Read .env.example instead.</span></div>
+      </div>
+      <div class="report"><strong>Third eye</strong><br>Fixed: unhandled promise in api/orders.ts:42<br>Not fixed: N+1 query on the reports page, needs your OK</div>
+    </div>
+  </header>
+
+  <div class="options" id="get">
+    <div class="option">
+      <h2>Claude Code plugin</h2>
+      <p>For Windows, Linux and macOS. Run these two commands in a terminal, then start Claude Code. Skills are named like /sarkhans-starter:verify.</p>
+      <div class="body">
+        <pre class="commands"><code><span>claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter</span><span>claude plugin install sarkhans-starter@sarkhans-claude-starter</span></code></pre>
+      </div>
+      <div class="actions">
+        <button class="btn btn-amber" type="button" id="copy-commands">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M13 4H5a1 1 0 0 0-1 1v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>Copy commands</span>
+        </button>
       </div>
     </div>
-  </section>
+    <div class="option">
+      <h2>Mac app</h2>
+      <p>For macOS 13 or newer. Sets up every project from one window and updates itself. macOS asks you to <a href="#install">allow it once</a>.</p>
+      <div class="body">
+        <ul class="facts">
+          <li>One click for all your projects, with the right rules for each stack</li>
+          <li>Work mode per project, and shared team rules</li>
+          <li>A weekly report of what the guardrails stopped</li>
+        </ul>
+      </div>
+      <div class="actions">
+        <a class="btn btn-dark" href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v10m0 0 4-4m-4 4-4-4M4 16h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download for Mac
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <section>
+<section id="stops">
+  <div class="wrap">
+    <h2>What it stops, and what happens instead</h2>
+    <p class="intro">Instructions alone are suggestions. Each line below is enforced by a hook: Claude is stopped, gets the reason, and has to fix the cause.</p>
+    <table class="table ledger">
+      <thead><tr><th>Rule</th><th>What Claude tried</th><th>What happens instead</th></tr></thead>
+      <tbody>
+        <tr><td>Secrets</td><td>Read .env</td><td>Uses .env.example and the config module.</td></tr>
+        <tr><td>Main branch</td><td>git push origin main</td><td>Pushes a feature branch and opens a pull request.</td></tr>
+        <tr><td>Invented code</td><td>import pad from "left-pad"</td><td>Checks what's really installed before using it.</td></tr>
+        <tr><td>Your name on commits</td><td>Co-Authored-By: Claude</td><td>Commits read as yours, with no AI mention.</td></tr>
+        <tr><td>Comments</td><td>// TODO fix later</td><td>Finishes the work or tells you what's left.</td></tr>
+        <tr><td>Swallowed errors</td><td>catch {}</td><td>Handles the error or passes it on with context.</td></tr>
+        <tr><td>Your design</td><td>Edits tailwind.config.ts</td><td>Waits until you ask for a design change.</td></tr>
+        <tr><td>Database</td><td>price FLOAT in a migration</td><td>Uses a decimal type and gets a schema review.</td></tr>
+        <tr><td>"Done" too early</td><td>Finishes with type errors</td><td>Sent back to fix them before it can stop.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Three layers that work together</h2>
+    <p class="intro">Your code stays untouched. The app adds a short CLAUDE.md and a .claude folder to each project, hidden from git. The plugin needs no files in your projects at all.</p>
+    <div class="columns">
+      <div class="column">
+        <h3>Rules</h3>
+        <p class="kind">What Claude reads</p>
+        <p>Third eye, clean code, testing, security, git and design rules. About 2,800 tokens per session; detailed rules load only for matching files.</p>
+      </div>
+      <div class="column">
+        <h3>Agents</h3>
+        <p class="kind">Who does the bigger work</p>
+        <p>An architect plans, specialists build in parallel, a reviewer checks every result. Reviewers keep notes per project and get sharper over time.</p>
+      </div>
+      <div class="column">
+        <h3>Hooks</h3>
+        <p class="kind">What can't be skipped</p>
+        <p>Checks on every edit and command, in TypeScript, Go, PHP, Python, Rust, Java and more. They block, explain and make Claude fix the cause.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="wrap modes">
+    <div>
+      <h2>Pick how much help each project gets</h2>
+      <p class="intro" style="margin-bottom:0">Small fixes shouldn't need a committee. Big changes should. Choose per project.</p>
+    </div>
+    <div>
+      <div class="switch" role="tablist" aria-label="Work mode">
+        <button role="tab" id="tab-lite" aria-controls="mode-lite" aria-selected="false">Lite</button>
+        <button role="tab" id="tab-standard" aria-controls="mode-standard" aria-selected="true">Standard</button>
+        <button role="tab" id="tab-strict" aria-controls="mode-strict" aria-selected="false">Strict</button>
+      </div>
+      <div class="panels">
+        <div class="mode-panel" role="tabpanel" id="mode-lite" aria-labelledby="tab-lite" hidden>
+          <h3>Lite</h3>
+          <p>Claude edits freely and uses agents only when they help. Safety checks and git rules stay on.</p>
+          <dl><dt>Claude edits itself</dt><dd>Always</dd><dt>Report required</dt><dd>Changes of 80+ lines</dd></dl>
+        </div>
+        <div class="mode-panel" role="tabpanel" id="mode-standard" aria-labelledby="tab-standard">
+          <h3>Standard</h3>
+          <p>Small changes directly; bigger work goes to the agent team with a plan and an independent review.</p>
+          <dl><dt>Claude edits itself</dt><dd>Up to 3 files per request</dd><dt>Report required</dt><dd>Changes of 30+ lines</dd></dl>
+        </div>
+        <div class="mode-panel" role="tabpanel" id="mode-strict" aria-labelledby="tab-strict" hidden>
+          <h3>Strict</h3>
+          <p>Every change goes through the agent team: plan, build, independent review. Slowest, most thorough.</p>
+          <dl><dt>Claude edits itself</dt><dd>Never</dd><dt>Report required</dt><dd>Every change</dd></dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="choose">
+  <div class="wrap">
+    <h2>Plugin or Mac app?</h2>
+    <p class="intro">Both give Claude the same rules, agents, skills and guardrails. The app adds a window to manage many projects and your team.</p>
+    <table class="table compare">
+      <thead><tr><th scope="col"><span class="sr-only">Feature</span></th><th scope="col">Plugin</th><th scope="col">Mac app</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Works on</th><td data-label="Plugin">Windows, Linux and macOS</td><td data-label="Mac app">macOS 13 or newer</td></tr>
+        <tr><th scope="row">Install</th><td data-label="Plugin">Two commands in a terminal</td><td data-label="Mac app">Download, allow once</td></tr>
+        <tr><th scope="row">Rules, agents, skills, guardrails</th><td data-label="Plugin">Yes, in every project</td><td data-label="Mac app">Yes, in the projects you pick</td></tr>
+        <tr><th scope="row">Stack detection and project commands</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
+        <tr><th scope="row">Work mode per project</th><td data-label="Plugin">In .claude/hooks/config.json</td><td data-label="Mac app">A switch in the app</td></tr>
+        <tr><th scope="row">Weekly report of what was stopped</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
+        <tr><th scope="row">Shared team rules</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
+        <tr><th scope="row">Updates</th><td data-label="Plugin">Through /plugin in Claude Code</td><td data-label="Mac app">Automatic</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install the Mac app</h2>
+    <p class="intro">You'll need Claude Code with a Claude Pro, Max, Team or Enterprise plan. The app installs Claude Code, Node.js and Git for you if they're missing.</p>
+    <div class="columns">
+      <div class="column">
+        <span class="step">Step 1</span>
+        <h3>Drag it into Applications</h3>
+        <p>Open Sarkhans-Claude-Starter.dmg and drag the app onto Applications. No admin rights? Use the Applications folder inside your home folder.</p>
+      </div>
+      <div class="column">
+        <span class="step">Step 2</span>
+        <h3>Allow it once</h3>
+        <ol>
+          <li>Double-click the app, then click Done.</li>
+          <li>Open System Settings, then Privacy &amp; Security.</li>
+          <li>Under Security, click Open Anyway twice and confirm.</li>
+        </ol>
+        <p>On macOS 13 and 14: right-click the app, choose Open, then Open.</p>
+      </div>
+      <div class="column">
+        <span class="step">Step 3</span>
+        <h3>Set up your projects</h3>
+        <p>Choose your projects folder and the language Claude explains things in. Select projects, press Set up, then Open in Claude Code.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Why the extra step?</strong> macOS shows a plain Open button only for apps notarized through a paid Apple developer account. This app is free, so macOS asks once. After that it opens normally and updates itself.</p>
+  </div>
+</section>
+
+<section id="team">
+  <div class="wrap team">
+    <div>
+      <h2>One set of rules for the whole team</h2>
+      <p class="intro" style="margin-bottom:0">Keep your team's rules in one shared folder, such as a git repository, and point the app at it under Settings, Team rules. Every project gets the rules and updates itself when they change.</p>
+    </div>
+    <pre><code>team-rules/
+  team.json       name, default work mode, language
+  rules/
+    api.md        your API conventions
+    naming.md     your naming rules</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap faq">
     <h2>Questions</h2>
-    <details><summary>Why does macOS ask me to confirm the app?</summary><p>Apple shows a simple "Open" button only for apps from developers with a paid Apple developer account. This app is free and signed without one, so macOS asks once. Download it only from this site or the GitHub Releases page.</p></details>
-    <details><summary>Is my code sent anywhere?</summary><p>No. The app only writes rule files into your projects and checks GitHub for updates. The guardrail log stays on your Mac. See the <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/PRIVACY.md">privacy note</a>.</p></details>
-    <details><summary>Will it change my code or my git history?</summary><p>No. Setting up a project only adds a short CLAUDE.md and a .claude folder, hidden from git by default. Your own CLAUDE.md is never touched.</p></details>
-    <details><summary>How do updates work?</summary><p>The app checks for new versions on its own and shows an Update button. Set-up projects get new rules automatically.</p></details>
-  </section>
-</main>
+    <details><summary>Is my code sent anywhere?</summary><p>No. The starter only adds rules for Claude Code, and the app checks GitHub for updates. The log of what the guardrails stopped stays on your Mac.</p></details>
+    <details><summary>Will it change my code or my git history?</summary><p>No. The app adds a short CLAUDE.md and a .claude folder, hidden from git by default. Your own CLAUDE.md is never touched, and Remove takes everything out again.</p></details>
+    <details><summary>Does it work with my language?</summary><p>The rules and hooks cover any project. TypeScript and Next.js, Go, PHP with Laravel or Symfony, Python with Django or FastAPI get extra checks, and Rust, Java, Kotlin, .NET, Ruby, Dart and Swift are recognized too.</p></details>
+    <details><summary>How do updates work?</summary><p>The app checks for new versions by itself and shows an Update button; set-up projects get the new rules automatically. The plugin updates through /plugin in Claude Code.</p></details>
+    <details><summary>Can Claude explain things in my language?</summary><p>Yes. Pick the language for explanations and reports during setup or per project. Code, commits and pull requests stay in English.</p></details>
+  </div>
+</section>
 
-<footer class="wrap">
-  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter">GitHub</a>
-  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases">Releases</a>
-  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/issues/new/choose">Report a problem</a>
-  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/PRIVACY.md">Privacy</a>
-  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/LICENSE">MIT License</a>
-  <p>Sarkhans Claude Starter is an independent project and isn't affiliated with Anthropic. Claude and Claude Code are Anthropic's products.</p>
-</footer>
+<section class="closing">
+  <div class="wrap">
+    <h2>Give Claude rules it can't skip</h2>
+    <p class="intro">Free and open source under the MIT license.</p>
+    <div class="actions">
+      <a class="btn btn-amber" href="#get">Get the plugin</a>
+      <a class="btn btn-dark" href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v10m0 0 4-4m-4 4-4-4M4 16h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download for Mac
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>Sarkhans Claude Starter is an independent project, not affiliated with Anthropic.</span>
+    <nav aria-label="Footer">
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter">GitHub</a>
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases">Releases</a>
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/issues/new/choose">Report a problem</a>
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/PRIVACY.md">Privacy</a>
+      <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/LICENSE">License</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+  const commands = "claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter\nclaude plugin install sarkhans-starter@sarkhans-claude-starter";
+  const copyButton = document.getElementById("copy-commands");
+  const copyLabel = copyButton.querySelector("span");
+  copyButton.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(commands);
+      copyLabel.textContent = "Copied";
+    } catch {
+      copyLabel.textContent = "Select the commands to copy";
+    }
+    setTimeout(() => { copyLabel.textContent = "Copy commands"; }, 2000);
+  });
+
+  const tabs = [...document.querySelectorAll('.switch [role="tab"]')];
+  const select = (tab) => {
+    for (const other of tabs) {
+      const selected = other === tab;
+      other.setAttribute("aria-selected", String(selected));
+      other.tabIndex = selected ? 0 : -1;
+      document.getElementById(other.getAttribute("aria-controls")).hidden = !selected;
+    }
+  };
+  tabs.forEach((tab, index) => {
+    tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+    tab.addEventListener("click", () => select(tab));
+    tab.addEventListener("keydown", (event) => {
+      const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+      if (!step) return;
+      const next = tabs[(index + step + tabs.length) % tabs.length];
+      select(next);
+      next.focus();
+    });
+  });
+</script>
 </body>
 </html>
