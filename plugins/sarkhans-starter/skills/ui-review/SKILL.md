@@ -8,6 +8,8 @@ argument-hint: "[page route or component path]"
 Target: $ARGUMENTS
 
 ## 1. Code review (always)
+If the `modern-web-guidance` skill is installed, look up the guides for the patterns in the target (dialogs, forms, layout, images, CSP…) first and judge the code against them, not against older habits.
+
 Read the target files and check against `${CLAUDE_PLUGIN_ROOT}/rules/styling-and-a11y.md` and `${CLAUDE_PLUGIN_ROOT}/rules/react-components.md`:
 - **Semantics & a11y** — headings order, buttons vs links, labels, `alt`, `aria-*` correctness, focus-visible styles, keyboard traps, color contrast of token pairs.
 - **States** — loading, empty, error, success, disabled/pending for every async piece.

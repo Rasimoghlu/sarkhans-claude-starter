@@ -9,7 +9,15 @@
       "name": "sarkhans-starter",
       "source": "./plugins/sarkhans-starter",
       "description": "Guardrails, rules, specialist agents and skills for professional work with Claude Code: third-eye reports, no invented APIs, safe git, design lock, database review.",
-      "version": "4.9.0"
+      "version": "4.10.0"
+    },
+    {
+      "name": "modern-web-guidance",
+      "source": {
+        "source": "github",
+        "repo": "GoogleChrome/modern-web-guidance"
+      },
+      "description": "Modern web platform guidance for coding agents by Google Chrome (Apache-2.0): accessibility, performance, security and modern HTML/CSS. Installed together with sarkhans-starter."
     }
   ]
 }

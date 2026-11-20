@@ -73,7 +73,7 @@ Plus everywhere: secrets, env reads only in the config module, new files ≤ 400
 
 ## Skills
 - **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
-- **Catalog** (`skills-catalog.json`): `frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `web-design-guidelines`, `emil-design-eng`, `vercel-react-best-practices`, plus the `playwright` and `context7` MCP servers.
+- **Catalog** (`skills-catalog.json`): `frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `web-design-guidelines`, `emil-design-eng`, `vercel-react-best-practices`, `modern-web-guidance` (Google Chrome, on by default for web projects: anything with a `package.json`, an `index.html` or a `composer.json`), plus the `playwright` and `context7` MCP servers.
 - **Recommended:** on a first install these are switched on automatically, based on the stack (skip with `--no-recommended`):
   - `context7` for every project;
   - `playwright` and `web-design-guidelines` when there is a `package.json`;

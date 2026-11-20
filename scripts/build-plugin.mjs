@@ -13,6 +13,11 @@ const OUTPUT = join(ROOT, "plugins", PLUGIN_NAME);
 const VERSION = readFileSync(join(STARTER, "VERSION"), "utf8").trim();
 const DESCRIPTION = "Guardrails, rules, specialist agents and skills for professional work with Claude Code: third-eye reports, no invented APIs, safe git, design lock, database review.";
 const SKILL_NAMES = readdirSync(join(TEMPLATE, "skills"));
+const WEB_GUIDANCE = {
+  name: "modern-web-guidance",
+  source: { source: "github", repo: "GoogleChrome/modern-web-guidance" },
+  description: "Modern web platform guidance for coding agents by Google Chrome (Apache-2.0): accessibility, performance, security and modern HTML/CSS. Installed together with sarkhans-starter.",
+};
 
 function listFiles(dir, base = dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -64,6 +69,7 @@ function build(destination) {
     homepage: "https://github.com/sarkhandigitech/sarkhans-claude-starter",
     repository: "https://github.com/sarkhandigitech/sarkhans-claude-starter",
     license: "MIT",
+    dependencies: [WEB_GUIDANCE.name],
   }, null, 2) + "\n");
   copyTree(join(TEMPLATE, "skills"), join(destination, "skills"), rewriteText);
   copyTree(join(TEMPLATE, "agents"), join(destination, "agents"), rewriteText);
@@ -87,7 +93,7 @@ function marketplace() {
     name: MARKETPLACE_NAME,
     description: "Sarkhan’s Claude Starter for Claude Code",
     owner: { name: "sarkhandigitech" },
-    plugins: [{ name: PLUGIN_NAME, source: `./plugins/${PLUGIN_NAME}`, description: DESCRIPTION, version: VERSION }],
+    plugins: [{ name: PLUGIN_NAME, source: `./plugins/${PLUGIN_NAME}`, description: DESCRIPTION, version: VERSION }, WEB_GUIDANCE],
   }, null, 2) + "\n";
 }
 
