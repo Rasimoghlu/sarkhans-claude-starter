@@ -89,7 +89,7 @@
   html:not(.scroll-ready) .stick { position: relative; height: auto; padding: calc(var(--nav-height) + 72px) 0 96px; }
   html:not(.scroll-ready) .track + .track .stick, html:not(.scroll-ready) section + .track .stick { padding-top: 96px; border-top: 1px solid var(--line); }
 
-  .hero-copy { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .hero-copy { display: flex; flex-direction: column; align-items: center; gap: 24px; pointer-events: auto; will-change: transform, opacity; }
   .hero-copy .lead { max-width: 46ch; }
   .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
   .cue { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--slate); font-size: 14px; font-weight: 600; }
@@ -366,33 +366,43 @@
   .hero-inner { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: calc(var(--nav-height) + 40px) 24px 72px; text-align: center; }
 
   .perch { position: fixed; inset: 0; z-index: 25; pointer-events: none; }
+  .sway { position: absolute; inset: 0; }
   .branch { position: absolute; left: 0; top: 0; overflow: visible; }
-  .bird { position: absolute; left: 0; top: 0; width: 120px; height: 160px; transform-origin: 0 0; will-change: transform; }
-  .bird svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .branch .leaf { transform-box: view-box; }
+  .branch.shiver .leaf { animation: shiver .6s ease-out var(--d, 0s); }
+  .bird { position: absolute; left: 0; top: 0; width: 120px; height: 160px; transform-origin: 0 0; will-change: transform; pointer-events: auto; cursor: pointer; }
+  .bird > svg { display: block; width: 100%; height: 100%; overflow: visible; transition: filter .25s; }
   .bird .wing, .bird .head, .bird .leg, .bird .bird-body { transform-box: view-box; }
   .bird .wing-l { transform-origin: 32px 90px; }
   .bird .wing-r { transform-origin: 88px 90px; }
   .bird .wing { transition: transform .35s var(--ease); }
-  .bird .head { transform-origin: 60px 92px; transform: translateY(var(--nod, 0px)) rotate(var(--tilt, 0deg)); transition: transform .45s var(--ease); }
-  .bird .pupil { transform: translate(var(--look-x, 0px), var(--look-y, 0px)); transition: transform .35s var(--ease); }
+  .bird .head { transform-origin: 60px 92px; transform: translateY(var(--nod, 0px)) rotate(var(--tilt, 0deg)); transition: transform .4s var(--ease); }
+  .bird .pupil { transform-box: fill-box; transform-origin: center; transform: translate(var(--look-x, 0px), var(--look-y, 0px)) scale(var(--pupil, 1)); transition: transform .3s var(--ease); }
   .bird .lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); transition: transform .09s ease-in; }
   .bird.blink .lid { transform: scaleY(1); }
   .bird .leg { transition: transform .2s var(--ease); }
+  .bird.alert > svg { filter: drop-shadow(0 0 7px rgba(242, 163, 58, .9)); }
+  .bird.alert { --pupil: .72; }
 
-  .bird.flying .wing-l { animation: flap-l .22s ease-in-out infinite alternate; }
-  .bird.flying .wing-r { animation: flap-r .22s ease-in-out infinite alternate; }
+  .bird.flying .wing-l { animation: flap-l .16s ease-in-out infinite alternate; }
+  .bird.flying .wing-r { animation: flap-r .16s ease-in-out infinite alternate; }
   .bird.flying .leg { transform: translateY(-7px); }
-  .bird.landing svg { animation: land .42s var(--ease); }
-  .bird.walking .bird-body { animation: bob .3s ease-in-out infinite alternate; }
-  .bird.walking .leg-l { animation: step .3s ease-in-out infinite alternate; }
-  .bird.walking .leg-r { animation: step .3s ease-in-out infinite alternate-reverse; }
+  .bird.landing > svg { animation: land .42s var(--ease); }
+  .bird.hop > svg { animation: hop .55s cubic-bezier(.3, .6, .4, 1); }
+  .bird.nod .head { animation: nod .8s var(--ease); }
+
+  .owl-bubble { position: absolute; left: 0; top: 0; padding: 8px 14px; border-radius: 12px; background: var(--ink); color: #fff; font: 600 14px/1.3 var(--sans); white-space: nowrap; box-shadow: 0 12px 30px -10px rgba(29, 21, 48, .5); opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .3s var(--ease); }
+  .owl-bubble::before { content: ""; position: absolute; left: var(--tail, 50%); top: -6px; width: 12px; height: 12px; margin-left: -6px; background: var(--ink); border-radius: 2px; transform: rotate(45deg); }
+  .owl-bubble.on { opacity: 1; transform: none; }
+
   @keyframes flap-l { from { transform: rotate(55deg); } to { transform: rotate(140deg); } }
   @keyframes flap-r { from { transform: rotate(-55deg); } to { transform: rotate(-140deg); } }
-  @keyframes land { 0% { transform: translateY(0) scale(1, 1); } 35% { transform: translateY(6px) scale(1.06, .9); } 70% { transform: translateY(-2px) scale(.98, 1.03); } 100% { transform: none; } }
-  @keyframes bob { to { transform: translateY(-3px); } }
-  @keyframes step { to { transform: translateY(-5px); } }
+  @keyframes land { 0% { transform: none; } 35% { transform: translateY(6px) scale(1.06, .9); } 70% { transform: translateY(-2px) scale(.98, 1.03); } 100% { transform: none; } }
+  @keyframes hop { 0% { transform: none; } 15% { transform: translateY(4px) scale(1.05, .92); } 50% { transform: translateY(-30px); } 85% { transform: translateY(3px) scale(1.04, .94); } 100% { transform: none; } }
+  @keyframes nod { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(8px) rotate(2deg); } 50% { transform: translateY(0); } 75% { transform: translateY(6px) rotate(-2deg); } }
+  @keyframes shiver { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(7deg); } 55% { transform: rotate(-5deg); } 80% { transform: rotate(2deg); } }
   @media (prefers-reduced-motion: reduce) {
-    .bird * { animation: none !important; transition: none !important; }
+    .bird *, .branch * { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
@@ -417,6 +427,7 @@
 </header>
 
 <div class="perch" aria-hidden="true">
+  <div class="sway" id="sway">
   <svg class="branch" id="branch"></svg>
   <div class="bird" id="bird">
     <svg viewBox="0 0 120 160">
@@ -442,6 +453,8 @@
 <clipPath id="bd-lc450"><circle cx="450" cy="470" r="76"/></clipPath><clipPath id="bd-lc574"><circle cx="574" cy="470" r="76"/></clipPath></defs><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bd-bg)"/><circle cx="760" cy="250" r="150" fill="url(#bd-moon)"/><circle cx="250" cy="230" r="5" fill="#fff" fill-opacity=".55"/><circle cx="318" cy="180" r="3" fill="#fff" fill-opacity=".55"/><circle cx="812" cy="420" r="4" fill="#fff" fill-opacity=".55"/><circle cx="214" cy="360" r="3" fill="#fff" fill-opacity=".55"/><g filter="url(#bd-sh)"><path d="M 452 262 C 368 262 352 300 352 372 L 352 452 C 352 506 328 532 276 538 C 328 544 352 570 352 624 L 352 700 C 352 772 368 806 452 806" fill="none" stroke="url(#bd-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="M 572 262 C 656 262 672 300 672 372 L 672 452 C 672 506 696 532 748 538 C 696 544 672 570 672 624 L 672 700 C 672 772 656 806 572 806" fill="none" stroke="url(#bd-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><circle cx="450" cy="470" r="76" fill="#120B22"/><circle cx="450" cy="470" r="64" fill="url(#bd-eye)"/><g class="pupil"><circle cx="450" cy="476" r="30" fill="#120B22"/><circle cx="436" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#bd-lc450)"><rect class="lid" x="370" y="390" width="160" height="160" fill="#2E2150"/></g><circle cx="574" cy="470" r="76" fill="#120B22"/><circle cx="574" cy="470" r="64" fill="url(#bd-eye)"/><g class="pupil"><circle cx="574" cy="476" r="30" fill="#120B22"/><circle cx="560" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#bd-lc574)"><rect class="lid" x="494" y="390" width="160" height="160" fill="#2E2150"/></g><path d="M 488 572 L 536 572 L 512 612 Z" fill="#F2A33A" stroke="#F2A33A" stroke-width="16" stroke-linejoin="round"/><rect x="430" y="664" width="164" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.5"/><rect x="456" y="712" width="112" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.32"/></g><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bd-gloss)"/><rect x="102" y="102" width="820" height="820" rx="184" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="4"/></svg></g>
     </svg>
   </div>
+  </div>
+  <div class="owl-bubble" id="owl-bubble">Who pushed to main?</div>
 </div>
 
 <main>
@@ -1118,13 +1131,16 @@
 (() => {
   const bird = document.getElementById("bird");
   const branch = document.getElementById("branch");
+  const sway = document.getElementById("sway");
+  const bubble = document.getElementById("owl-bubble");
   const nav = document.getElementById("nav");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const BODY_W = 120, FEET = 154;
 
-  let W = innerWidth, scale = 0.46, length = 800, baseY = 86;
-  let x = 0, landed = false, walking = false, lastScrollY = scrollY, settleTimer = 0, blinkTimer = 0, idleTimer = 0, scrolling = false;
+  let W = innerWidth, scale = 0.36, length = 360, baseY = 63;
+  let x = 0, landed = false, lastScrollY = scrollY, scrolling = false, reactUntil = 0;
+  let settleTimer = 0, blinkTimer = 0, bubbleTimer = 0, pointer = null, pointerFrame = 0;
 
   function random(seed) {
     let state = seed;
@@ -1134,58 +1150,78 @@
     };
   }
 
+  function session(key) {
+    try {
+      const seen = sessionStorage.getItem(key) === "1";
+      sessionStorage.setItem(key, "1");
+      return seen;
+    } catch {
+      return false;
+    }
+  }
+
   const k = (px) => clamp((W + 20 - px) / (length + 20), 0, 1);
   const centerY = (px) => {
     const t = k(px);
-    return baseY - 6 * t + 9 * t * t + 2.2 * Math.sin(t * 9.5) + 1.2 * Math.sin(t * 23);
+    return baseY - 4 * t + 7 * t * t + 1.6 * Math.sin(t * 8.5) + 0.8 * Math.sin(t * 21);
   };
   const thickness = (px) => 3 + 13 * Math.pow(1 - k(px), 1.25);
   const surfaceY = (px) => centerY(px) - thickness(px) / 2;
   const tipX = () => W - length;
 
-  function leaf(lx, ly, angle, size, colors) {
-    const s = size;
-    const n = (v) => (v * s).toFixed(1);
-    return `<g transform="translate(${lx.toFixed(1)} ${ly.toFixed(1)}) rotate(${angle.toFixed(1)})">`
+  const GREENS = [["#5F8F5A", "#7FAE6E", "#C9DDB6"], ["#4C7A4B", "#6A9A5E", "#BFD6AA"], ["#6E9A55", "#93BA72", "#D8E7C3"]];
+  const AUTUMN = ["#D98A22", "#F2A33A", "#FBE0B0"];
+
+  function leaf(lx, ly, angle, size, colors, delay) {
+    const n = (v) => (v * size).toFixed(1);
+    return `<g class="leaf" style="transform-origin: ${lx.toFixed(1)}px ${ly.toFixed(1)}px; --d: ${delay.toFixed(2)}s"><g transform="translate(${lx.toFixed(1)} ${ly.toFixed(1)}) rotate(${angle.toFixed(1)})">`
       + `<path d="M0 0 Q${n(-1.5)} ${n(0.2)} ${n(-2.4)} 0" stroke="#4A3122" stroke-width="1.2" fill="none"/>`
       + `<path d="M${n(-2.2)} 0 C${n(-3.4)} ${n(-1.6)} ${n(-6.6)} ${n(-1.7)} ${n(-8.6)} 0 C${n(-6.6)} ${n(1.7)} ${n(-3.4)} ${n(1.6)} ${n(-2.2)} 0 Z" fill="${colors[0]}"/>`
       + `<path d="M${n(-2.2)} 0 C${n(-3.4)} ${n(-1.6)} ${n(-6.6)} ${n(-1.7)} ${n(-8.6)} 0 Z" fill="${colors[1]}" opacity=".55"/>`
       + `<path d="M${n(-2.4)} 0 L${n(-8.2)} 0" stroke="${colors[2]}" stroke-width=".9" opacity=".8"/>`
       + [0.38, 0.55, 0.72].map((f) => `<path d="M${n(-8.6 * f)} 0 l${n(-1.1)} ${n(-0.9)} M${n(-8.6 * f)} 0 l${n(-1.1)} ${n(0.9)}" stroke="${colors[2]}" stroke-width=".6" opacity=".6"/>`).join("")
-      + "</g>";
+      + "</g></g>";
   }
-
-  const GREENS = [["#5F8F5A", "#7FAE6E", "#C9DDB6"], ["#4C7A4B", "#6A9A5E", "#BFD6AA"], ["#6E9A55", "#93BA72", "#D8E7C3"]];
-  const AUTUMN = ["#D98A22", "#F2A33A", "#FBE0B0"];
 
   function twig(rand, startK, up, reach) {
     const px = W + 20 - (length + 20) * startK;
     const py = centerY(px) + (up ? -thickness(px) * 0.3 : thickness(px) * 0.3);
     const ex = px - reach * (0.75 + rand() * 0.3), ey = py + (up ? -1 : 1) * reach * (0.28 + rand() * 0.18);
     const cx = px - reach * 0.35, cy = py + (up ? -1 : 1) * reach * 0.04;
-    const width = 2.4 + rand() * 1.6;
-    let out = `<path d="M${px.toFixed(1)} ${py.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="url(#bark)" stroke-width="${width.toFixed(1)}" fill="none" stroke-linecap="round"/>`;
-    const count = 3 + Math.floor(rand() * 3);
+    let out = `<path d="M${px.toFixed(1)} ${py.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="url(#bark)" stroke-width="${(2.4 + rand() * 1.4).toFixed(1)}" fill="none" stroke-linecap="round"/>`;
+    const count = 3 + Math.floor(rand() * 2);
     for (let i = 0; i < count; i++) {
-      const f = 0.35 + (i / count) * 0.65;
-      const lx = px + (ex - px) * f, ly = py + (ey - py) * f;
-      const side = i % 2 ? 1 : -1;
-      const palette = rand() < 0.16 ? AUTUMN : GREENS[Math.floor(rand() * GREENS.length)];
-      out += leaf(lx, ly, (up ? -150 : 150) + side * (35 + rand() * 40) + (rand() - 0.5) * 20, 2.1 + rand() * 0.9, palette);
+      const f = 0.4 + (i / count) * 0.6;
+      const palette = rand() < 0.18 ? AUTUMN : GREENS[Math.floor(rand() * GREENS.length)];
+      out += leaf(px + (ex - px) * f, py + (ey - py) * f, (up ? -150 : 150) + (i % 2 ? 1 : -1) * (35 + rand() * 40), 2.1 + rand() * 0.8, palette, rand() * 0.15);
     }
-    return out + leaf(ex, ey, (up ? -160 : 160) + (rand() - 0.5) * 30, 2.4, GREENS[0]);
+    return out + leaf(ex, ey, (up ? -160 : 160) + (rand() - 0.5) * 30, 2.4, GREENS[0], rand() * 0.15);
+  }
+
+  function blockedRects() {
+    return [...document.querySelectorAll(".brand, .navlinks a")].map((element) => element.getBoundingClientRect()).filter((r) => r.width > 0);
+  }
+
+  const halfWidth = () => 34 * scale + 10;
+
+  function layout() {
+    W = innerWidth;
+    scale = W < 720 ? 0.31 : 0.36;
+    baseY = (nav.getBoundingClientRect().height || 72) - 9;
+    const items = blockedRects();
+    const rightmost = Math.max(0, ...items.map((r) => r.right));
+    const brand = document.querySelector(".brand").getBoundingClientRect();
+    length = W - rightmost >= halfWidth() * 2 + 12
+      ? clamp(W * 0.3, 260, 460)
+      : W - brand.right - 30;
+    length = Math.min(length, W - 20);
   }
 
   function drawBranch() {
-    W = innerWidth;
-    const navHeight = nav.getBoundingClientRect().height || 72;
-    scale = W < 720 ? 0.31 : 0.36;
-    length = Math.min(W * (W < 920 ? 0.72 : 0.64), 980);
-    baseY = navHeight - 9;
     const rand = random(7);
     branch.setAttribute("width", W);
     branch.setAttribute("height", baseY + 70);
-    const steps = 90, top = [], bottom = [], highlight = [];
+    const steps = 70, top = [], bottom = [], highlight = [];
     for (let i = 0; i <= steps; i++) {
       const px = W + 20 - (length + 20) * (i / steps);
       const half = thickness(px) / 2;
@@ -1194,97 +1230,61 @@
       highlight.push(`${px.toFixed(1)},${(centerY(px) - half * 0.55).toFixed(1)}`);
     }
     let bark = "";
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < Math.round(length / 12); i++) {
       const t = 0.02 + rand() * 0.88;
       const px = W + 20 - (length + 20) * t, cy = centerY(px), half = thickness(px) / 2;
       if (half < 2.4) continue;
-      const offset = (rand() - 0.5) * half * 1.3;
-      const len = 6 + rand() * 16 * (1 - t * 0.6);
-      bark += `<path d="M${px.toFixed(1)} ${(cy + offset).toFixed(1)} q${(-len / 2).toFixed(1)} ${((rand() - 0.5) * 2).toFixed(1)} ${(-len).toFixed(1)} ${((rand() - 0.5) * 1.5).toFixed(1)}" stroke="#3B2618" stroke-width="${(0.6 + rand() * 0.9).toFixed(2)}" fill="none" stroke-linecap="round" opacity="${(0.35 + rand() * 0.4).toFixed(2)}"/>`;
+      const len = 6 + rand() * 14 * (1 - t * 0.6);
+      bark += `<path d="M${px.toFixed(1)} ${(cy + (rand() - 0.5) * half * 1.3).toFixed(1)} q${(-len / 2).toFixed(1)} ${((rand() - 0.5) * 2).toFixed(1)} ${(-len).toFixed(1)} ${((rand() - 0.5) * 1.5).toFixed(1)}" stroke="#3B2618" stroke-width="${(0.6 + rand() * 0.9).toFixed(2)}" fill="none" stroke-linecap="round" opacity="${(0.35 + rand() * 0.4).toFixed(2)}"/>`;
     }
-    const knots = [0.18, 0.47].map((t) => {
-      const px = W + 20 - (length + 20) * t, cy = centerY(px), half = thickness(px) / 2;
-      return `<ellipse cx="${px.toFixed(1)}" cy="${(cy + half * 0.15).toFixed(1)}" rx="${(half * 0.9).toFixed(1)}" ry="${(half * 0.5).toFixed(1)}" fill="#3B2618" opacity=".55"/><ellipse cx="${(px + 1).toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(half * 0.45).toFixed(1)}" ry="${(half * 0.22).toFixed(1)}" fill="#8C6545" opacity=".7"/>`;
-    }).join("");
-    const twigs = [twig(rand, 0.3, false, 58), twig(rand, 0.5, false, 40), twig(rand, 0.7, false, 50), twig(rand, 0.9, true, 20)].join("");
+    const knotX = W + 20 - (length + 20) * 0.28, knotY = centerY(knotX), knotHalf = thickness(knotX) / 2;
+    const knot = `<ellipse cx="${knotX.toFixed(1)}" cy="${(knotY + knotHalf * 0.15).toFixed(1)}" rx="${(knotHalf * 0.9).toFixed(1)}" ry="${(knotHalf * 0.5).toFixed(1)}" fill="#3B2618" opacity=".55"/><ellipse cx="${(knotX + 1).toFixed(1)}" cy="${knotY.toFixed(1)}" rx="${(knotHalf * 0.45).toFixed(1)}" ry="${(knotHalf * 0.22).toFixed(1)}" fill="#8C6545" opacity=".7"/>`;
+    const twigs = twig(rand, 0.42, false, 46) + twig(rand, 0.72, false, 36);
     const tx = tipX(), ty = centerY(tx);
-    const tipLeaves = leaf(tx + 2, ty, 172, 2.6, GREENS[1]) + leaf(tx + 6, ty + 1, 140, 2.2, GREENS[0]) + leaf(tx + 4, ty - 1, -150, 2.1, GREENS[2]);
+    const tipLeaves = leaf(tx + 2, ty, 172, 2.5, GREENS[1], 0.05) + leaf(tx + 6, ty + 1, 140, 2.1, GREENS[0], 0.1) + leaf(tx + 4, ty - 1, -150, 2, GREENS[2], 0);
     branch.innerHTML = `<defs>
       <linearGradient id="bark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A6243"/><stop offset=".55" stop-color="#6B4A35"/><stop offset="1" stop-color="#3E2A1D"/></linearGradient>
       <filter id="branch-shadow" x="-5%" y="-50%" width="110%" height="250%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#1D1530" flood-opacity=".22"/></filter>
     </defs>
-    <g filter="url(#branch-shadow)">${twigs}<polygon points="${top.join(" ")} ${bottom.join(" ")}" fill="url(#bark)"/>${knots}${bark}<polyline points="${highlight.join(" ")}" fill="none" stroke="#B08560" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>${tipLeaves}</g>`;
+    <g filter="url(#branch-shadow)">${twigs}<polygon points="${top.join(" ")} ${bottom.join(" ")}" fill="url(#bark)"/>${knot}${bark}<polyline points="${highlight.join(" ")}" fill="none" stroke="#B08560" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>${tipLeaves}</g>`;
+    sway.style.transformOrigin = `${W + 20}px ${baseY}px`;
   }
 
   function place(px, py = surfaceY(px) - FEET * scale) {
     bird.style.transform = `translate(${(px - (BODY_W / 2) * scale).toFixed(1)}px, ${py.toFixed(1)}px) scale(${scale})`;
   }
 
-  function blockedRects() {
-    return [...document.querySelectorAll(".brand, .navlinks a")].map((element) => element.getBoundingClientRect()).filter((r) => r.width > 0);
-  }
-
   function freeAt(px, rects) {
-    const half = 34 * scale + 10, left = px - half, right = px + half;
-    return rects.every((r) => r.right < left || r.left > right);
+    const half = halfWidth();
+    return rects.every((r) => r.right < px - half || r.left > px + half);
   }
 
-  function candidates() {
-    const list = [];
-    for (let px = W - 40 * scale - 16; px >= tipX() + 60; px -= 6) list.push(px);
-    return list;
-  }
-
-  function homeX(rects) {
-    const free = candidates().filter((px) => freeAt(px, rects));
-    if (!free.length) return W - 60;
+  function homeX() {
+    const rects = blockedRects();
+    const free = [];
+    for (let px = W - 34 * scale - 14; px >= tipX() + 50; px -= 4) if (freeAt(px, rects)) free.push(px);
+    if (!free.length) return W - 40;
     let best = [free[0], free[0]], run = [free[0], free[0]];
     for (let i = 1; i < free.length; i++) {
-      if (run[1] - free[i] <= 6) run[1] = free[i];
-      else run = [free[i], free[i]];
-      if (run[0] - run[1] > best[0] - best[1]) best = [...run];
+      run = run[1] - free[i] <= 4 ? [run[0], free[i]] : [free[i], free[i]];
+      if (run[0] - run[1] > best[0] - best[1]) best = run;
     }
     return (best[0] + best[1]) / 2;
   }
 
-  function settle() {
-    if (!landed || walking) return;
-    const rects = blockedRects();
-    if (!freeAt(x, rects)) walkTo(homeX(rects));
-  }
-
-  function wander() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      if (landed && !walking && !scrolling && !document.hidden && !reduce.matches) {
-        const rects = blockedRects();
-        const options = candidates().filter((px) => freeAt(px, rects) && Math.abs(px - x) > 50 && Math.abs(px - x) < 220);
-        if (options.length) walkTo(options[Math.floor(Math.random() * options.length)]);
-      }
-      wander();
-    }, 7000 + Math.random() * 7000);
-  }
-
-  function walkTo(target) {
-    walking = true;
-    const from = x, distance = Math.abs(target - from);
-    const duration = reduce.matches ? 0 : clamp(distance / 90, 0.6, 3) * 1000;
-    bird.classList.add("walking");
-    bird.style.setProperty("--tilt", `${target < from ? -9 : 9}deg`);
-    bird.style.setProperty("--look-x", `${target < from ? -22 : 22}px`);
-    const started = performance.now();
-    const step = (now) => {
-      const p = duration ? clamp((now - started) / duration, 0, 1) : 1;
-      const eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-      x = from + (target - from) * eased;
-      place(x);
-      if (p < 1) return requestAnimationFrame(step);
-      walking = false;
-      bird.classList.remove("walking");
-      bird.style.setProperty("--tilt", "0deg");
-      bird.style.setProperty("--look-x", "0px");
-    };
-    requestAnimationFrame(step);
+  function bounceBranch(strength) {
+    if (reduce.matches) return;
+    const angle = -strength * clamp(160 / Math.max(80, W + 20 - x), 0.6, 1.6);
+    sway.animate([
+      { transform: "rotate(0deg)" },
+      { transform: `rotate(${angle}deg)`, offset: 0.25 },
+      { transform: `rotate(${-angle * 0.45}deg)`, offset: 0.55 },
+      { transform: `rotate(${angle * 0.18}deg)`, offset: 0.8 },
+      { transform: "rotate(0deg)" },
+    ], { duration: 900, easing: "ease-out" });
+    branch.classList.remove("shiver");
+    void branch.getBoundingClientRect();
+    branch.classList.add("shiver");
   }
 
   function blink(times = 1) {
@@ -1298,78 +1298,149 @@
   function scheduleBlink() {
     clearTimeout(blinkTimer);
     blinkTimer = setTimeout(() => {
-      if (!document.hidden) blink(Math.random() < 0.25 ? 2 : 1);
+      if (!document.hidden && Date.now() > reactUntil) blink(Math.random() < 0.25 ? 2 : 1);
       scheduleBlink();
-    }, 2600 + Math.random() * 3400);
+    }, 3500 + Math.random() * 4500);
   }
 
-  function look(direction) {
-    const down = direction > 0;
-    bird.style.setProperty("--nod", direction ? `${down ? 6 : -3}px` : "0px");
-    if (!walking) bird.style.setProperty("--tilt", direction ? `${down ? -8 : 4}deg` : "0deg");
-    bird.style.setProperty("--look-x", direction ? `${down ? -10 : -6}px` : "0px");
-    bird.style.setProperty("--look-y", direction ? `${down ? 28 : -24}px` : "0px");
+  function setLook(lx, ly, tilt = 0, nod = 0) {
+    bird.style.setProperty("--look-x", `${lx.toFixed(1)}px`);
+    bird.style.setProperty("--look-y", `${ly.toFixed(1)}px`);
+    bird.style.setProperty("--tilt", `${tilt.toFixed(1)}deg`);
+    bird.style.setProperty("--nod", `${nod}px`);
+  }
+
+  function lookAt(targetX, targetY, turn = false) {
+    const box = bird.getBoundingClientRect();
+    const dx = targetX - (box.left + box.width / 2), dy = targetY - (box.top + box.height * 0.32);
+    const distance = Math.hypot(dx, dy) || 1, reach = Math.min(1, distance / 180) * 24;
+    setLook((dx / distance) * reach, (dy / distance) * reach, turn ? clamp(dx * 0.03, -14, 14) : 0, turn && dy > 0 ? 4 : 0);
+  }
+
+  function followPointer() {
+    pointerFrame = 0;
+    if (!landed || scrolling || Date.now() < reactUntil || reduce.matches) return;
+    if (pointer) lookAt(pointer[0], pointer[1]);
+    else setLook(0, 0);
+  }
+
+  function react(element, kind) {
+    if (!landed || reduce.matches) return;
+    const box = element.getBoundingClientRect();
+    reactUntil = Date.now() + (kind === "alert" ? 1300 : 900);
+    if (kind === "alert") {
+      lookAt(box.left + box.width / 2, box.top + box.height / 2, true);
+      bird.classList.add("alert");
+      setTimeout(() => {
+        bird.classList.remove("alert");
+        followPointer();
+      }, 1100);
+    } else if (kind === "nod") {
+      lookAt(box.left + box.width / 2, box.top + box.height / 2);
+      bird.classList.remove("nod");
+      void bird.getBoundingClientRect();
+      bird.classList.add("nod");
+      setTimeout(() => bird.classList.remove("nod"), 850);
+    } else {
+      bird.classList.remove("hop");
+      void bird.getBoundingClientRect();
+      bird.classList.add("hop");
+      setTimeout(() => bounceBranch(1.4), 460);
+      setTimeout(() => bird.classList.remove("hop"), 600);
+    }
+  }
+
+  function watch(selector, kind) {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    let wasOn = element.classList.contains("on");
+    new MutationObserver(() => {
+      const isOn = element.classList.contains("on");
+      if (isOn && !wasOn) react(element, kind);
+      wasOn = isOn;
+    }).observe(element, { attributes: true, attributeFilter: ["class"] });
   }
 
   function onScroll() {
     const delta = scrollY - lastScrollY;
     lastScrollY = scrollY;
-    if (!landed || reduce.matches || Math.abs(delta) < 2) return;
+    if (!landed || reduce.matches || Math.abs(delta) < 2 || Date.now() < reactUntil) return;
     scrolling = true;
-    look(Math.sign(delta));
+    setLook(delta > 0 ? -8 : -4, delta > 0 ? 26 : -22, delta > 0 ? -7 : 3, delta > 0 ? 5 : -3);
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       scrolling = false;
-      look(0);
+      followPointer();
     }, 320);
   }
 
-  function fly() {
-    x = homeX(blockedRects());
-    const endY = surfaceY(x) - FEET * scale, endX = x - (BODY_W / 2) * scale;
-    const H = innerHeight;
-    const points = [
-      [-160, H * 0.42, -14, 0.9],
-      [W * 0.22, H * 0.55, -6, 0.75],
-      [W * 0.5, H * 0.3, 8, 0.6],
-      [endX - 80, endY - 30, 12, scale],
-      [endX, endY, 0, scale],
-    ];
+  function showBubble() {
+    if (session("owl-bubble")) return blink(2);
+    const box = bird.getBoundingClientRect();
+    const width = bubble.offsetWidth;
+    const center = box.left + box.width / 2;
+    const left = clamp(center - width / 2, 8, W - width - 8);
+    bubble.style.left = `${left}px`;
+    bubble.style.top = `${surfaceY(x) + 16}px`;
+    bubble.style.setProperty("--tail", `${center - left}px`);
+    bubble.classList.add("on");
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(() => bubble.classList.remove("on"), 2600);
+  }
+
+  function land() {
+    place(x);
+    landed = true;
+    scheduleBlink();
+    setTimeout(() => blink(2), 700);
+  }
+
+  function arrive() {
+    x = homeX();
+    if (reduce.matches || session("owl-arrived")) return land();
+    const endX = x - (BODY_W / 2) * scale, endY = surfaceY(x) - FEET * scale;
     bird.classList.add("flying");
-    const animation = bird.animate(points.map(([px, py, r, s], i) => ({
-      transform: `translate(${px}px, ${py}px) scale(${s}) rotate(${r}deg)`,
-      offset: [0, 0.3, 0.62, 0.88, 1][i],
-    })), { duration: 2800, easing: "cubic-bezier(.3,.1,.3,1)", fill: "forwards" });
-    animation.onfinish = () => {
+    const flight = bird.animate([
+      { transform: `translate(${W + 40}px, ${-120}px) scale(${scale}) rotate(-18deg)` },
+      { transform: `translate(${endX + 110}px, ${endY + 46}px) scale(${scale}) rotate(-12deg)`, offset: 0.55 },
+      { transform: `translate(${endX + 22}px, ${endY - 14}px) scale(${scale}) rotate(-4deg)`, offset: 0.85 },
+      { transform: `translate(${endX}px, ${endY}px) scale(${scale}) rotate(0deg)` },
+    ], { duration: 1050, easing: "cubic-bezier(.25,.6,.3,1)", fill: "forwards" });
+    flight.onfinish = () => {
       place(x);
-      animation.cancel();
+      flight.cancel();
       bird.classList.remove("flying");
       bird.classList.add("landing");
       setTimeout(() => bird.classList.remove("landing"), 450);
-      landed = true;
-      setTimeout(() => blink(2), 900);
-      scheduleBlink();
-      wander();
+      bounceBranch(2.2);
+      land();
     };
   }
 
+  layout();
   drawBranch();
-  if (reduce.matches) {
-    x = homeX(blockedRects());
-    place(x);
-    landed = true;
-  } else {
-    place(-400, -400);
-    setTimeout(fly, 450);
-  }
+  place(-400, -400);
+  setTimeout(arrive, reduce.matches ? 0 : 350);
+
+  watch("#stamp", "alert");
+  watch("#eye-report", "nod");
+  watch("#done-pill", "hop");
+  bird.addEventListener("click", showBubble);
   addEventListener("scroll", onScroll, { passive: true });
+  addEventListener("pointermove", (event) => {
+    pointer = [event.clientX, event.clientY];
+    if (!pointerFrame) pointerFrame = requestAnimationFrame(followPointer);
+  }, { passive: true });
+  document.addEventListener("pointerleave", () => {
+    pointer = null;
+    followPointer();
+  });
   addEventListener("resize", () => {
+    layout();
     drawBranch();
-    x = clamp(x, tipX() + 60, W - 30);
-    if (landed) {
-      place(x);
-      settle();
-    }
+    if (!landed) return;
+    x = homeX();
+    place(x);
   });
 })();
 </script>
