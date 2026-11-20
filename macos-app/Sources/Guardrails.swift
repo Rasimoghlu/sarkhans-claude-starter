@@ -61,7 +61,7 @@ enum GuardrailCategory: String {
         case .types: return "Type-system escapes"
         case .errors: return "Swallowed errors"
         case .debug: return "Leftover debug output"
-        case .security: return "Security risks (SQL, XSS, eval, TLS)"
+        case .security: return "Security risks (SQL, XSS, eval, TLS, pentest scope)"
         case .database: return "Database design problems"
         case .design: return "Unrequested design changes"
         case .workmode: return "Work-mode limits"

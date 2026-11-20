@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { readInput, loadConfig, block, ok, run, currentBranch, projectDir, AI_MENTION } from "./lib.mjs";
+import { readInput, loadConfig, block, ok, run, currentBranch, projectDir, AI_MENTION, readSessionState } from "./lib.mjs";
+import { pentestBlock, SCOPE_STATE } from "./pentest.mjs";
 
 const input = await readInput();
 const config = loadConfig();
@@ -147,8 +148,11 @@ function checkGit() {
   }
 }
 
+const pentestScope = readSessionState(SCOPE_STATE);
 for (const part of parts) {
   if (config.blockDangerousCommands) {
+    const pentestReason = pentestBlock(part, pentestScope);
+    if (pentestReason) block(`BLOCKED (guard-bash): ${pentestReason}`);
     checkRecursiveDelete(part);
     for (const [pattern, why] of RULES) {
       if (pattern.test(part)) block(`BLOCKED (guard-bash): \`${part}\`\nReason: ${why}\n${ASK}`);

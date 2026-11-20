@@ -26,6 +26,7 @@ The app adds what the plugin can't: one-click setup for all your projects with t
 - **Guardrails that block**, not just instructions: hooks stop comments in code, invented imports, pushes to main, AI mentions in commits, secret files and unsafe code.
 - **Work modes** per project (Lite / Standard / Strict) and a team of specialist agents for bigger work, with reviewers that keep project memory.
 - **Guardrail report**: the app shows what the rules stopped this week in each project.
+- **Security testing**: `/security-audit` reads the code for holes, `/pentest` attacks your running app on localhost or a staging server you name, proves each hole with a real request and turns it into a regression test. A hook keeps security tools away from every other host. For pull requests there's a ready [GitHub workflow](examples/github) with Anthropic's security review.
 - **Team rules**: share your team's conventions from one folder; choose a default team, or a different team per project. Works in the app and in the plugin.
 - Third-eye reports, design lock, database review, kickoff for new projects, and about 2,800 tokens of rules per session.
 
@@ -147,6 +148,7 @@ node claude-web-starter/install.mjs --help
 | `scripts/` | `build-plugin.mjs` and the plugin's own files |
 | `site/` | the project site (GitHub Pages) |
 | `examples/team-rules/` | a team rules folder to copy |
+| `examples/github/` | a workflow for Anthropic's security review on every pull request |
 | `.github/workflows/` | release when `VERSION` changes on `main`, build check on pull requests, site deploy |
 | `docs/` | architecture and porting guide |
 

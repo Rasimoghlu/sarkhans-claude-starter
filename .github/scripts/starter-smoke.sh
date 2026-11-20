@@ -68,6 +68,22 @@ echo '{"tool_name":"Read","tool_input":{"file_path":".env"}}' | node "$HOOKS/pro
 grep -q '"category":"secrets"' "$LOG" || fail "guardrail log missing the blocked .env read"
 pass "guardrail log"
 
+SCOPE="node $WORK/fresh/.claude/scripts/pentest-scope.mjs --project $WORK/fresh"
+bash_guard() { echo "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"$1\"}}" | CLAUDE_PROJECT_DIR="$WORK/fresh" node "$HOOKS/guard-bash.mjs" >/dev/null 2>&1; echo $?; }
+$SCOPE start https://example.com >/dev/null 2>&1 && fail "pentest scope accepted a production host"
+$SCOPE start https://api.example.com --staging >/dev/null 2>&1 && fail "pentest scope accepted a host that isn't named like a test server"
+[ "$(bash_guard 'nmap -sV shop.example.com')" = 2 ] || fail "security tool allowed against a host out of scope"
+[ "$(bash_guard 'sqlmap -u http://localhost:3000/items?id=1')" = 0 ] || fail "security tool blocked on localhost"
+$SCOPE start https://staging.example.dev --staging >/dev/null || fail "pentest scope refused a staging host"
+[ "$(bash_guard 'nuclei -u https://staging.example.dev')" = 0 ] || fail "security tool blocked inside the scope"
+[ "$(bash_guard 'curl -s https://example.com')" = 2 ] || fail "request outside the scope allowed during a pentest"
+[ "$(bash_guard 'echo {} > /tmp/claude-hooks/pentest-scope-x.json')" = 2 ] || fail "pentest scope could be changed by hand"
+$SCOPE end >/dev/null
+[ "$(bash_guard 'curl -s https://example.com')" = 0 ] || fail "requests still limited after the pentest ended"
+grep -q '"category":"security"' "$LOG" || fail "pentest block not logged as security"
+[ -f "$WORK/fresh/.claude/skills/pentest/SKILL.md" ] || fail "pentest skill not installed"
+pass "pentest scope"
+
 mkdir -p "$WORK/team/rules"
 echo '{"name":"CI team","preset":"strict"}' > "$WORK/team/team.json"
 echo "# Team rule" > "$WORK/team/rules/style.md"
