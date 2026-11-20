@@ -75,6 +75,8 @@ function build(destination) {
   copyTree(join(TEMPLATE, "hooks"), join(destination, "hooks"));
   copyTree(join(TEMPLATE, "scripts"), join(destination, "scripts"));
   cpSync(join(ROOT, "scripts", "plugin-files", "plugin-hook.mjs"), join(destination, "hooks", "plugin-hook.mjs"));
+  cpSync(join(ROOT, "scripts", "plugin-files", "team.mjs"), join(destination, "scripts", "team.mjs"));
+  copyTree(join(ROOT, "scripts", "plugin-files", "team-skill"), join(destination, "skills", "team"));
   cpSync(join(ROOT, "scripts", "plugin-files", "README.md"), join(destination, "README.md"));
   cpSync(join(ROOT, "scripts", "plugin-files", "icon.png"), join(destination, ".claude-plugin", "icon.png"));
   writeFileSync(join(destination, "hooks", "hooks.json"), JSON.stringify(pluginHooks(), null, 2) + "\n");

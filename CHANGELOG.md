@@ -2,6 +2,12 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.8.0
+- **A team per project.** Settings → Team rules can now hold several teams. Pick a default team for all your projects, and on any project's page choose another team or No team. Each team shows how many projects use it.
+- **Team rules in the plugin.** Plugin users on Windows, Linux and macOS can use team rules too: `/sarkhans-starter:team use <folder>` for the current project, `/sarkhans-starter:team set-default <folder>` for every project. You can also describe what you want in your own words. The team's work mode and language apply as well.
+- Installer in a terminal: new `--teams`, `--add-team`, `--remove-team`, and per project `--team <folder>`, `--no-team`, `--default-team`.
+- Projects update only when their own team's rules change, not when another team changes.
+
 ## 4.7.1
 - New app icon: the Night Owl, a reviewer that never sleeps.
 - The app is now called Sarkhan’s Claude Starter in Finder, the Dock and its windows. Downloads and updates keep working as before.

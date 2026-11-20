@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { readInput, loadConfig, projectDir, currentBranch, detectStacks, dockerSettings } from "./lib.mjs";
+import { teamForProject } from "./team.mjs";
 
 const input = await readInput();
 const config = loadConfig();
@@ -57,6 +58,40 @@ if (pluginMode) {
     `Detailed rules live in ${rulesDir}/ (${detailed}). Before editing a kind of file, read the matching ones: code-quality.md and testing.md for any code, security.md for servers and input handling, database.md for schema changes, design-policy.md and styling-and-a11y.md for UI, and the stack file for the language.`,
     "Skills of this plugin are namespaced: /sarkhans-starter:<name> (for example /sarkhans-starter:verify).",
   );
+  lines.push(...teamLines());
+}
+
+function rulePaths(front) {
+  const lines = front.split(/\r?\n/);
+  const start = lines.findIndex((line) => /^paths:/.test(line));
+  if (start < 0) return [];
+  const clean = (value) => value.trim().replace(/^["']|["']$/g, "");
+  const inline = lines[start].slice("paths:".length).trim();
+  if (inline) return inline.replace(/^\[|\]$/g, "").split(",").map(clean).filter(Boolean);
+  const items = [];
+  for (const line of lines.slice(start + 1)) {
+    const item = line.match(/^\s+-\s+(.+)$/);
+    if (!item) break;
+    items.push(clean(item[1]));
+  }
+  return items;
+}
+
+function teamLines() {
+  const { choice, team, error } = teamForProject(projectDir);
+  if (error) return ["", `TEAM RULES could not be loaded: ${error}. Tell the user once; /sarkhans-starter:team shows how to fix it.`];
+  if (!team) return choice.folder ? ["", `TEAM RULES: the team folder ${choice.folder} was not found. Tell the user once; /sarkhans-starter:team shows how to fix it.`] : [];
+  const rules = team.rules.map((rule) => {
+    const text = readFileSync(join(team.folder, "rules", rule), "utf8");
+    const front = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] || "";
+    const scope = rulePaths(front);
+    return `### ${rule}${scope.length ? ` (applies to files matching ${scope.join(", ")})` : ""}\n${text.replace(/^---[\s\S]*?---\r?\n/, "").trim()}`;
+  });
+  return [
+    "",
+    `TEAM RULES — ${team.name} (${choice.source === "project" ? "chosen for this project" : "default team"}). Your team agreed on these; follow them like the rules above.`,
+    ...rules,
+  ];
 }
 
 const docker = dockerSettings();

@@ -95,7 +95,14 @@ Skills are copied into `.claude/skills/<name>` (review bundled scripts); MCP ser
 Every time a hook blocks Claude, it's logged in `.claude/logs/guardrails.jsonl` (time, hook, category, short text) inside the project. The app shows the last 7 days per project and the weekly total on its overview. Turn it off with `"logGuardrails": false`. Nothing leaves the machine.
 
 ## Team rules
-`--set-team <folder>` shares one rules folder with all projects on this machine: `<folder>/rules/*.md` are copied as `.claude/rules/team-*.md` on every install and update, and `<folder>/team.json` sets `name` plus defaults for new projects (`preset`, `responseLanguage`, `skills`). The team files are part of the rules fingerprint, so the app updates projects when they change. `--clear-team` turns it off.
+A team folder holds `rules/*.md` and an optional `team.json` (`name`, plus defaults for new projects: `preset`, `responseLanguage`, `skills`). A computer can know several teams; one can be the default.
+
+- `--teams`: show the teams, the default and which projects made their own choice.
+- `--set-team <folder>` / `--clear-team`: set or clear the default team (used by every project without its own choice).
+- `--add-team <folder>` / `--remove-team <folder>`: remember or forget a team. The folder itself is never changed.
+- `<project> --team <folder>`, `<project> --no-team`, `<project> --default-team`: choose for one project, then update it.
+
+Choices live in `~/.claude-starter/settings.json`. The project gets the team's rules as `.claude/rules/team-*.md` on every install and update. `--rules-hash` prints `{"base": …, "teams": {folder: hash}}`; a project's `.claude/starter-hash` is `base` or `base-teamhash`, so the app sees exactly which projects need an update.
 
 ## Settings — `.claude/hooks/config.json`
 `responseLanguage`, `projectPhase`, `designMode`, `preset`, `logGuardrails`, `orchestratorMode` (`balanced` / `strict` / `advisory`), `directEditMaxFiles`, `reportMinChangedLines`, `checkDbDesign`, `docker`, `enforceCommentPolicy`, `checkImports`, `enforceEnvModule`, `requireThirdEyeReport`, `requireSubagentEvidence`, `blockNewDependencies`, `protectedBranches`, `maxNewFileLines`, `extraProtectedPaths`. Claude cannot edit this file.

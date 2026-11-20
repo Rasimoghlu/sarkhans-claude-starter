@@ -9,7 +9,7 @@
       "name": "sarkhans-starter",
       "source": "./plugins/sarkhans-starter",
       "description": "Guardrails, rules, specialist agents and skills for professional work with Claude Code: third-eye reports, no invented APIs, safe git, design lock, database review.",
-      "version": "4.7.1"
+      "version": "4.8.0"
     }
   ]
 }

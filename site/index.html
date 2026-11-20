@@ -623,7 +623,7 @@
         <tr><th scope="row">Stack detection and project commands</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
         <tr><th scope="row">Work mode per project</th><td data-label="Plugin">In .claude/hooks/config.json</td><td data-label="Mac app">A switch in the app</td></tr>
         <tr><th scope="row">Weekly report of what was stopped</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
-        <tr><th scope="row">Shared team rules</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
+        <tr><th scope="row">Shared team rules</th><td data-label="Plugin">Yes, with /sarkhans-starter:team</td><td data-label="Mac app">Yes, per project with a click</td></tr>
         <tr><th scope="row">Updates</th><td data-label="Plugin">Through /plugin in Claude Code</td><td data-label="Mac app">Automatic</td></tr>
       </tbody>
     </table>
@@ -674,7 +674,7 @@
 <section id="team">
   <div class="wrap">
     <h2>Made for teams</h2>
-    <p class="intro">Give everyone on your team the same checks and the same way of working with Claude, and share your own conventions from one place.</p>
+    <p class="intro">Give everyone on your team the same checks and the same way of working with Claude, and share your own conventions from one place. Use one team everywhere, or a different team per project.</p>
     <div class="columns">
       <div class="column">
         <h3>One set of rules</h3>
@@ -689,7 +689,7 @@
       <div class="column">
         <h3>Mac and Windows together</h3>
         <p class="kind">App or plugin</p>
-        <p>Mac users get the app, everyone else the plugin with the same guardrails. Shared team rules sync through the app.</p>
+        <p>Mac users pick teams in the app, everyone else in the plugin with /sarkhans-starter:team. Both read the same shared folder.</p>
       </div>
     </div>
     <div class="team">
@@ -698,7 +698,8 @@
         <ol class="team-steps">
           <li>Copy the <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/tree/main/examples/team-rules">example folder</a> into a repository your team shares.</li>
           <li>Write your rules as short Markdown files in rules/.</li>
-          <li>Each teammate opens Settings, Team rules, and picks the folder.</li>
+          <li>Each teammate picks the folder: in the app under Settings, Team rules, or in the plugin with /sarkhans-starter:team set-default and the folder.</li>
+          <li>Need another team for one project? Choose it on that project’s page, or with /sarkhans-starter:team use.</li>
         </ol>
       </div>
       <div class="team-map" id="team-map">
@@ -709,7 +710,7 @@
     api.md
     naming.md</code></pre></div>
         <div class="tm-mac" style="top: 0"><b>Your Mac</b><span class="tm-path">.claude/rules/</span><span class="tm-chips"><span class="tm-chip">team-api.md</span><span class="tm-chip">team-naming.md</span></span></div>
-        <div class="tm-mac" style="top: 210px"><b>Your teammate’s Mac</b><span class="tm-path">.claude/rules/</span><span class="tm-chips"><span class="tm-chip">team-api.md</span><span class="tm-chip">team-naming.md</span></span></div>
+        <div class="tm-mac" style="top: 210px"><b>Teammate on Windows</b><span class="tm-path">plugin, read each session</span><span class="tm-chips"><span class="tm-chip">api.md</span><span class="tm-chip">naming.md</span></span></div>
       </div>
     </div>
   </div>
@@ -722,6 +723,7 @@
     <details><summary>Will it change my code or my git history?</summary><p>No. The app adds a short CLAUDE.md and a .claude folder, hidden from git by default. Your own CLAUDE.md is never touched, and Remove takes everything out again.</p></details>
     <details><summary>Does it work with my language?</summary><p>The rules and hooks cover any project. TypeScript and Next.js, Go, PHP with Laravel or Symfony, Python with Django or FastAPI get extra checks, and Rust, Java, Kotlin, .NET, Ruby, Dart and Swift are recognized too.</p></details>
     <details><summary>How do updates work?</summary><p>The app checks for new versions by itself and shows an Update button; set-up projects get the new rules automatically. The plugin updates through /plugin in Claude Code.</p></details>
+    <details><summary>Can each project use a different team?</summary><p>Yes. Pick a default team for all your projects, then give any project another team or none: on the project’s page in the app, or with /sarkhans-starter:team in the plugin.</p></details>
     <details><summary>Can Claude explain things in my language?</summary><p>Yes. Pick the language for explanations and reports during setup or per project. Code, commits and pull requests stay in English.</p></details>
   </div>
 </section>
