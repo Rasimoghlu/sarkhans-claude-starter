@@ -83,7 +83,7 @@ function build(destination) {
 function marketplace() {
   return JSON.stringify({
     name: MARKETPLACE_NAME,
-    description: "Sarkhans Claude Starter for Claude Code",
+    description: "Sarkhan’s Claude Starter for Claude Code",
     owner: { name: "sarkhandigitech" },
     plugins: [{ name: PLUGIN_NAME, source: `./plugins/${PLUGIN_NAME}`, description: DESCRIPTION, version: VERSION }],
   }, null, 2) + "\n";

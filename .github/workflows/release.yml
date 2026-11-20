@@ -51,5 +51,5 @@ jobs:
             "$RUNNER_TEMP/dist/Sarkhans-Claude-Starter.zip" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "Sarkhans Claude Starter $version" \
+            --title "Sarkhan’s Claude Starter $version" \
             --notes-file "$RUNNER_TEMP/notes.md"

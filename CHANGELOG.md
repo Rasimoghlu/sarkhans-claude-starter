@@ -4,6 +4,7 @@ Each section becomes the release notes that people see in the app and on the Rel
 
 ## 4.7.1
 - New app icon: the Night Owl, a reviewer that never sleeps.
+- The app is now called Sarkhan’s Claude Starter in Finder, the Dock and its windows. Downloads and updates keep working as before.
 
 ## 4.7.0
 - **Guardrail report.** Each project panel shows what the rules stopped in the last 7 days: secrets, invented imports, git mistakes, comments, swallowed errors, design changes and more. The overview shows the weekly total. The log stays on your Mac.

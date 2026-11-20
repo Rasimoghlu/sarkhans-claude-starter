@@ -1,6 +1,6 @@
-<p align="center"><img src="brand/logo.svg" width="128" height="128" alt="Sarkhans Claude Starter logo"></p>
+<p align="center"><img src="brand/logo.svg" width="128" height="128" alt="Sarkhan’s Claude Starter logo"></p>
 
-# Sarkhans Claude Starter
+# Sarkhan’s Claude Starter
 
 Rules Claude Code can't skip, a team of specialist agents, and a report on every change — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.
 
@@ -17,7 +17,7 @@ claude plugin install sarkhans-starter@sarkhans-claude-starter
 The rules, agents, skills and guardrails then work in every project. Skills are named like `/sarkhans-starter:verify`. [More about the plugin](#claude-code-plugin-windows-linux-macos)
 
 ### Option 2: Mac app
-### [Download Sarkhans Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
+### [Download Sarkhan’s Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
 macOS 13 or newer, Apple Silicon and Intel, always the latest version. [How to install](#install-on-a-mac).
 
 The app adds what the plugin can't: one-click setup for all your projects with the right rules for each stack, a work mode per project, shared team rules, a weekly report of what the guardrails stopped, and automatic updates.
@@ -39,16 +39,16 @@ The app adds what the plugin can't: one-click setup for all your projects with t
 ## Install on a Mac
 
 ### 1. Put the app in Applications
-Open the downloaded `Sarkhans-Claude-Starter.dmg` and drag **Sarkhans Claude Starter** onto the **Applications** folder.
+Open the downloaded `Sarkhans-Claude-Starter.dmg` and drag **Sarkhan’s Claude Starter** onto the **Applications** folder.
 If your Mac account has no admin rights, drag it into the **Applications** folder inside your home folder instead (Finder → Go → Home; create a folder named `Applications` if it isn't there).
 
 ### 2. Allow it once
 The app isn't notarized by Apple (that needs a paid Apple developer account). That's why macOS asks you to confirm it **once**, the first time you open it. Apps from developers who pay Apple for notarization show a simple **Open** button instead.
 
 **macOS 15 Sequoia, macOS 26 Tahoe and macOS 27 Golden Gate (the current version)**
-1. Double-click **Sarkhans Claude Starter** in Applications. macOS shows *"Sarkhans Claude Starter" Not Opened*. Click **Done**, not Move to Trash.
+1. Double-click **Sarkhan’s Claude Starter** in Applications. macOS says the app was not opened. Click **Done**, not Move to Trash.
 2. Open the **Apple menu** → **System Settings** → **Privacy & Security**.
-3. Scroll all the way down to **Security**. Next to *"Sarkhans Claude Starter" was blocked to protect your Mac* click **Open Anyway**.
+3. Scroll all the way down to **Security**. Next to the message that the app was blocked to protect your Mac, click **Open Anyway**.
 4. In the next window click **Open Anyway** again and confirm with your password or Touch ID. The app opens.
 
 The **Open Anyway** button appears only after step 1 and stays for about an hour. If you don't see it, do step 1 again.
@@ -133,4 +133,4 @@ node claude-web-starter/install.mjs --help
 - Third-party skills from the catalog are downloaded from their own repositories at install time and keep their own licenses; they are not part of this repository.
 
 ## License
-[MIT](LICENSE). Privacy: [PRIVACY.md](PRIVACY.md). Security reports: [SECURITY.md](SECURITY.md). Sarkhans Claude Starter is an independent project and isn't affiliated with Anthropic.
+[MIT](LICENSE). Privacy: [PRIVACY.md](PRIVACY.md). Security reports: [SECURITY.md](SECURITY.md). Sarkhan’s Claude Starter is an independent project and isn't affiliated with Anthropic.

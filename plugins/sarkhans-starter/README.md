@@ -1,6 +1,6 @@
-# Sarkhans Claude Starter — plugin
+# Sarkhan’s Claude Starter — plugin
 
-The rules, agents, skills and guardrail hooks of Sarkhans Claude Starter as a Claude Code plugin, for people who don't use the Mac app.
+The rules, agents, skills and guardrail hooks of Sarkhan’s Claude Starter as a Claude Code plugin, for people who don't use the Mac app.
 
 ```bash
 claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter

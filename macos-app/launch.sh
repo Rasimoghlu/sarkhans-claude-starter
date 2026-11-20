@@ -12,7 +12,7 @@ HASH_FILE="$BINARY.sha256"
 BUILD_LOG="$HOME/Library/Logs/ClaudeStarter-build.log"
 
 alert() {
-  /usr/bin/osascript -e "display alert \"Sarkhans Claude Starter\" message \"$1\"" >/dev/null 2>&1
+  /usr/bin/osascript -e "display alert \"Sarkhan’s Claude Starter\" message \"$1\"" >/dev/null 2>&1
 }
 
 SOURCE_HASH="$(cat "$SOURCES"/*.swift | /usr/bin/shasum -a 256 | cut -d' ' -f1)"
@@ -23,7 +23,7 @@ if [ ! -x "$BINARY" ] || [ "$SOURCE_HASH" != "$BUILT_HASH" ]; then
     alert "Swift compiler not found. Run this in Terminal: xcode-select --install — then open the app again."
     exit 1
   fi
-  /usr/bin/osascript -e 'display notification "Updating the app (~30 seconds)…" with title "Sarkhans Claude Starter"' >/dev/null 2>&1 &
+  /usr/bin/osascript -e 'display notification "Updating the app (~30 seconds)…" with title "Sarkhan’s Claude Starter"' >/dev/null 2>&1 &
   mkdir -p "$(dirname "$BUILD_LOG")"
   if ! /usr/bin/xcrun swiftc -O -parse-as-library "$SOURCES"/*.swift -o "$BINARY.tmp" >"$BUILD_LOG" 2>&1; then
     alert "The app could not be built. Details: ~/Library/Logs/ClaudeStarter-build.log"

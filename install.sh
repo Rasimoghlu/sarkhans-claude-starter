@@ -26,7 +26,7 @@ mkdir -p "$DEST"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-echo "→ Downloading $APP_NAME…"
+echo "→ Downloading Sarkhan’s Claude Starter…"
 curl -fsSL "$DOWNLOAD_URL" -o "$WORK/app.zip" || fail "Download failed. Check your internet connection and try again."
 ditto -x -k "$WORK/app.zip" "$WORK" || fail "The download couldn't be unpacked."
 [ -d "$WORK/$APP_NAME.app" ] || fail "The download doesn't contain the app."
@@ -34,7 +34,7 @@ codesign --verify --deep --strict "$WORK/$APP_NAME.app" 2>/dev/null || fail "The
 
 if pgrep -xq ClaudeStarter; then
   echo "→ Closing the running app…"
-  osascript -e "quit app \"$APP_NAME\"" >/dev/null 2>&1 || true
+  osascript -e 'quit app id "local.dev.claude-starter"' >/dev/null 2>&1 || true
   for _ in $(seq 1 25); do pgrep -xq ClaudeStarter || break; sleep 0.2; done
 fi
 
