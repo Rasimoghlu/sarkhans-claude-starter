@@ -108,6 +108,16 @@ struct SetupView: View {
                     }
                     Divider()
                     SetupStep(
+                        title: "Claude Code",
+                        detail: model.claudeCodeAvailable ? "Installed" : "Needed to work with Claude in your projects. Uses the official installer. Requires a Claude Pro, Max, Team or Enterprise plan.",
+                        state: model.claudeCodeAvailable ? .done : .optional
+                    ) {
+                        if !model.claudeCodeAvailable {
+                            Button("Install Claude Code") { model.installClaudeCode() }
+                        }
+                    }
+                    Divider()
+                    SetupStep(
                         title: "Projects folder",
                         detail: folderDetail,
                         state: model.projects.isEmpty ? .needed : .done

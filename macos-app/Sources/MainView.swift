@@ -293,8 +293,20 @@ struct OverviewView: View {
                 OverviewStat(value: model.count(status: .notSetUp), label: "Not set up", color: .secondary)
                 OverviewStat(value: model.count(status: .updateAvailable), label: "Update available", color: .orange)
                 OverviewStat(value: model.count(status: .ready), label: "Ready", color: .green)
+                OverviewStat(value: model.guardrailsThisWeek, label: "Stopped this week", color: .accentColor)
             }
             .padding(.top, 6)
+            if !model.claudeCodeAvailable {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text("Claude Code isn’t installed yet, so the rules have nothing to run in.")
+                    Button("Install Claude Code") { model.installClaudeCode() }
+                }
+                .padding(12)
+                .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.top, 8)
+            }
             if !model.gitAvailable {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill")

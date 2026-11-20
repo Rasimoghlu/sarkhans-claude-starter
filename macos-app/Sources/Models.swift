@@ -18,6 +18,7 @@ struct Project: Identifiable, Hashable, Sendable {
     var preset: String?
     var orchestratorMode: String?
     var contextTokens: Int?
+    var guardrails: GuardrailSummary?
 
     var id: String { path }
     var workMode: String {

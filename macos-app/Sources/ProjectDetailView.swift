@@ -18,6 +18,7 @@ struct ProjectDetailView: View {
                 }
                 if project.isInstalled {
                     claudeSection(project)
+                    protectionSection(project)
                     designSection(project)
                     SkillSections(project: project)
                     maintenanceSection(project)
@@ -74,6 +75,41 @@ struct ProjectDetailView: View {
             parts.append("“Rules in every session” is what Claude reads before your first message; fewer tokens leave more room for your code.")
         }
         return parts.joined(separator: " ")
+    }
+
+    private func protectionSection(_ project: Project) -> some View {
+        Section {
+            if let summary = project.guardrails, summary.weekTotal > 0 {
+                ForEach(summary.weekRows) { row in
+                    HStack(spacing: 10) {
+                        Image(systemName: row.category.symbol)
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: 20)
+                        Text(row.category.title)
+                        Spacer()
+                        Text("\(row.count)")
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                Label("Nothing had to be stopped in the last 7 days.", systemImage: "checkmark.shield")
+                    .foregroundStyle(.secondary)
+            }
+            if let summary = project.guardrails, summary.allTimeTotal > 0 {
+                HStack {
+                    Text("All time: \(summary.allTimeTotal)")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Show log") { model.revealGuardrailLog(project) }
+                        .buttonStyle(.link)
+                }
+            }
+        } header: {
+            Text("Stopped by the guardrails · last 7 days")
+        } footer: {
+            Text("Each time a rule blocks Claude, it’s counted here, and Claude has to fix the cause. The log stays on this Mac; nothing is sent anywhere.")
+        }
     }
 
     private func designSection(_ project: Project) -> some View {
