@@ -58,10 +58,11 @@ struct RootView: View {
         .task { await model.start() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             guard model.hasLoaded, !model.isBusy, !model.isInstallingNode else { return }
-            if !model.canFinishSetup || !model.gitAvailable {
+            if !model.canFinishSetup || !model.gitAvailable || !model.claudeCodeAvailable {
                 Task { await model.start() }
             }
             Task { await model.checkForUpdatesIfDue() }
+            Task { await model.refreshRulesHash() }
         }
         .onReceive(Timer.publish(every: 1800, on: .main, in: .common).autoconnect()) { _ in
             guard model.hasLoaded, !model.isUpdating else { return }

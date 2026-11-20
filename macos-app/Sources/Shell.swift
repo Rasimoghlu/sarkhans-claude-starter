@@ -92,6 +92,18 @@ enum GitLocator {
     }
 }
 
+enum ClaudeCodeLocator {
+    static func isAvailable() -> Bool {
+        let home = NSHomeDirectory()
+        let candidates = [home + "/.local/bin/claude", "/opt/homebrew/bin/claude", "/usr/local/bin/claude", home + "/.npm-global/bin/claude"]
+        if candidates.contains(where: { FileManager.default.isExecutableFile(atPath: $0) }) {
+            return true
+        }
+        let result = Shell.run("/bin/zsh", ["-lic", "command -v claude"], timeout: 8)
+        return result.succeeded && result.output.contains("claude")
+    }
+}
+
 enum NodeInstaller {
     private struct Release: Decodable {
         let version: String

@@ -1,13 +1,15 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
-import { join, resolve, relative, isAbsolute, sep } from "node:path";
+import { join, resolve, relative, isAbsolute, sep, basename } from "node:path";
 import { spawnSync } from "node:child_process";
 
 export const projectDir = resolve(process.env.CLAUDE_PROJECT_DIR || process.cwd());
 
 const DEFAULT_CONFIG = {
   responseLanguage: "English",
+  projectPhase: "existing",
+  designMode: "open",
   orchestratorMode: "balanced",
   directEditMaxFiles: 3,
   reportMinChangedLines: 30,
@@ -28,6 +30,7 @@ const DEFAULT_CONFIG = {
   requireThirdEyeReport: true,
   requireSubagentEvidence: true,
   maxStopRetries: 3,
+  logGuardrails: true,
   extraProtectedPaths: [],
 };
 
@@ -53,7 +56,57 @@ export async function readInput() {
   }
 }
 
+const GUARDRAIL_CATEGORIES = [
+  ["secrets", /secret|\.env\b|private key|api key|token|connection string/i],
+  ["git", /\b(main|master)\b|force-push|--force|push|merge|commit|co-author|claude|anthropic|\bAI\b|--no-verify|rewrite/i],
+  ["invented", /hallucinat|not installed|not declared|does not exist|doesn't exist|unresolved|cannot find|import/i],
+  ["dependencies", /dependenc|package|npm install|composer require|pip install|go get|lockfile/i],
+  ["comments", /comment|docstring|doc block|docblock|jsdoc|todo|fixme/i],
+  ["types", /\bany\b|ts-ignore|type: ignore|phpstan-ignore|nolint|noqa|loose comparison|strict_types|cast/i],
+  ["errors", /swallow|empty `catch|except .*pass|err != nil/i],
+  ["debug", /console\.log|print\(|var_dump|\bdd\(|fmt\.Print|debugger|debug output/i],
+  ["security", /sql|xss|injection|eval|shell=true|pickle|unserialize|tls|dangerouslysetinnerhtml|unescaped|csrf/i],
+  ["database", /migration|foreign key|\bfk\b|normaliz|money|float|index|schema|data-architect/i],
+];
+const HOOK_CATEGORIES = {
+  "design-guard": "design",
+  "orchestrator-guard": "workmode",
+  "subagent-evidence": "evidence",
+};
+
+function guardrailCategory(hook, text) {
+  if (HOOK_CATEGORIES[hook]) return HOOK_CATEGORIES[hook];
+  if (hook === "stop-checks") return /report is incomplete|data-architect/i.test(text) ? "report" : "build";
+  const match = GUARDRAIL_CATEGORIES.find(([, pattern]) => pattern.test(text));
+  if (match) return match[0];
+  if (hook === "guard-bash") return "commands";
+  if (hook === "protect-files") return "protected";
+  return "other";
+}
+
+function recordBlock(message) {
+  try {
+    if (process.env.STARTER_HOOK_NAME || loadConfig().logGuardrails === false) return;
+    const hook = basename(process.argv[1] || "", ".mjs");
+    const bullets = [...message.matchAll(/^\s*•\s*(.+)$/gm)].map((m) => m[1]);
+    const items = bullets.length ? bullets : [message.replace(/^BLOCKED \([^)]*\):\s*/, "").split("\n")[0]];
+    const dir = join(projectDir, ".claude", "logs");
+    const file = join(dir, "guardrails.jsonl");
+    mkdirSync(dir, { recursive: true });
+    if (existsSync(file) && statSync(file).size > 2_000_000) writeFileSync(file, readFileSync(file, "utf8").split("\n").slice(-5000).join("\n"));
+    const recent = existsSync(file) ? readFileSync(file, "utf8").split("\n").slice(-30).join("\n") : "";
+    const now = new Date();
+    const lines = items.map((item) => ({ time: now.toISOString(), hook, category: guardrailCategory(hook, item), text: item.slice(0, 200) }))
+      .filter((entry) => !recent.includes(JSON.stringify(entry.text)) || !recent.includes(now.toISOString().slice(0, 15)))
+      .map((entry) => JSON.stringify(entry) + "\n");
+    if (lines.length) appendFileSync(file, lines.join(""));
+  } catch {
+    return;
+  }
+}
+
 export function block(message) {
+  recordBlock(message);
   process.stderr.write(message.trim() + "\n");
   process.exit(2);
 }

@@ -91,8 +91,14 @@ node ~/claude-web-starter/install.mjs --unregister-skill deploy-check
 ```
 Skills are copied into `.claude/skills/<name>` (review bundled scripts); MCP servers go into `.mcp.json` and Claude Code asks you to approve them.
 
+## Guardrail report
+Every time a hook blocks Claude, it's logged in `.claude/logs/guardrails.jsonl` (time, hook, category, short text) inside the project. The app shows the last 7 days per project and the weekly total on its overview. Turn it off with `"logGuardrails": false`. Nothing leaves the machine.
+
+## Team rules
+`--set-team <folder>` shares one rules folder with all projects on this machine: `<folder>/rules/*.md` are copied as `.claude/rules/team-*.md` on every install and update, and `<folder>/team.json` sets `name` plus defaults for new projects (`preset`, `responseLanguage`, `skills`). The team files are part of the rules fingerprint, so the app updates projects when they change. `--clear-team` turns it off.
+
 ## Settings — `.claude/hooks/config.json`
-`responseLanguage`, `projectPhase`, `designMode`, `preset`, `orchestratorMode` (`balanced` / `strict` / `advisory`), `directEditMaxFiles`, `reportMinChangedLines`, `checkDbDesign`, `docker`, `enforceCommentPolicy`, `checkImports`, `enforceEnvModule`, `requireThirdEyeReport`, `requireSubagentEvidence`, `blockNewDependencies`, `protectedBranches`, `maxNewFileLines`, `extraProtectedPaths`. Claude cannot edit this file.
+`responseLanguage`, `projectPhase`, `designMode`, `preset`, `logGuardrails`, `orchestratorMode` (`balanced` / `strict` / `advisory`), `directEditMaxFiles`, `reportMinChangedLines`, `checkDbDesign`, `docker`, `enforceCommentPolicy`, `checkImports`, `enforceEnvModule`, `requireThirdEyeReport`, `requireSubagentEvidence`, `blockNewDependencies`, `protectedBranches`, `maxNewFileLines`, `extraProtectedPaths`. Claude cannot edit this file.
 
 ## Honest limits
 Instructions are not guarantees; hooks enforce what is measurable (regex and the project's own tools). Missing tools are skipped and shown as ⏭️ in `/verify`. Agent supervision is strengthened by evidence checks and the reviewer, but your review is the final word.

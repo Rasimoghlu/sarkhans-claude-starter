@@ -128,6 +128,28 @@ struct SettingsView: View {
                 Text("My skills")
             }
             Section {
+                if let folder = model.teamFolder {
+                    LabeledContent("Team", value: model.teamName ?? "")
+                    Text(folder)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    HStack {
+                        Button("Change…") { model.chooseTeamFolder() }
+                        Button("Turn off") { model.clearTeam() }
+                    }
+                    .disabled(!model.canRun)
+                } else {
+                    Button("Use team rules…") { model.chooseTeamFolder() }
+                        .disabled(!model.canRun)
+                }
+            } header: {
+                Text("Team rules")
+            } footer: {
+                Text("Share one folder with your team (a git repository or a synced folder) holding rules/*.md and an optional team.json with name, preset, responseLanguage and skills. Every set-up project gets the rules; when they change, projects update automatically.")
+            }
+            Section {
                 LabeledContent("Version", value: AppInfo.version)
                 LabeledContent("Source", value: Updater.repository.map { "github.com/\($0)" } ?? "Not set up in this build")
                 HStack {
@@ -171,6 +193,7 @@ struct SettingsView: View {
                 LabeledContent("Rules", value: model.starterVersion ?? "Not found")
                 LabeledContent("Node.js", value: model.nodePath ?? "Not found")
                 LabeledContent("Git", value: model.gitAvailable ? "Installed" : "Not found")
+                LabeledContent("Claude Code", value: model.claudeCodeAvailable ? "Installed" : "Not found")
                 Button("Show activity…") { model.showingActivity = true }
             } header: {
                 Text("About")

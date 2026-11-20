@@ -39,6 +39,9 @@ final class StarterModel: ObservableObject {
     @Published private(set) var log = ""
     @Published private(set) var nodePath: String?
     @Published private(set) var gitAvailable = true
+    @Published private(set) var claudeCodeAvailable = true
+    @Published private(set) var teamFolder: String?
+    @Published private(set) var teamName: String?
     @Published private(set) var isInstallingNode = false
     @Published private(set) var starterVersion: String?
     @Published private(set) var isLoading = false
@@ -126,6 +129,8 @@ final class StarterModel: ObservableObject {
         loadCatalog()
         nodePath = await Task.detached(priority: .userInitiated) { NodeLocator.find() }.value
         gitAvailable = await Task.detached(priority: .userInitiated) { GitLocator.isAvailable() }.value
+        claudeCodeAvailable = await Task.detached(priority: .userInitiated) { ClaudeCodeLocator.isAvailable() }.value
+        loadTeam()
         currentRulesHash = await readRulesHash()
         refresh()
         if !didApplyInitialFilter {
@@ -487,6 +492,51 @@ final class StarterModel: ObservableObject {
         filter = needsSetupProjects.isEmpty ? .all : .needsSetup
     }
 
+    private static let starterSettingsPath = NSHomeDirectory() + "/.claude-starter/settings.json"
+
+    func loadTeam() {
+        let folder = Self.readJSONObject(Self.starterSettingsPath)?["teamFolder"] as? String
+        teamFolder = folder
+        teamName = folder.map { (Self.readJSONObject($0 + "/team.json")?["name"] as? String) ?? ($0 as NSString).lastPathComponent }
+    }
+
+    func chooseTeamFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Use These Rules"
+        panel.message = "Choose the team rules folder (team.json and/or a rules folder with .md files)"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task { await changeTeam(["--set-team", url.path]) }
+    }
+
+    func clearTeam() {
+        Task { await changeTeam(["--clear-team"]) }
+    }
+
+    private func changeTeam(_ arguments: [String]) async {
+        guard let node = nodePath else { return }
+        let result = await Shell.runAsync(node, [installerPath] + arguments, timeout: 20, extraPath: (node as NSString).deletingLastPathComponent)
+        appendLog(title: "Team rules", result: result)
+        guard result.succeeded else {
+            showNotice(result.output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").last ?? "Couldn’t use that folder", isError: true)
+            return
+        }
+        loadTeam()
+        showNotice(teamName.map { "Team rules “\($0)” are on. Projects get them with their next update." } ?? "Team rules are off", isError: false)
+        await refreshRulesHash()
+    }
+
+    func refreshRulesHash() async {
+        let latest = await readRulesHash()
+        guard latest != currentRulesHash else { return }
+        currentRulesHash = latest
+        refresh()
+        didAutoUpdateRules = false
+        updateOutdatedRulesIfNeeded()
+    }
+
     func confirmProjectsFolder() {
         UserDefaults.standard.set(wwwPath, forKey: "projectsFolder")
         hasChosenFolder = true
@@ -496,14 +546,29 @@ final class StarterModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: project.path)])
     }
 
-    func openInClaudeCode(_ project: Project) {
-        let launcher = fileManager.temporaryDirectory.appendingPathComponent("Open \(project.name) in Claude Code.command")
-        let inner = "command -v claude >/dev/null && exec claude; echo; echo 'Claude Code is not installed yet. See https://code.claude.com/docs'; echo; exec /bin/zsh -li"
+    var guardrailsThisWeek: Int {
+        projects.compactMap { $0.guardrails?.weekTotal }.reduce(0, +)
+    }
+
+    func revealGuardrailLog(_ project: Project) {
+        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: project.path + GuardrailSummary.logPath)])
+    }
+
+    func installClaudeCode() {
+        runInTerminal(
+            name: "Install Claude Code",
+            commands: "echo 'Installing Claude Code (official installer from claude.ai)…'; curl -fsSL https://claude.ai/install.sh | bash && echo && echo 'Done. Switch back to Sarkhans Claude Starter; it notices Claude Code by itself.'; exec /bin/zsh -li"
+        )
+    }
+
+    private func runInTerminal(name: String, directory: String? = nil, commands: String) {
+        let launcher = fileManager.temporaryDirectory.appendingPathComponent("\(name).command")
+        let changeDirectory = directory.map { "cd " + Self.shellQuoted($0) + " || exit 1" } ?? ""
         let script = """
         #!/bin/zsh
         rm -f "$0"
-        cd \(Self.shellQuoted(project.path)) || exit 1
-        exec /bin/zsh -lic \(Self.shellQuoted(inner))
+        \(changeDirectory)
+        exec /bin/zsh -lic \(Self.shellQuoted(commands))
 
         """
         do {
@@ -513,6 +578,14 @@ final class StarterModel: ObservableObject {
         } catch {
             showNotice("Couldn’t open Terminal: \(error.localizedDescription)", isError: true)
         }
+    }
+
+    func openInClaudeCode(_ project: Project) {
+        runInTerminal(
+            name: "Open \(project.name) in Claude Code",
+            directory: project.path,
+            commands: "command -v claude >/dev/null && exec claude; echo; echo 'Claude Code is not installed yet. Install it from Sarkhans Claude Starter (Overview) or see https://code.claude.com/docs'; echo; exec /bin/zsh -li"
+        )
     }
 
     private static func shellQuoted(_ value: String) -> String {
@@ -831,7 +904,8 @@ final class StarterModel: ObservableObject {
             rulesHash: Self.readTrimmed(path + "/.claude/starter-hash"),
             preset: config?["preset"] as? String,
             orchestratorMode: config?["orchestratorMode"] as? String,
-            contextTokens: (marker ?? legacy) == nil ? nil : Self.alwaysLoadedTokens(projectPath: path)
+            contextTokens: (marker ?? legacy) == nil ? nil : Self.alwaysLoadedTokens(projectPath: path),
+            guardrails: (marker ?? legacy) == nil ? nil : GuardrailSummary.load(projectPath: path)
         )
     }
 

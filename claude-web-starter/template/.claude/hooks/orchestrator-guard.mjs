@@ -18,11 +18,12 @@ const editedPath = toolInput.file_path || toolInput.notebook_path || "";
 const mode = config.orchestratorMode || "balanced";
 
 if (input.agent_id) {
-  const allowed = READ_ONLY_AGENTS[input.agent_type];
+  const agentName = String(input.agent_type || "").split(":").pop();
+  const allowed = READ_ONLY_AGENTS[agentName];
   if (allowed && EDIT_TOOLS.includes(tool)) {
     const rel = relPath(editedPath);
     if (!allowed.some((prefix) => rel.startsWith(prefix))) {
-      block(`BLOCKED (orchestrator-guard): ${input.agent_type} is read-only — it may write only ${allowed.join(" and ")}. Report the change as a finding instead.`);
+      block(`BLOCKED (orchestrator-guard): ${agentName} is read-only — it may write only ${allowed.join(" and ")}. Report the change as a finding instead.`);
     }
   }
   ok();

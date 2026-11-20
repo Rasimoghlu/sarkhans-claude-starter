@@ -1,0 +1,11 @@
+name: Idea or request
+description: Suggest a rule, a skill, an agent or an app feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help you?
+      description: Describe the situation and what you'd like Claude or the app to do.
+    validations:
+      required: true

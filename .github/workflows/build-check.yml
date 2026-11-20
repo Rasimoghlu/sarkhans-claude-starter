@@ -26,3 +26,10 @@ jobs:
           node-version: 20
       - name: Installer and hooks smoke test
         run: bash .github/scripts/starter-smoke.sh
+      - name: Plugin is generated from the template
+        run: node scripts/build-plugin.mjs --check
+      - name: Validate plugin and marketplace
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate .
+          claude plugin validate ./plugins/sarkhans-starter

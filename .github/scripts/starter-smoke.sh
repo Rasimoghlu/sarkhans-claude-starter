@@ -62,3 +62,30 @@ done
 [ "$(guard '{"session_id":"s","agent_id":"x","agent_type":"reviewer","tool_name":"Write","tool_input":{"file_path":"src/a.ts"}}')" = 2 ] || fail "reviewer could edit code"
 [ "$(guard '{"session_id":"s","agent_id":"x","agent_type":"reviewer","tool_name":"Write","tool_input":{"file_path":".claude/agent-memory/reviewer/MEMORY.md"}}')" = 0 ] || fail "reviewer memory blocked"
 pass "orchestrator guard"
+
+LOG="$WORK/fresh/.claude/logs/guardrails.jsonl"
+echo '{"tool_name":"Read","tool_input":{"file_path":".env"}}' | node "$HOOKS/protect-files.mjs" >/dev/null 2>&1 || true
+grep -q '"category":"secrets"' "$LOG" || fail "guardrail log missing the blocked .env read"
+pass "guardrail log"
+
+mkdir -p "$WORK/team/rules"
+echo '{"name":"CI team","preset":"strict"}' > "$WORK/team/team.json"
+echo "# Team rule" > "$WORK/team/rules/style.md"
+before="$(node "$INSTALLER" --rules-hash)"
+node "$INSTALLER" --set-team "$WORK/team" >/dev/null
+[ "$(node "$INSTALLER" --rules-hash)" != "$before" ] || fail "team rules don't change the fingerprint"
+make_project teamed
+node "$INSTALLER" "$WORK/teamed" --no-recommended >/dev/null
+[ -f "$WORK/teamed/.claude/rules/team-style.md" ] || fail "team rule not copied"
+[ "$(node -p "require('$WORK/teamed/.claude/hooks/config.json').preset")" = "strict" ] || fail "team preset not applied to a new project"
+node "$INSTALLER" --clear-team >/dev/null
+node "$INSTALLER" "$WORK/teamed" --force >/dev/null
+[ ! -f "$WORK/teamed/.claude/rules/team-style.md" ] || fail "team rule not removed after --clear-team"
+pass "team rules"
+
+PLUGIN="$ROOT/plugins/sarkhans-starter"
+make_project plain
+context="$(echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/plain" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context)"
+echo "$context" | grep -q "Third eye" || fail "plugin session context lacks the core rules"
+echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/fresh" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context | grep -q . && fail "plugin hooks ran in a project set up with the app"
+pass "plugin hooks"

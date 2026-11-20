@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sarkhans Claude Starter — guardrails, agents and rules for Claude Code</title>
+<meta name="description" content="A free Mac app that sets up Claude Code in all your projects: rules that are enforced, specialist agents, a third-eye report, design lock, database review and team rules.">
+<link rel="icon" href="icon.png">
+<meta property="og:title" content="Sarkhans Claude Starter">
+<meta property="og:description" content="Guardrails, agents and rules for Claude Code — set up every project with one click.">
+<meta property="og:image" content="icon.png">
+<style>
+  :root {
+    --bg: #f7f8fb; --surface: #ffffff; --text: #141a26; --muted: #5b6577; --line: #e3e7ef;
+    --accent: #3b6fe0; --accent-text: #ffffff; --code: #eef1f7; --ok: #1f8a4c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1a2b; --surface: #16233a; --text: #e8eef7; --muted: #9aa8bf; --line: #24344f;
+      --accent: #4f8ef7; --accent-text: #0b1322; --code: #0c1524; --ok: #4cc38a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  header.hero { padding: 72px 0 48px; text-align: center; }
+  .hero img { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 12px 40px rgba(20, 40, 90, .25); }
+  h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin: 24px 0 12px; letter-spacing: -0.02em; }
+  .lead { font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 auto 32px; }
+  .button { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 12px; background: var(--accent); color: var(--accent-text); font-weight: 600; font-size: 18px; text-decoration: none; }
+  .button:hover { filter: brightness(1.08); }
+  .meta { color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .meta a { color: var(--muted); }
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+  ol.steps > li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px 20px 72px; position: relative; }
+  ol.steps > li::before { content: counter(step); position: absolute; left: 22px; top: 18px; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; font-weight: 700; }
+  ol.steps h3 { margin: 0 0 6px; font-size: 17px; }
+  ol.steps p, ol.steps li li { color: var(--muted); font-size: 15px; }
+  ol.steps ol { margin: 8px 0 0; padding-left: 20px; }
+  code, pre { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  pre { white-space: pre-wrap; word-break: break-word; background: var(--code); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 12px 0 0; }
+  code { background: var(--code); padding: 1px 6px; border-radius: 6px; }
+  pre code { background: none; padding: 0; }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { color: var(--muted); margin: 10px 0 0; }
+  .two { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+  footer { padding: 32px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  footer a { color: var(--muted); margin-right: 18px; }
+</style>
+</head>
+<body>
+<header class="hero wrap">
+  <img src="icon.png" alt="Sarkhans Claude Starter icon">
+  <h1>Sarkhans Claude Starter</h1>
+  <p class="lead">Set up Claude Code in all your projects with one click: rules that are actually enforced, specialist agents, a third-eye report on every change, a design lock and database review.</p>
+  <a class="button" href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg">Download for Mac</a>
+  <p class="meta">Free and open source (MIT) · macOS 13 or newer · Apple Silicon and Intel · <a href="#install">how to install</a> · <a href="#plugin">not on a Mac?</a></p>
+</header>
+
+<main class="wrap">
+  <section>
+    <h2>What you get</h2>
+    <p class="sub">Most Claude Code setups only ask the AI to behave. This one checks it.</p>
+    <div class="grid">
+      <div class="card"><h3>Guardrails that block</h3><p>Hooks stop comments in code, invented packages and imports, pushes to main, AI mentions in commits, secret files and unsafe code — in TypeScript, Go, PHP, Python and more.</p></div>
+      <div class="card"><h3>Third eye</h3><p>Claude reports every problem it notices while working, fixes the safe ones and asks before risky changes.</p></div>
+      <div class="card"><h3>Work modes</h3><p>Lite, Standard or Strict per project. Standard: small changes directly, bigger work through a planned and reviewed agent team.</p></div>
+      <div class="card"><h3>Agents that learn</h3><p>Architect, specialists, reviewer, database and security agents. Reviewers keep notes per project and get better over time.</p></div>
+      <div class="card"><h3>Guardrail report</h3><p>See what the rules stopped this week in each project: secrets, invented imports, git mistakes, swallowed errors and more.</p></div>
+      <div class="card"><h3>Team rules</h3><p>Share one folder of rules with your team. Every project gets them and updates when they change.</p></div>
+      <div class="card"><h3>Design lock</h3><p>In existing projects Claude doesn't touch your visual design unless you ask. New projects start with a planning kickoff.</p></div>
+      <div class="card"><h3>Database review</h3><p>Normalized schemas, real foreign keys, safe migrations — checked by a database agent and a migration lint.</p></div>
+      <div class="card"><h3>Light on context</h3><p>About 2,800 tokens per session. Detailed rules load only when Claude works on matching files.</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install in three steps</h2>
+    <p class="sub">The app isn't notarized by Apple, so macOS asks you to confirm it once. After that it opens normally and updates itself.</p>
+    <ol class="steps">
+      <li>
+        <h3>Drag it into Applications</h3>
+        <p>Open the downloaded <code>Sarkhans-Claude-Starter.dmg</code> and drag the app onto <strong>Applications</strong>. No admin rights? Use the <strong>Applications</strong> folder inside your home folder.</p>
+      </li>
+      <li>
+        <h3>Allow it once</h3>
+        <p><strong>macOS 15, 26 and 27:</strong></p>
+        <ol>
+          <li>Double-click the app. macOS says it was not opened — click <strong>Done</strong>.</li>
+          <li>Apple menu → <strong>System Settings</strong> → <strong>Privacy &amp; Security</strong>.</li>
+          <li>Scroll down to <strong>Security</strong> and click <strong>Open Anyway</strong>, then <strong>Open Anyway</strong> again and confirm with your password or Touch ID.</li>
+        </ol>
+        <p><strong>macOS 13 and 14:</strong> right-click the app → <strong>Open</strong> → <strong>Open</strong>.</p>
+      </li>
+      <li>
+        <h3>Set up your projects</h3>
+        <p>The app installs what's missing (Node.js, Git, Claude Code), asks for your projects folder and the language Claude should explain things in. Select projects, press <strong>Set up</strong>, then <strong>Open in Claude Code</strong>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="plugin">
+    <div>
+      <div>
+        <h2>Not on a Mac?</h2>
+        <p class="sub">The rules, agents, skills and guardrails are also a Claude Code plugin — on Windows, Linux and macOS, in the terminal and the desktop app.</p>
+        <pre><code>claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin install sarkhans-starter@sarkhans-claude-starter</code></pre>
+        <p class="meta" style="text-align:left">Skills are namespaced, e.g. <code>/sarkhans-starter:verify</code>.</p>
+      </div>
+      <div style="margin-top:40px">
+        <h2>Requirements</h2>
+        <p class="sub">Claude Code with a Claude Pro, Max, Team or Enterprise plan (the free plan doesn't include Claude Code). The app can install Claude Code, Node.js and Git for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Questions</h2>
+    <details><summary>Why does macOS ask me to confirm the app?</summary><p>Apple shows a simple "Open" button only for apps from developers with a paid Apple developer account. This app is free and signed without one, so macOS asks once. Download it only from this site or the GitHub Releases page.</p></details>
+    <details><summary>Is my code sent anywhere?</summary><p>No. The app only writes rule files into your projects and checks GitHub for updates. The guardrail log stays on your Mac. See the <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/PRIVACY.md">privacy note</a>.</p></details>
+    <details><summary>Will it change my code or my git history?</summary><p>No. Setting up a project only adds a short CLAUDE.md and a .claude folder, hidden from git by default. Your own CLAUDE.md is never touched.</p></details>
+    <details><summary>How do updates work?</summary><p>The app checks for new versions on its own and shows an Update button. Set-up projects get new rules automatically.</p></details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter">GitHub</a>
+  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases">Releases</a>
+  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/issues/new/choose">Report a problem</a>
+  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/PRIVACY.md">Privacy</a>
+  <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/blob/main/LICENSE">MIT License</a>
+  <p>Sarkhans Claude Starter is an independent project and isn't affiliated with Anthropic. Claude and Claude Code are Anthropic's products.</p>
+</footer>
+</body>
+</html>

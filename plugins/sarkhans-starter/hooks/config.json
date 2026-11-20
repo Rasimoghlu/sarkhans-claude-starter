@@ -1,0 +1,32 @@
+{
+  "responseLanguage": "English",
+  "projectPhase": "existing",
+  "designMode": "locked",
+  "preset": "standard",
+  "orchestratorMode": "balanced",
+  "directEditMaxFiles": 3,
+  "reportMinChangedLines": 30,
+  "blockSecretFiles": true,
+  "blockProtectedWrites": true,
+  "blockDangerousCommands": true,
+  "blockNewDependencies": true,
+  "enforceGitRules": true,
+  "protectedBranches": [
+    "main",
+    "master"
+  ],
+  "formatOnEdit": true,
+  "lintOnEdit": true,
+  "checkForbiddenPatterns": true,
+  "enforceCommentPolicy": true,
+  "checkImports": true,
+  "enforceEnvModule": true,
+  "maxNewFileLines": 400,
+  "typecheckOnStop": true,
+  "requireThirdEyeReport": true,
+  "maxStopRetries": 3,
+  "extraProtectedPaths": [],
+  "requireSubagentEvidence": true,
+  "checkDbDesign": true,
+  "logGuardrails": true
+}

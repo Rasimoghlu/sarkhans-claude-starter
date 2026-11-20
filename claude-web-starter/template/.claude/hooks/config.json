@@ -27,5 +27,6 @@
   "maxStopRetries": 3,
   "extraProtectedPaths": [],
   "requireSubagentEvidence": true,
-  "checkDbDesign": true
+  "checkDbDesign": true,
+  "logGuardrails": true
 }
