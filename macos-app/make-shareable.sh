@@ -102,15 +102,15 @@ write_readme() {
     echo "2. Open it from Applications."
     if ! $NOTARIZED; then
       echo
-      echo "   The first time, macOS says it can't verify the app. Click \"Done\", then:"
-      echo "   • macOS 15 Sequoia / macOS 26 Tahoe: Apple menu → System Settings → Privacy & Security"
-      echo "     → scroll down to Security → \"Open Anyway\" next to $APP_NAME → \"Open Anyway\" again → your Mac password."
-      echo "     The button is shown for about an hour after you tried to open the app."
-      echo "   • macOS 13–14: right-click the app → Open → Open."
+      echo "   The app isn't notarized by Apple, so macOS asks you to confirm it once:"
+      echo "   macOS 15 Sequoia / macOS 26 Tahoe:"
+      echo "   a) Double-click the app. In \"Not Opened\" click Done (not Move to Trash)."
+      echo "   b) Apple menu → System Settings → Privacy & Security → scroll down to Security."
+      echo "   c) Next to \"$APP_NAME was blocked to protect your Mac\" click Open Anyway."
+      echo "   d) Click Open Anyway again and confirm with your password or Touch ID."
+      echo "      The button stays for about an hour after a). If it's gone, do a) again."
+      echo "   macOS 13 Ventura / 14 Sonoma: right-click the app → Open → Open."
       echo "   This is needed only once. Updates install themselves from inside the app."
-      echo
-      echo "   No approval at all: paste this line into Terminal instead of using this installer:"
-      echo "   curl -fsSL https://raw.githubusercontent.com/sarkhandigitech/sarkhans-claude-starter/main/install.sh | bash"
     fi
     echo
     echo "3. In the app:"
