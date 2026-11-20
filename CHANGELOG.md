@@ -2,6 +2,19 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.6.0
+- **Faster everyday work.** Claude now makes small changes itself (up to 3 files per request) instead of starting an agent for every line. Bigger work still goes to the agent team with plans and reviews.
+- **Work mode per project:** Lite, Standard or Strict, in the project panel under Claude. Projects that used the old default move to Standard.
+- **Much smaller rules.** What Claude reads at the start of every session went from about 10,500 tokens to about 2,800, and each message adds 150 characters instead of 860. More room is left for your code. Detailed rules load only when Claude works on matching files. The project panel shows the number.
+- **Agents that learn.** The reviewer, architect, database and security agents keep notes for each project (conventions, decisions, recurring mistakes) and use them next time.
+- One `reviewer` agent replaces the separate verifier and code reviewer.
+- The final report is required only for changes of 30+ lines (or any database change), not for one-line fixes.
+- `/security-audit` runs in its own context, so a long audit no longer fills your conversation.
+- **Open in Claude Code** button: opens Terminal in the project folder and starts Claude.
+- `CLAUDE.md` is now short (project, stack, commands) and your own `CLAUDE.md` is never touched. Existing projects are converted automatically; the old file is kept in `.claude/CLAUDE.md.before-4.6`.
+- Projects with an `AGENTS.md` (Cursor, Codex) keep it: the starter's `CLAUDE.md` imports it.
+- Fixed: `/ship` opened pull requests against `main` even when the repository's default branch is different.
+
 ## 4.5.5
 - Every folder in your projects folder is listed now, not only Node, PHP, Go and Python projects.
 - Recognised in addition: Rust, Java/Kotlin (Maven, Gradle), .NET, Ruby, Dart/Flutter, Swift, Docker and static sites. Anything else is shown as "Other" and still gets the full rules.

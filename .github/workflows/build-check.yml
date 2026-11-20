@@ -1,0 +1,28 @@
+name: Build check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile the app (Apple Silicon and Intel)
+        run: |
+          xcrun swiftc -O -parse-as-library -target arm64-apple-macos13.0 macos-app/Sources/*.swift -o "$RUNNER_TEMP/ui-arm64"
+          xcrun swiftc -O -parse-as-library -target x86_64-apple-macos13.0 macos-app/Sources/*.swift -o "$RUNNER_TEMP/ui-x86_64"
+
+  starter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Installer and hooks smoke test
+        run: bash .github/scripts/starter-smoke.sh
