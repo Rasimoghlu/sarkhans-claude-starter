@@ -1,3 +1,5 @@
+<p align="center"><img src="brand/logo.svg" width="128" height="128" alt="Sarkhans Claude Starter logo"></p>
+
 # Sarkhans Claude Starter
 
 Rules Claude Code can't skip, a team of specialist agents, and a report on every change — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.

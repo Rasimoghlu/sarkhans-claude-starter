@@ -2,6 +2,9 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.7.1
+- New app icon: the Night Owl, a reviewer that never sleeps.
+
 ## 4.7.0
 - **Guardrail report.** Each project panel shows what the rules stopped in the last 7 days: secrets, invented imports, git mistakes, comments, swallowed errors, design changes and more. The overview shows the weekly total. The log stays on your Mac.
 - **Team rules.** Settings → Team rules: pick a shared folder (for example a git repository) with your team's rules. Every set-up project gets them, and when the folder changes, projects update by themselves.

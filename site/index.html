@@ -8,7 +8,9 @@
 <meta property="og:title" content="Sarkhans Claude Starter">
 <meta property="og:description" content="Claude writes the code. The starter checks it.">
 <meta property="og:image" content="https://sarkhandigitech.github.io/sarkhans-claude-starter/icon.png">
-<link rel="icon" href="icon.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -42,7 +44,7 @@
 
   nav.top { display: flex; align-items: center; justify-content: space-between; height: 80px; }
   .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; }
-  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  .brand img { width: 40px; height: 40px; margin: -4px 0; }
   .navlinks { display: flex; gap: 28px; font-weight: 500; font-size: 15px; }
   .navlinks a { text-decoration: none; color: var(--slate); }
   .navlinks a:hover { color: var(--ink); }
@@ -150,7 +152,11 @@
   .mode-panel dt { color: var(--slate); }
   .mode-panel dd { margin: 0; font-weight: 600; }
 
-  .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: stretch; }
+  .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); align-items: stretch; margin-top: 40px; }
+  .team-title { font-size: 21px; letter-spacing: -0.02em; margin: 0 0 12px; }
+  .team-steps { margin: 0; padding-left: 22px; color: var(--slate); }
+  .team-steps li { margin-bottom: 8px; }
+  .team-steps a { color: var(--ink); }
   .team > div { display: flex; flex-direction: column; justify-content: center; }
   .team pre { margin: 0; display: flex; align-items: center; background: var(--plum); color: #ece6f8; border-radius: var(--radius-panel); padding: 28px; font: 400 14.5px/1.7 var(--mono); }
 
@@ -202,11 +208,12 @@
 <body>
 <div class="wrap">
   <nav class="top" aria-label="Main">
-    <a class="brand" href="#top"><img src="icon.png" alt="">Sarkhans Claude Starter</a>
+    <a class="brand" href="#top"><img src="logo.svg" alt="" width="40" height="40">Sarkhans Claude Starter</a>
     <div class="navlinks">
       <a href="#stops">What it stops</a>
       <a href="#modes">Work modes</a>
       <a href="#choose">Plugin or app</a>
+      <a href="#team">For teams</a>
       <a href="#install">Install</a>
       <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter">GitHub</a>
     </div>
@@ -412,16 +419,41 @@
 </section>
 
 <section id="team">
-  <div class="wrap team">
-    <div>
-      <h2>One set of rules for the whole team</h2>
-      <p class="intro" style="margin-bottom:0">Keep your team's rules in one shared folder, such as a git repository, and point the app at it under Settings, Team rules. Every project gets the rules and updates itself when they change.</p>
+  <div class="wrap">
+    <h2>Made for teams</h2>
+    <p class="intro">Give everyone on your team the same checks and the same way of working with Claude, and share your own conventions from one place.</p>
+    <div class="columns">
+      <div class="column">
+        <h3>One set of rules</h3>
+        <p class="kind">Shared from one folder</p>
+        <p>Keep your conventions in a shared folder, such as a git repository. Every project of every teammate gets them and updates itself when they change.</p>
+      </div>
+      <div class="column">
+        <h3>The same standards</h3>
+        <p class="kind">Set once for everyone</p>
+        <p>The team folder sets the default work mode, the language Claude explains things in and the skills each new project gets.</p>
+      </div>
+      <div class="column">
+        <h3>Mac and Windows together</h3>
+        <p class="kind">App or plugin</p>
+        <p>Mac users get the app, everyone else the plugin with the same guardrails. Shared team rules sync through the app.</p>
+      </div>
     </div>
-    <pre><code>team-rules/
+    <div class="team">
+      <div>
+        <h3 class="team-title">Set it up in two minutes</h3>
+        <ol class="team-steps">
+          <li>Copy the <a href="https://github.com/sarkhandigitech/sarkhans-claude-starter/tree/main/examples/team-rules">example folder</a> into a repository your team shares.</li>
+          <li>Write your rules as short Markdown files in rules/.</li>
+          <li>Each teammate opens Settings, Team rules, and picks the folder.</li>
+        </ol>
+      </div>
+      <pre><code>team-rules/
   team.json       name, default work mode, language
   rules/
     api.md        your API conventions
     naming.md     your naming rules</code></pre>
+    </div>
   </div>
 </section>
 
