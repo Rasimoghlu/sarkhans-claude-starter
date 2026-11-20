@@ -393,6 +393,7 @@ final class StarterModel: ObservableObject {
         case "all": return true
         case "frontend": return project.hasFrontend
         case "react": return project.usesReact
+        case "web": return project.hasFrontend || project.stacks.contains("Static site") || project.stacks.contains("PHP")
         default: return false
         }
     }

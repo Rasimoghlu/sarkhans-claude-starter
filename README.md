@@ -27,6 +27,7 @@ The app adds what the plugin can't: one-click setup for all your projects with t
 - **Work modes** per project (Lite / Standard / Strict) and a team of specialist agents for bigger work, with reviewers that keep project memory.
 - **Guardrail report**: the app shows what the rules stopped this week in each project.
 - **Security testing**: `/security-audit` reads the code for holes, `/pentest` attacks your running app on localhost or a staging server you name, proves each hole with a real request and turns it into a regression test. A hook keeps security tools away from every other host. For pull requests there's a ready [GitHub workflow](examples/github) with Anthropic's security review.
+- **Modern web know-how**: Google Chrome's [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) comes with every web project and with the plugin, so Claude looks up current HTML, CSS, accessibility, performance and security practice before writing UI code.
 - **Team rules**: share your team's conventions from one folder; choose a default team, or a different team per project. Works in the app and in the plugin.
 - Third-eye reports, design lock, database review, kickoff for new projects, and about 2,800 tokens of rules per session.
 

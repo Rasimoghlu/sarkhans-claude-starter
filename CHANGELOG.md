@@ -2,6 +2,11 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.10.0
+- **Modern Web Guidance by Google Chrome, on by default.** Every newly set-up web project (with a `package.json`, an `index.html` or a `composer.json`) gets Chrome's Modern Web Guidance skill: before writing UI code, Claude looks up current practice for accessibility, performance, security (CSP, sanitization, passkeys), forms, dialogs and layout, built with Firefox and Edge. In existing projects, turn it on under the project's skills.
+- The plugin now installs Modern Web Guidance together with itself.
+- `/ui-review` checks the code against these guides when they're installed.
+
 ## 4.9.0
 - **Pentest.** New `/pentest` skill: Claude tests your running app the way an attacker would (login, other users' data, admin rights, injection, XSS, SSRF, redirects, CSRF, rate limits, uploads, error pages, headers). A hole counts only with the real request and response that prove it, and each one becomes a failing test before it's fixed, after you agree. Findings go to `reports/pentest-<date>.md`.
 - **Safe by design.** A pentest reaches only your computer or a staging server you name. Security tools such as nmap, sqlmap, nuclei or ZAP are blocked against every other host, and the scope ends by itself after 2 hours.

@@ -127,6 +127,15 @@ echo "$context" | grep -q "Third eye" || fail "plugin session context lacks the 
 echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/fresh" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context | grep -q . && fail "plugin hooks ran in a project set up with the app"
 pass "plugin hooks"
 
+node -e '
+const catalog = require(process.argv[1]);
+const guidance = catalog.find((item) => item.id === "modern-web-guidance");
+if (!guidance || guidance.recommended !== "web" || guidance.repo !== "GoogleChrome/modern-web-guidance") process.exit(1);
+const plugin = require(process.argv[2]);
+if (!(plugin.dependencies || []).includes("modern-web-guidance")) process.exit(1);
+' "$ROOT/claude-web-starter/skills-catalog.json" "$PLUGIN/.claude-plugin/plugin.json" || fail "Modern Web Guidance is not on by default"
+pass "modern web guidance by default"
+
 node "$PLUGIN/scripts/team.mjs" use "$WORK/team" --project "$WORK/plain" >/dev/null
 context="$(echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/plain" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context)"
 echo "$context" | grep -q "TEAM RULES — CI team" || fail "plugin does not load the project's team rules"

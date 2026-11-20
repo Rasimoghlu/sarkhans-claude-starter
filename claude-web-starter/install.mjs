@@ -905,8 +905,10 @@ const recommendedNotes = [];
 if (freshInstall && !args.includes("--no-recommended")) {
   const deps = pkg ? { ...pkg.dependencies, ...pkg.devDependencies } : {};
   const usesReact = Boolean(deps.react || deps.next);
+  const servesWebPages = Boolean(pkg) || fileExists("index.html") || fileExists("composer.json");
   const wanted = catalog.filter((item) =>
     item.recommended === "all" || (item.recommended === "frontend" && Boolean(pkg)) || (item.recommended === "react" && usesReact)
+    || (item.recommended === "web" && servesWebPages)
     || (team?.skills || []).includes(item.id));
   for (const item of wanted) {
     try {

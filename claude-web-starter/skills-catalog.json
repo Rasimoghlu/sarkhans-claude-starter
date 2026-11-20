@@ -72,6 +72,17 @@
     "recommended": "react"
   },
   {
+    "id": "modern-web-guidance",
+    "type": "skill",
+    "category": "Frontend",
+    "name": "Modern Web Guidance (Google Chrome)",
+    "repo": "GoogleChrome/modern-web-guidance",
+    "skill": "modern-web-guidance",
+    "description": "Up-to-date web platform know-how from Google Chrome, with Firefox and Edge: accessibility, performance, security (CSP, sanitization, passkeys), forms, dialogs, layout and modern HTML/CSS instead of custom JavaScript. Claude looks up the right guide before writing UI code.",
+    "url": "https://github.com/GoogleChrome/modern-web-guidance",
+    "recommended": "web"
+  },
+  {
     "id": "playwright",
     "type": "mcp",
     "category": "MCP",
