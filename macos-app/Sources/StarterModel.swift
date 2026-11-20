@@ -40,8 +40,9 @@ final class StarterModel: ObservableObject {
     @Published private(set) var nodePath: String?
     @Published private(set) var gitAvailable = true
     @Published private(set) var claudeCodeAvailable = true
-    @Published private(set) var teamFolder: String?
-    @Published private(set) var teamName: String?
+    @Published private(set) var teams: [TeamInfo] = []
+    @Published private(set) var defaultTeamFolder: String?
+    @Published private(set) var projectTeams: [String: String] = [:]
     @Published private(set) var isInstallingNode = false
     @Published private(set) var starterVersion: String?
     @Published private(set) var isLoading = false
@@ -54,7 +55,7 @@ final class StarterModel: ObservableObject {
     @Published private(set) var updateStatus: String?
     @Published private(set) var isUpdating = false
     @Published private(set) var updatePhase = ""
-    @Published private(set) var currentRulesHash: String?
+    @Published private(set) var rulesHashes: RulesHashes?
     @Published var autoUpdateRules: Bool = UserDefaults.standard.object(forKey: "autoUpdateRules") as? Bool ?? true {
         didSet { UserDefaults.standard.set(autoUpdateRules, forKey: "autoUpdateRules") }
     }
@@ -130,8 +131,8 @@ final class StarterModel: ObservableObject {
         nodePath = await Task.detached(priority: .userInitiated) { NodeLocator.find() }.value
         gitAvailable = await Task.detached(priority: .userInitiated) { GitLocator.isAvailable() }.value
         claudeCodeAvailable = await Task.detached(priority: .userInitiated) { ClaudeCodeLocator.isAvailable() }.value
-        loadTeam()
-        currentRulesHash = await readRulesHash()
+        loadTeams()
+        rulesHashes = await readRulesHashes()
         refresh()
         if !didApplyInitialFilter {
             didApplyInitialFilter = true
@@ -147,14 +148,13 @@ final class StarterModel: ObservableObject {
         updateOutdatedRulesIfNeeded()
     }
 
-    private func readRulesHash() async -> String? {
+    private func readRulesHashes() async -> RulesHashes? {
         guard let node = nodePath, starterVersion != nil else { return nil }
         let result = await Shell.runAsync(node, [installerPath, "--rules-hash"], timeout: 20, extraPath: (node as NSString).deletingLastPathComponent)
         guard result.succeeded,
-              let line = result.output.split(separator: "\n").last?.trimmingCharacters(in: .whitespaces),
-              line.count == 16, line.allSatisfy(\.isHexDigit)
+              let line = result.output.split(separator: "\n").last(where: { $0.hasPrefix("{") })
         else { return nil }
-        return line
+        return try? JSONDecoder().decode(RulesHashes.self, from: Data(line.utf8))
     }
 
     private func updateOutdatedRulesIfNeeded() {
@@ -265,8 +265,8 @@ final class StarterModel: ObservableObject {
 
     func status(of project: Project) -> ProjectStatus {
         guard let installed = project.installedVersion else { return .notSetUp }
-        if let current = currentRulesHash, let installedHash = project.rulesHash {
-            return installedHash == current ? .ready : .updateAvailable
+        if let installedHash = project.rulesHash, let expected = rulesHashes?.expected(forTeam: teamFolder(for: project)) {
+            return installedHash == expected ? .ready : .updateAvailable
         }
         if let latest = starterVersion, Self.isOlder(installed, than: latest) { return .updateAvailable }
         return .ready
@@ -494,44 +494,154 @@ final class StarterModel: ObservableObject {
 
     private static let starterSettingsPath = NSHomeDirectory() + "/.claude-starter/settings.json"
 
-    func loadTeam() {
-        let folder = Self.readJSONObject(Self.starterSettingsPath)?["teamFolder"] as? String
-        teamFolder = folder
-        teamName = folder.map { (Self.readJSONObject($0 + "/team.json")?["name"] as? String) ?? ($0 as NSString).lastPathComponent }
+    func loadTeams() {
+        let settings = Self.readJSONObject(Self.starterSettingsPath) ?? [:]
+        let defaultFolder = settings["teamFolder"] as? String
+        var folders = settings["teams"] as? [String] ?? []
+        if let defaultFolder, !folders.contains(defaultFolder) { folders.append(defaultFolder) }
+        teams = folders.map { Self.teamInfo($0) }
+        defaultTeamFolder = defaultFolder
+        projectTeams = settings["projectTeams"] as? [String: String] ?? [:]
     }
 
-    func chooseTeamFolder() {
+    static func teamInfo(_ folder: String) -> TeamInfo {
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: folder, isDirectory: &isDirectory) && isDirectory.boolValue
+        let rules = ((try? FileManager.default.contentsOfDirectory(atPath: folder + "/rules")) ?? [])
+            .filter { $0.hasSuffix(".md") }
+            .sorted()
+        let name = readJSONObject(folder + "/team.json")?["name"] as? String ?? (folder as NSString).lastPathComponent
+        return TeamInfo(folder: folder, name: name, rules: rules, exists: exists)
+    }
+
+    var defaultTeam: TeamInfo? {
+        defaultTeamFolder.map { folder in teams.first { $0.folder == folder } ?? Self.teamInfo(folder) }
+    }
+
+    func teamSetting(for project: Project) -> String {
+        projectTeams[Self.canonicalPath(project.path)] ?? TeamSetting.followDefault
+    }
+
+    func teamFolder(for project: Project) -> String? {
+        switch teamSetting(for: project) {
+        case TeamSetting.followDefault: return defaultTeamFolder
+        case TeamSetting.noTeam: return nil
+        case let folder: return folder
+        }
+    }
+
+    func team(for project: Project) -> TeamInfo? {
+        teamFolder(for: project).map { folder in teams.first { $0.folder == folder } ?? Self.teamInfo(folder) }
+    }
+
+    func projectCount(using team: TeamInfo) -> Int {
+        projects.filter { $0.isInstalled && teamFolder(for: $0) == team.folder }.count
+    }
+
+    func setTeam(_ setting: String, for project: Project) {
+        guard project.isInstalled, !isRunning(project), teamSetting(for: project) != setting else { return }
+        let key = Self.canonicalPath(project.path)
+        let flags: [String]
+        switch setting {
+        case TeamSetting.followDefault:
+            projectTeams.removeValue(forKey: key)
+            flags = ["--default-team"]
+        case TeamSetting.noTeam:
+            projectTeams[key] = TeamSetting.noTeam
+            flags = ["--no-team"]
+        default:
+            projectTeams[key] = setting
+            flags = ["--team", setting]
+        }
+        enqueue([(project, [[project.path] + flags + ["--force"]])], kind: .setting) { "\($0.id)|team" }
+    }
+
+    func chooseTeamFolder(for project: Project) {
+        guard let folder = pickTeamFolder() else { return }
+        setTeam(folder, for: project)
+    }
+
+    func addTeam() {
+        guard let folder = pickTeamFolder() else { return }
+        Task {
+            guard await runTeamCommand(["--add-team", folder]) else { return }
+            let name = teams.first { $0.folder == folder }?.name ?? (folder as NSString).lastPathComponent
+            showNotice("Team “\(name)” added. Choose it in a project, or make it the default.", isError: false)
+        }
+    }
+
+    func makeDefault(_ team: TeamInfo) {
+        Task {
+            guard await runTeamCommand(["--set-team", team.folder]) else { return }
+            showNotice("“\(team.name)” is now the default team. Projects get its rules with their next update.", isError: false)
+        }
+    }
+
+    func clearDefaultTeam() {
+        Task {
+            guard await runTeamCommand(["--clear-team"]) else { return }
+            showNotice("No default team. Projects with their own team keep it.", isError: false)
+        }
+    }
+
+    func removeTeam(_ team: TeamInfo) {
+        let users = projectCount(using: team)
+        guard confirm(
+            title: "Remove “\(team.name)” from this Mac?",
+            message: users == 0
+                ? "The team folder itself isn’t touched. You can add it again any time."
+                : "\(users == 1 ? "1 project uses" : "\(users) projects use") this team. They switch to the default team with their next update. The team folder itself isn’t touched.",
+            action: "Remove"
+        ) else { return }
+        Task {
+            guard await runTeamCommand(["--remove-team", team.folder]) else { return }
+            showNotice("Team “\(team.name)” removed from this Mac", isError: false)
+        }
+    }
+
+    private func pickTeamFolder() -> String? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-        panel.prompt = "Use These Rules"
-        panel.message = "Choose the team rules folder (team.json and/or a rules folder with .md files)"
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        Task { await changeTeam(["--set-team", url.path]) }
+        panel.prompt = "Use This Team"
+        panel.message = "Choose your team’s rules folder: it holds a rules folder with .md files, a team.json, or both"
+        guard panel.runModal() == .OK, let url = panel.url else { return nil }
+        return Self.canonicalPath(url.path)
     }
 
-    func clearTeam() {
-        Task { await changeTeam(["--clear-team"]) }
-    }
-
-    private func changeTeam(_ arguments: [String]) async {
-        guard let node = nodePath else { return }
+    private func runTeamCommand(_ arguments: [String]) async -> Bool {
+        guard let node = nodePath else { return false }
         let result = await Shell.runAsync(node, [installerPath] + arguments, timeout: 20, extraPath: (node as NSString).deletingLastPathComponent)
         appendLog(title: "Team rules", result: result)
         guard result.succeeded else {
-            showNotice(result.output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").last ?? "Couldn’t use that folder", isError: true)
-            return
+            let message = result.output
+                .split(separator: "\n")
+                .last { $0.hasPrefix("✖") }
+                .map { String($0.dropFirst()).trimmingCharacters(in: .whitespaces) }
+            showNotice(message ?? "Couldn’t change team rules. See Activity for details.", isError: true)
+            return false
         }
-        loadTeam()
-        showNotice(teamName.map { "Team rules “\($0)” are on. Projects get them with their next update." } ?? "Team rules are off", isError: false)
         await refreshRulesHash()
+        return true
+    }
+
+    private var teamSignature: String {
+        ([defaultTeamFolder ?? ""] + projectTeams.keys.sorted().map { "\($0)=\(projectTeams[$0] ?? "")" }).joined(separator: "\n")
+    }
+
+    nonisolated static func canonicalPath(_ path: String) -> String {
+        guard let resolved = realpath(path, nil) else { return path }
+        defer { free(resolved) }
+        return String(cString: resolved)
     }
 
     func refreshRulesHash() async {
-        let latest = await readRulesHash()
-        guard latest != currentRulesHash else { return }
-        currentRulesHash = latest
+        let previousTeams = teamSignature
+        loadTeams()
+        let latest = await readRulesHashes()
+        guard latest != rulesHashes || teamSignature != previousTeams else { return }
+        rulesHashes = latest
         refresh()
         didAutoUpdateRules = false
         updateOutdatedRulesIfNeeded()
@@ -699,6 +809,9 @@ final class StarterModel: ObservableObject {
                     succeeded = result.succeeded
                 }
                 if let key = job.key { self.pendingKeys.remove(key) }
+                if job.key?.hasSuffix("|team") == true {
+                    await self.refreshRulesHash()
+                }
                 if job.batch.kind != .setting {
                     self.states[job.project.id] = succeeded ? .succeeded : .failed
                 } else if !succeeded {

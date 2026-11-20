@@ -18,6 +18,7 @@ struct ProjectDetailView: View {
                 }
                 if project.isInstalled {
                     claudeSection(project)
+                    teamSection(project)
                     protectionSection(project)
                     designSection(project)
                     SkillSections(project: project)
@@ -75,6 +76,54 @@ struct ProjectDetailView: View {
             parts.append("“Rules in every session” is what Claude reads before your first message; fewer tokens leave more room for your code.")
         }
         return parts.joined(separator: " ")
+    }
+
+    private func teamSection(_ project: Project) -> some View {
+        Section {
+            Picker("Team rules", selection: Binding(
+                get: { model.teamSetting(for: project) },
+                set: { model.setTeam($0, for: project) }
+            )) {
+                Text(model.defaultTeam.map { "Default team (\($0.name))" } ?? "Default team (none set)")
+                    .tag(TeamSetting.followDefault)
+                Text("No team").tag(TeamSetting.noTeam)
+                ForEach(model.teams) { Text($0.exists ? $0.name : "\($0.name) (folder not found)").tag($0.folder) }
+                if !model.teams.contains(where: { $0.folder == model.teamSetting(for: project) }),
+                   ![TeamSetting.followDefault, TeamSetting.noTeam].contains(model.teamSetting(for: project)) {
+                    Text((model.teamSetting(for: project) as NSString).lastPathComponent).tag(model.teamSetting(for: project))
+                }
+            }
+            .disabled(model.isRunning(project) || model.pendingKeys.contains("\(project.id)|team"))
+            if let team = model.team(for: project) {
+                LabeledContent("Rules from the team") {
+                    Text(team.exists ? (team.rules.isEmpty ? "None yet" : team.rules.joined(separator: ", ")) : "Folder not found")
+                        .foregroundStyle(team.exists ? Color.secondary : Color.orange)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+            Button("Use another team folder…") { model.chooseTeamFolder(for: project) }
+                .disabled(!model.canRun || model.isRunning(project))
+        } header: {
+            Text("Team")
+        } footer: {
+            Text(teamFooter(project))
+        }
+    }
+
+    private func teamFooter(_ project: Project) -> String {
+        if let team = model.team(for: project), !team.exists {
+            return "The folder \(team.folder) isn’t there any more. Pick another team, or choose No team."
+        }
+        switch model.teamSetting(for: project) {
+        case TeamSetting.followDefault:
+            return model.defaultTeam == nil
+                ? "No default team is set, so this project has no team rules. Add a team in Settings, or pick a folder here."
+                : "This project follows the default team from Settings. Pick another team to use it only here."
+        case TeamSetting.noTeam:
+            return "This project doesn’t use team rules, even when a default team is set."
+        default:
+            return "Only this project uses this team. Its rules are copied into .claude/rules/ as team-*.md and stay up to date."
+        }
     }
 
     private func protectionSection(_ project: Project) -> some View {

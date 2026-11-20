@@ -83,9 +83,39 @@ node "$INSTALLER" "$WORK/teamed" --force >/dev/null
 [ ! -f "$WORK/teamed/.claude/rules/team-style.md" ] || fail "team rule not removed after --clear-team"
 pass "team rules"
 
+mkdir -p "$WORK/team2/rules"
+echo "# Second team rule" > "$WORK/team2/rules/naming.md"
+node "$INSTALLER" --set-team "$WORK/team" >/dev/null
+node "$INSTALLER" --add-team "$WORK/team2" >/dev/null
+make_project own
+node "$INSTALLER" "$WORK/own" --no-recommended --team "$WORK/team2" >/dev/null
+[ -f "$WORK/own/.claude/rules/team-naming.md" ] && [ ! -f "$WORK/own/.claude/rules/team-style.md" ] || fail "project team not used instead of the default"
+node "$INSTALLER" "$WORK/teamed" --force >/dev/null
+[ -f "$WORK/teamed/.claude/rules/team-style.md" ] || fail "default team not used by a project without its own choice"
+node "$INSTALLER" "$WORK/own" --no-team --force >/dev/null
+ls "$WORK/own/.claude/rules" | grep -q '^team-' && fail "--no-team left team rules"
+node "$INSTALLER" "$WORK/own" --default-team --force >/dev/null
+[ -f "$WORK/own/.claude/rules/team-style.md" ] || fail "--default-team did not bring back the default team"
+hashes="$(node "$INSTALLER" --rules-hash)"
+expected="$(node -e 'const h=JSON.parse(process.argv[1]); console.log(h.base + "-" + h.teams[process.argv[2]])' "$hashes" "$(cd "$WORK/team" && pwd -P)")"
+[ "$(cat "$WORK/own/.claude/starter-hash")" = "$expected" ] || fail "project fingerprint does not match base-team hash"
+node "$INSTALLER" --teams | grep -q "CI team" || fail "--teams does not list the default team"
+node "$INSTALLER" --remove-team "$WORK/team2" >/dev/null
+node "$INSTALLER" --clear-team >/dev/null
+pass "team per project"
+
 PLUGIN="$ROOT/plugins/sarkhans-starter"
 make_project plain
 context="$(echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/plain" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context)"
 echo "$context" | grep -q "Third eye" || fail "plugin session context lacks the core rules"
 echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/fresh" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context | grep -q . && fail "plugin hooks ran in a project set up with the app"
 pass "plugin hooks"
+
+node "$PLUGIN/scripts/team.mjs" use "$WORK/team" --project "$WORK/plain" >/dev/null
+context="$(echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/plain" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context)"
+echo "$context" | grep -q "TEAM RULES — CI team" || fail "plugin does not load the project's team rules"
+echo "$context" | grep -q "MODE strict" || fail "plugin does not apply the team's preset"
+node "$PLUGIN/scripts/team.mjs" none --project "$WORK/plain" >/dev/null
+echo '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$WORK/plain" CLAUDE_PLUGIN_ROOT="$PLUGIN" node "$PLUGIN/hooks/plugin-hook.mjs" session-context | grep -q "TEAM RULES" && fail "plugin loads team rules after none"
+node "$PLUGIN/scripts/team.mjs" use --project "$WORK/plain" >/dev/null 2>&1 && fail "team use without a folder did not fail"
+pass "plugin team rules"

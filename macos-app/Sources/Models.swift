@@ -58,6 +58,34 @@ enum WorkMode: String, CaseIterable, Identifiable {
     }
 }
 
+struct TeamInfo: Identifiable, Hashable, Sendable {
+    let folder: String
+    let name: String
+    let rules: [String]
+    let exists: Bool
+
+    var id: String { folder }
+    var rulesSummary: String {
+        guard exists else { return "Folder not found" }
+        return rules.count == 1 ? "1 rule file" : "\(rules.count) rule files"
+    }
+}
+
+enum TeamSetting {
+    static let followDefault = "default"
+    static let noTeam = "none"
+}
+
+struct RulesHashes: Decodable, Equatable, Sendable {
+    let base: String
+    let teams: [String: String]
+
+    func expected(forTeam folder: String?) -> String? {
+        guard let folder else { return base }
+        return teams[folder].map { "\(base)-\($0)" }
+    }
+}
+
 struct CatalogItem: Decodable, Identifiable, Hashable, Sendable {
     let id: String
     let type: String

@@ -5,6 +5,7 @@ import { homedir, tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { detectOtherStacks, isStaticSite, commandText } from "./template/.claude/hooks/stacks.mjs";
+import { NO_TEAM, PRESETS, readStarterSettings, saveStarterSettings, canonical, readTeam, teamHash, knownTeamFolders, teamChoice, teamLabel, rememberTeam, chooseProjectTeam, describeTeam } from "./template/.claude/hooks/team.mjs";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -41,14 +42,22 @@ and your personal rules in ~/.claude (CLAUDE.md section + no AI attribution).
   --pick <name>          with --register-skill: which skill to take when the source has several
   --unregister-skill <id> remove one of your own skills from the catalog
   --rules-hash           print the fingerprint of the rules this starter installs
-  --set-team <folder>    share team rules: <folder>/team.json (name, preset, responseLanguage, skills) and <folder>/rules/*.md
-  --clear-team           stop using team rules`;
+
+Team rules (a folder with rules/*.md and an optional team.json: name, preset, responseLanguage, skills):
+  --teams                       show the teams on this computer and which projects use which
+  --set-team <folder>           default team: every project uses it unless it has its own choice
+  --clear-team                  no default team
+  --add-team <folder>           remember a team without making it the default
+  --remove-team <folder>        forget a team (the folder itself is not touched)
+  <project-dir> --team <folder> this project uses this team, then updates the project
+  <project-dir> --no-team       this project uses no team
+  <project-dir> --default-team  this project follows the default team again`;
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(USAGE);
   process.exit(0);
 }
-const FLAG_VALUES = new Set(["--set-team", "--add-skill", "--remove-skill", "--phase", "--design", "--language", "--preset", "--register-skill", "--pick", "--unregister-skill"]);
+const FLAG_VALUES = new Set(["--set-team", "--add-team", "--remove-team", "--team", "--add-skill", "--remove-skill", "--phase", "--design", "--language", "--preset", "--register-skill", "--pick", "--unregister-skill"]);
 const target = args.find((a, i) => !a.startsWith("--") && !FLAG_VALUES.has(args[i - 1]));
 
 const log = (s) => console.log(s);
@@ -104,46 +113,7 @@ function installGlobal() {
   log(notes.length ? `✔ Global: ${notes.join("; ")}` : "✔ Global: personal rules already up to date");
 }
 
-const STARTER_SETTINGS = join(homedir(), ".claude-starter", "settings.json");
-
-function readStarterSettings() {
-  try {
-    return JSON.parse(readFileSync(STARTER_SETTINGS, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function readTeam(folder) {
-  if (!folder || !existsSync(folder)) return null;
-  const rulesDir = join(folder, "rules");
-  const rules = existsSync(rulesDir) ? readdirSync(rulesDir).filter((file) => file.endsWith(".md")).sort() : [];
-  let manifest = {};
-  if (existsSync(join(folder, "team.json"))) {
-    try {
-      manifest = JSON.parse(readFileSync(join(folder, "team.json"), "utf8"));
-    } catch {
-      throw new Error(`${join(folder, "team.json")} is not valid JSON`);
-    }
-  } else if (!rules.length) {
-    return null;
-  }
-  return {
-    folder,
-    name: String(manifest.name || folder.split(/[\\/]/).pop()),
-    preset: manifest.preset,
-    responseLanguage: manifest.responseLanguage,
-    skills: Array.isArray(manifest.skills) ? manifest.skills.map(String) : [],
-    files: [...(existsSync(join(folder, "team.json")) ? ["team.json"] : []), ...rules.map((rule) => join("rules", rule))],
-    rules,
-  };
-}
-
-function currentTeam() {
-  return readTeam(readStarterSettings().teamFolder);
-}
-
-function rulesHash() {
+function baseRulesHash() {
   const hash = createHash("sha256");
   const sources = ["template", "packs", "global"]
     .flatMap((dir) => listFiles(join(here, dir)).map((file) => join(dir, file)))
@@ -154,45 +124,117 @@ function rulesHash() {
     hash.update(readFileSync(join(here, file)));
     hash.update("\0");
   }
-  const team = currentTeam();
-  for (const file of team?.files || []) {
-    hash.update(`team/${file.split("\\").join("/")}`);
-    hash.update("\0");
-    hash.update(readFileSync(join(team.folder, file)));
-    hash.update("\0");
-  }
   return hash.digest("hex").slice(0, 16);
 }
 
-if (args.includes("--set-team") || args.includes("--clear-team")) {
+function projectRulesHash(team) {
+  return team ? `${baseRulesHash()}-${teamHash(team)}` : baseRulesHash();
+}
+
+function loadTeamOrExit(value, flag) {
+  const folder = value && !value.startsWith("--") ? canonical(value.replace(/^~(?=$|[\\/])/, homedir())) : null;
+  let team = null;
+  try {
+    team = readTeam(folder);
+  } catch (error) {
+    console.error(`✖ ${error.message}`);
+    process.exit(1);
+  }
+  if (!team) {
+    console.error(`✖ ${folder ? `${folder} is not a team folder.` : `Use ${flag} <folder>.`} A team folder has a team.json, a rules/ folder with .md files, or both.`);
+    process.exit(1);
+  }
+  return team;
+}
+
+const TEAM_COMMANDS = ["--set-team", "--clear-team", "--add-team", "--remove-team", "--teams"];
+if (TEAM_COMMANDS.some((flag) => args.includes(flag))) {
   const settings = readStarterSettings();
+  const valueOf = (flag) => args[args.indexOf(flag) + 1];
+  if (args.includes("--teams")) {
+    const folders = knownTeamFolders(settings);
+    if (!folders.length) {
+      log("No teams on this computer yet. Add one with: node install.mjs --add-team <folder>");
+      process.exit(0);
+    }
+    log("Teams on this computer:");
+    for (const folder of folders) {
+      let team = null;
+      try {
+        team = readTeam(folder);
+      } catch {
+        team = null;
+      }
+      const label = team ? describeTeam(team) : "(folder not found or not a team folder)";
+      log(`  ${folder === settings.teamFolder ? "★" : " "} ${label}  ${folder}`);
+    }
+    log(settings.teamFolder ? "  ★ = default team: every project uses it unless it has its own choice." : "  No default team: projects use a team only when you choose one for them.");
+    const own = Object.entries(settings.projectTeams || {});
+    if (own.length) {
+      log("Projects with their own choice:");
+      for (const [project, folder] of own) log(`  ${project} → ${folder === NO_TEAM ? "no team" : folder}`);
+    }
+    process.exit(0);
+  }
   if (args.includes("--clear-team")) {
     delete settings.teamFolder;
-    log("✔ Team rules turned off. Projects drop them on their next update.");
+    log("✔ No default team any more. Projects with their own team keep it; the others drop team rules on their next update.");
+  } else if (args.includes("--remove-team")) {
+    const folder = canonical(String(valueOf("--remove-team") || "").replace(/^~(?=$|[\\/])/, homedir()));
+    if (!knownTeamFolders(settings).includes(folder)) {
+      console.error(`✖ ${folder} is not one of the teams on this computer. See them with: node install.mjs --teams`);
+      process.exit(1);
+    }
+    settings.teams = knownTeamFolders(settings).filter((known) => known !== folder);
+    if (settings.teamFolder === folder) delete settings.teamFolder;
+    const affected = Object.entries(settings.projectTeams || {}).filter(([, chosen]) => chosen === folder).map(([project]) => project);
+    for (const project of affected) delete settings.projectTeams[project];
+    log(`✔ Removed the team in ${folder} from this computer.${affected.length ? ` ${affected.length} project(s) that used it now follow the default team.` : ""} The folder itself is not touched.`);
   } else {
-    const value = args[args.indexOf("--set-team") + 1];
-    const folder = value && !value.startsWith("--") ? resolve(value) : null;
-    let team = null;
-    try {
-      team = readTeam(folder);
-    } catch (error) {
-      console.error(error.message);
-      process.exit(1);
+    const flag = args.includes("--set-team") ? "--set-team" : "--add-team";
+    const team = loadTeamOrExit(valueOf(flag), flag);
+    rememberTeam(settings, team.folder);
+    if (flag === "--set-team") {
+      settings.teamFolder = team.folder;
+      log(`✔ Default team: ${describeTeam(team)}. Every project uses it unless you choose another team for that project. Projects get it on their next update.`);
+    } else {
+      log(`✔ Added team ${describeTeam(team)}. Use it in a project with: node install.mjs <project> --team ${team.folder}`);
     }
-    if (!team) {
-      console.error("Use --set-team <folder>: the folder needs a team.json and/or a rules/ folder with .md files.");
-      process.exit(1);
-    }
-    settings.teamFolder = folder;
-    log(`✔ Team rules "${team.name}": ${team.rules.length} rule file(s)${team.preset ? `, default preset ${team.preset}` : ""}${team.skills.length ? `, skills ${team.skills.join(", ")}` : ""}. Projects get them on their next update.`);
   }
-  mkdirSync(dirname(STARTER_SETTINGS), { recursive: true });
-  writeFileSync(STARTER_SETTINGS, JSON.stringify(settings, null, 2) + "\n");
+  saveStarterSettings(settings);
   process.exit(0);
 }
 
+const PROJECT_TEAM_FLAGS = ["--team", "--no-team", "--default-team"];
+const projectTeamFlag = PROJECT_TEAM_FLAGS.find((flag) => args.includes(flag));
+if (projectTeamFlag && !target) {
+  console.error(`✖ ${projectTeamFlag} works on one project: node install.mjs <project> ${projectTeamFlag}${projectTeamFlag === "--team" ? " <folder>" : ""}. For every project at once use --set-team <folder>.`);
+  process.exit(1);
+}
+if (projectTeamFlag) {
+  const settings = readStarterSettings();
+  if (projectTeamFlag === "--team") {
+    const team = loadTeamOrExit(args[args.indexOf("--team") + 1], "--team");
+    rememberTeam(settings, team.folder);
+    chooseProjectTeam(settings, target, team.folder);
+  } else {
+    chooseProjectTeam(settings, target, projectTeamFlag === "--no-team" ? NO_TEAM : null);
+  }
+  saveStarterSettings(settings);
+}
+
 if (args.includes("--rules-hash")) {
-  console.log(rulesHash());
+  const settings = readStarterSettings();
+  const teams = {};
+  for (const folder of knownTeamFolders(settings)) {
+    try {
+      const team = readTeam(folder);
+      if (team) teams[folder] = teamHash(team);
+    } catch {
+      continue;
+    }
+  }
+  console.log(JSON.stringify({ base: baseRulesHash(), teams }));
   process.exit(0);
 }
 
@@ -538,11 +580,6 @@ const phaseFlag = args.includes("--phase") ? args[args.indexOf("--phase") + 1] :
 const designFlag = args.includes("--design") ? args[args.indexOf("--design") + 1] : null;
 const languageFlag = args.includes("--language") ? args[args.indexOf("--language") + 1] : null;
 const presetFlag = args.includes("--preset") ? args[args.indexOf("--preset") + 1] : null;
-const PRESETS = {
-  lite: { preset: "lite", orchestratorMode: "advisory", directEditMaxFiles: 3, reportMinChangedLines: 80, requireSubagentEvidence: false },
-  standard: { preset: "standard", orchestratorMode: "balanced", directEditMaxFiles: 3, reportMinChangedLines: 30, requireSubagentEvidence: true },
-  strict: { preset: "strict", orchestratorMode: "strict", directEditMaxFiles: 0, reportMinChangedLines: 0, requireSubagentEvidence: true },
-};
 if (presetFlag && !PRESETS[presetFlag]) {
   console.error("Use --preset lite|standard|strict");
   process.exit(1);
@@ -555,7 +592,7 @@ if ((phaseFlag && !["new", "existing"].includes(phaseFlag)) || (designFlag && ![
   console.error("Use --phase new|existing and --design locked|open");
   process.exit(1);
 }
-const settingsOnly = (phaseFlag || designFlag || languageFlag || presetFlag) && existsSync(join(resolve(target || "."), ".claude", "hooks", "config.json")) && !force;
+const settingsOnly = !projectTeamFlag && (phaseFlag || designFlag || languageFlag || presetFlag) && existsSync(join(resolve(target || "."), ".claude", "hooks", "config.json")) && !force;
 if (settingsOnly) {
   const settings = {};
   if (phaseFlag) settings.projectPhase = phaseFlag;
@@ -817,9 +854,11 @@ for (const name of allPackRuleNames) {
 for (const obsolete of OBSOLETE_FILES) {
   if (existsSync(join(root, ".claude", obsolete))) rmSync(join(root, ".claude", obsolete), { force: true });
 }
+const choice = teamChoice(readStarterSettings(), root);
 let team = null;
 try {
-  team = currentTeam();
+  team = readTeam(choice.folder);
+  if (choice.folder && !team) todo.push(`Team folder not found: ${choice.folder}. Check that it's still there, or pick another team for this project (--team <folder>, --no-team).`);
 } catch (error) {
   todo.push(`Team rules skipped: ${error.message}`);
 }
@@ -831,7 +870,7 @@ for (const existing of readdirSync(join(root, ".claude", "rules"))) {
   if (existing.startsWith("team-") && !teamRuleNames.has(existing)) rmSync(join(root, ".claude", "rules", existing), { force: true });
 }
 writeFileSync(join(root, ".claude", "starter-version"), VERSION + "\n");
-writeFileSync(join(root, ".claude", "starter-hash"), rulesHash() + "\n");
+writeFileSync(join(root, ".claude", "starter-hash"), projectRulesHash(team) + "\n");
 const projectConfigPath = join(root, ".claude", "hooks", "config.json");
 let phaseNote = "";
 try {
@@ -939,7 +978,7 @@ if (privateMode && hasGit) {
 }
 
 log(`\n✔ Claude starter v${VERSION} installed into ${root}${privateMode && hasGit ? " (private: hidden from git)" : ""}`);
-if (team) log(`  Team rules: ${team.name} (${team.rules.length} rule file${team.rules.length === 1 ? "" : "s"})`);
+if (team || choice.source === "project") log(`  Team rules: ${teamLabel(team, choice)}${team ? `, ${team.rules.length} rule file${team.rules.length === 1 ? "" : "s"}` : ""}`);
 if (withGlobal && !globalOnly) installGlobal();
 log(`  Stacks: ${stacks.join(", ")}`);
 if (phaseNote) log(`  Project ${phaseNote}`);

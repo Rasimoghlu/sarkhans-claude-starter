@@ -128,26 +128,34 @@ struct SettingsView: View {
                 Text("My skills")
             }
             Section {
-                if let folder = model.teamFolder {
-                    LabeledContent("Team", value: model.teamName ?? "")
-                    Text(folder)
-                        .font(.caption)
+                if model.teams.isEmpty {
+                    Text("No teams yet. Add your team’s shared rules folder to use the same rules in your projects.")
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    HStack {
-                        Button("Change…") { model.chooseTeamFolder() }
-                        Button("Turn off") { model.clearTeam() }
+                } else {
+                    Picker("Default team", selection: Binding(
+                        get: { model.defaultTeamFolder ?? TeamSetting.noTeam },
+                        set: { folder in
+                            if folder == TeamSetting.noTeam {
+                                model.clearDefaultTeam()
+                            } else if let team = model.teams.first(where: { $0.folder == folder }) {
+                                model.makeDefault(team)
+                            }
+                        }
+                    )) {
+                        Text("None").tag(TeamSetting.noTeam)
+                        ForEach(model.teams) { Text($0.exists ? $0.name : "\($0.name) (folder not found)").tag($0.folder) }
                     }
                     .disabled(!model.canRun)
-                } else {
-                    Button("Use team rules…") { model.chooseTeamFolder() }
-                        .disabled(!model.canRun)
+                    ForEach(model.teams) { team in
+                        TeamRow(team: team)
+                    }
                 }
+                Button("Add team…") { model.addTeam() }
+                    .disabled(!model.canRun)
             } header: {
                 Text("Team rules")
             } footer: {
-                Text("Share one folder with your team (a git repository or a synced folder) holding rules/*.md and an optional team.json with name, preset, responseLanguage and skills. Every set-up project gets the rules; when they change, projects update automatically.")
+                Text("A team is a shared folder, such as a git repository, with your conventions as .md files in rules/ and an optional team.json (name, work mode, language, skills). The default team goes to every project; in a project’s page you can pick another team or none. When the folder changes, projects update by themselves.")
             }
             Section {
                 LabeledContent("Version", value: AppInfo.version)
@@ -277,5 +285,47 @@ struct UpdateSheet: View {
         }
         .padding(22)
         .frame(width: 560)
+    }
+}
+
+@MainActor
+struct TeamRow: View {
+    @EnvironmentObject private var model: StarterModel
+    let team: TeamInfo
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(team.name)
+                    if team.folder == model.defaultTeamFolder {
+                        Text("Default")
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Color.accentColor.opacity(0.15), in: Capsule())
+                    }
+                }
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(team.exists ? Color.secondary : Color.orange)
+                Text(team.folder)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            Spacer()
+            Button("Show") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: team.folder)]) }
+                .disabled(!team.exists)
+            Button("Remove…") { model.removeTeam(team) }
+                .disabled(!model.canRun)
+        }
+    }
+
+    private var detail: String {
+        let users = model.projectCount(using: team)
+        let usage = users == 0 ? "not used yet" : users == 1 ? "used by 1 project" : "used by \(users) projects"
+        return "\(team.rulesSummary) · \(usage)"
     }
 }

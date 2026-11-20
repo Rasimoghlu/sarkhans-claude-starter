@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
 import { join, resolve, relative, isAbsolute, sep, basename } from "node:path";
 import { spawnSync } from "node:child_process";
+import { teamDefaults, teamForProject } from "./team.mjs";
 
 export const projectDir = resolve(process.env.CLAUDE_PROJECT_DIR || process.cwd());
 
@@ -36,7 +37,7 @@ const DEFAULT_CONFIG = {
 
 export function loadConfig() {
   const file = join(projectDir, ".claude", "hooks", "config.json");
-  if (!existsSync(file)) return { ...DEFAULT_CONFIG };
+  if (!existsSync(file)) return { ...DEFAULT_CONFIG, ...(process.env.STARTER_HOOK_NAME ? teamDefaults(teamForProject(projectDir).team) : {}) };
   try {
     return { ...DEFAULT_CONFIG, ...JSON.parse(readFileSync(file, "utf8")) };
   } catch {
