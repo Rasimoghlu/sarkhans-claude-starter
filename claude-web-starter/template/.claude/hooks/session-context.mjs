@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { readInput, loadConfig, projectDir, currentBranch, detectStacks, dockerSettings } from "./lib.mjs";
 
@@ -7,9 +7,18 @@ const config = loadConfig();
 
 const branch = currentBranch();
 const onProtected = (config.protectedBranches || ["main", "master"]).includes(branch);
+const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || "";
+const pluginMode = Boolean(pluginRoot) && !existsSync(join(projectDir, ".claude", "rules", "core.md"));
+function pluginVersion() {
+  try {
+    return JSON.parse(readFileSync(join(pluginRoot, ".claude-plugin", "plugin.json"), "utf8")).version || "?";
+  } catch {
+    return "?";
+  }
+}
 const version = existsSync(join(projectDir, ".claude", "starter-version"))
   ? readFileSync(join(projectDir, ".claude", "starter-version"), "utf8").trim()
-  : "?";
+  : pluginMode ? pluginVersion() : "?";
 
 const stacks = detectStacks();
 function phaseLines() {
@@ -31,11 +40,24 @@ const MODES = {
 };
 const mode = config.orchestratorMode || "balanced";
 const lines = [
-  `Starter v${version} active (stacks: ${stacks.join(", ") || "none detected"}). Rules: CLAUDE.md and .claude/rules/.`,
+  `Starter v${version} active (stacks: ${stacks.join(", ") || "none detected"}). Rules: ${pluginMode ? "below" : "CLAUDE.md and .claude/rules/"}.`,
   `LANGUAGE: write everything for the user in ${config.responseLanguage || "English"}; code, commits, branches, PR text and report headings stay in English.`,
   MODES[mode] || MODES.balanced,
   ...phaseLines(),
 ];
+
+if (pluginMode) {
+  const rulesDir = join(pluginRoot, "rules");
+  const core = readFileSync(join(rulesDir, "core.md"), "utf8").replace(/^---[\s\S]*?---\n/, "");
+  const detailed = readdirSync(rulesDir).filter((file) => file.endsWith(".md") && file !== "core.md").join(", ");
+  lines.push(
+    "",
+    core.trim(),
+    "",
+    `Detailed rules live in ${rulesDir}/ (${detailed}). Before editing a kind of file, read the matching ones: code-quality.md and testing.md for any code, security.md for servers and input handling, database.md for schema changes, design-policy.md and styling-and-a11y.md for UI, and the stack file for the language.`,
+    "Skills of this plugin are namespaced: /sarkhans-starter:<name> (for example /sarkhans-starter:verify).",
+  );
+}
 
 const docker = dockerSettings();
 if (docker) {

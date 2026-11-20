@@ -40,13 +40,15 @@ and your personal rules in ~/.claude (CLAUDE.md section + no AI attribution).
   --register-skill <src> add your own skill to the catalog (GitHub owner/repo, GitHub URL or local folder)
   --pick <name>          with --register-skill: which skill to take when the source has several
   --unregister-skill <id> remove one of your own skills from the catalog
-  --rules-hash           print the fingerprint of the rules this starter installs`;
+  --rules-hash           print the fingerprint of the rules this starter installs
+  --set-team <folder>    share team rules: <folder>/team.json (name, preset, responseLanguage, skills) and <folder>/rules/*.md
+  --clear-team           stop using team rules`;
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(USAGE);
   process.exit(0);
 }
-const FLAG_VALUES = new Set(["--add-skill", "--remove-skill", "--phase", "--design", "--language", "--preset", "--register-skill", "--pick", "--unregister-skill"]);
+const FLAG_VALUES = new Set(["--set-team", "--add-skill", "--remove-skill", "--phase", "--design", "--language", "--preset", "--register-skill", "--pick", "--unregister-skill"]);
 const target = args.find((a, i) => !a.startsWith("--") && !FLAG_VALUES.has(args[i - 1]));
 
 const log = (s) => console.log(s);
@@ -102,6 +104,45 @@ function installGlobal() {
   log(notes.length ? `✔ Global: ${notes.join("; ")}` : "✔ Global: personal rules already up to date");
 }
 
+const STARTER_SETTINGS = join(homedir(), ".claude-starter", "settings.json");
+
+function readStarterSettings() {
+  try {
+    return JSON.parse(readFileSync(STARTER_SETTINGS, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function readTeam(folder) {
+  if (!folder || !existsSync(folder)) return null;
+  const rulesDir = join(folder, "rules");
+  const rules = existsSync(rulesDir) ? readdirSync(rulesDir).filter((file) => file.endsWith(".md")).sort() : [];
+  let manifest = {};
+  if (existsSync(join(folder, "team.json"))) {
+    try {
+      manifest = JSON.parse(readFileSync(join(folder, "team.json"), "utf8"));
+    } catch {
+      throw new Error(`${join(folder, "team.json")} is not valid JSON`);
+    }
+  } else if (!rules.length) {
+    return null;
+  }
+  return {
+    folder,
+    name: String(manifest.name || folder.split(/[\\/]/).pop()),
+    preset: manifest.preset,
+    responseLanguage: manifest.responseLanguage,
+    skills: Array.isArray(manifest.skills) ? manifest.skills.map(String) : [],
+    files: [...(existsSync(join(folder, "team.json")) ? ["team.json"] : []), ...rules.map((rule) => join("rules", rule))],
+    rules,
+  };
+}
+
+function currentTeam() {
+  return readTeam(readStarterSettings().teamFolder);
+}
+
 function rulesHash() {
   const hash = createHash("sha256");
   const sources = ["template", "packs", "global"]
@@ -113,7 +154,41 @@ function rulesHash() {
     hash.update(readFileSync(join(here, file)));
     hash.update("\0");
   }
+  const team = currentTeam();
+  for (const file of team?.files || []) {
+    hash.update(`team/${file.split("\\").join("/")}`);
+    hash.update("\0");
+    hash.update(readFileSync(join(team.folder, file)));
+    hash.update("\0");
+  }
   return hash.digest("hex").slice(0, 16);
+}
+
+if (args.includes("--set-team") || args.includes("--clear-team")) {
+  const settings = readStarterSettings();
+  if (args.includes("--clear-team")) {
+    delete settings.teamFolder;
+    log("✔ Team rules turned off. Projects drop them on their next update.");
+  } else {
+    const value = args[args.indexOf("--set-team") + 1];
+    const folder = value && !value.startsWith("--") ? resolve(value) : null;
+    let team = null;
+    try {
+      team = readTeam(folder);
+    } catch (error) {
+      console.error(error.message);
+      process.exit(1);
+    }
+    if (!team) {
+      console.error("Use --set-team <folder>: the folder needs a team.json and/or a rules/ folder with .md files.");
+      process.exit(1);
+    }
+    settings.teamFolder = folder;
+    log(`✔ Team rules "${team.name}": ${team.rules.length} rule file(s)${team.preset ? `, default preset ${team.preset}` : ""}${team.skills.length ? `, skills ${team.skills.join(", ")}` : ""}. Projects get them on their next update.`);
+  }
+  mkdirSync(dirname(STARTER_SETTINGS), { recursive: true });
+  writeFileSync(STARTER_SETTINGS, JSON.stringify(settings, null, 2) + "\n");
+  process.exit(0);
 }
 
 if (args.includes("--rules-hash")) {
@@ -164,7 +239,8 @@ function runUninstall() {
   const claudeDir = join(root, ".claude");
   const packRules = ["node", "go", "php", "python", "docker"].flatMap((stack) => listFiles(join(here, "packs", stack, "rules")).map((f) => join("rules", f)));
   const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "starter-hash", ...OBSOLETE_FILES])];
-  const removed = managed.filter((file) => existsSync(join(claudeDir, file)));
+  const teamRules = existsSync(join(claudeDir, "rules")) ? readdirSync(join(claudeDir, "rules")).filter((file) => file.startsWith("team-")).map((file) => join("rules", file)) : [];
+  const removed = [...managed, ...teamRules].filter((file) => existsSync(join(claudeDir, file)));
   removed.forEach((file) => rmSync(join(claudeDir, file), { force: true }));
   for (const id of installedCatalogIds(root)) {
     const item = catalog.find((entry) => entry.id === id);
@@ -741,6 +817,19 @@ for (const name of allPackRuleNames) {
 for (const obsolete of OBSOLETE_FILES) {
   if (existsSync(join(root, ".claude", obsolete))) rmSync(join(root, ".claude", obsolete), { force: true });
 }
+let team = null;
+try {
+  team = currentTeam();
+} catch (error) {
+  todo.push(`Team rules skipped: ${error.message}`);
+}
+const teamRuleNames = new Set((team?.rules || []).map((rule) => `team-${rule}`));
+for (const rule of team?.rules || []) {
+  copyFileSync(join(team.folder, "rules", rule), join(root, ".claude", "rules", `team-${rule}`));
+}
+for (const existing of readdirSync(join(root, ".claude", "rules"))) {
+  if (existing.startsWith("team-") && !teamRuleNames.has(existing)) rmSync(join(root, ".claude", "rules", existing), { force: true });
+}
 writeFileSync(join(root, ".claude", "starter-version"), VERSION + "\n");
 writeFileSync(join(root, ".claude", "starter-hash"), rulesHash() + "\n");
 const projectConfigPath = join(root, ".claude", "hooks", "config.json");
@@ -749,8 +838,12 @@ try {
   const templateConfig = JSON.parse(readFileSync(projectConfigPath, "utf8"));
   const projectConfig = { ...templateConfig, ...(previousConfig || {}) };
   if (presetFlag) Object.assign(projectConfig, PRESETS[presetFlag]);
+  else if (!previousConfig && PRESETS[team?.preset]) Object.assign(projectConfig, PRESETS[team.preset]);
   else if (previousConfig && !previousConfig.preset) Object.assign(projectConfig, previousConfig.orchestratorMode === "advisory" ? PRESETS.lite : PRESETS.standard);
   if (languageFlag) projectConfig.responseLanguage = languageFlag;
+  else if (!previousConfig && team?.responseLanguage) projectConfig.responseLanguage = String(team.responseLanguage);
+  if (team) projectConfig.team = team.name;
+  else delete projectConfig.team;
   if (!projectConfig.responseLanguage) projectConfig.responseLanguage = "English";
   if (!previousConfig?.projectPhase || phaseFlag) {
     const detected = detectPhase();
@@ -773,8 +866,9 @@ const recommendedNotes = [];
 if (freshInstall && !args.includes("--no-recommended")) {
   const deps = pkg ? { ...pkg.dependencies, ...pkg.devDependencies } : {};
   const usesReact = Boolean(deps.react || deps.next);
-  const wanted = builtinCatalog.filter((item) =>
-    item.recommended === "all" || (item.recommended === "frontend" && Boolean(pkg)) || (item.recommended === "react" && usesReact));
+  const wanted = catalog.filter((item) =>
+    item.recommended === "all" || (item.recommended === "frontend" && Boolean(pkg)) || (item.recommended === "react" && usesReact)
+    || (team?.skills || []).includes(item.id));
   for (const item of wanted) {
     try {
       addCatalogItem(root, item);
@@ -845,6 +939,7 @@ if (privateMode && hasGit) {
 }
 
 log(`\n✔ Claude starter v${VERSION} installed into ${root}${privateMode && hasGit ? " (private: hidden from git)" : ""}`);
+if (team) log(`  Team rules: ${team.name} (${team.rules.length} rule file${team.rules.length === 1 ? "" : "s"})`);
 if (withGlobal && !globalOnly) installGlobal();
 log(`  Stacks: ${stacks.join(", ")}`);
 if (phaseNote) log(`  Project ${phaseNote}`);
