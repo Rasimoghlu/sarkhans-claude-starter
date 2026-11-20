@@ -1253,10 +1253,12 @@ final class StarterModel: ObservableObject {
         var isDirectory: ObjCBool = false
         guard fileManager.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue else { return nil }
 
-        let stacks = Self.stackMarkers
-            .filter { marker in marker.files.contains { self.fileManager.fileExists(atPath: path + "/" + $0) } }
+        guard !Self.ignoredFolders.contains(name), !name.hasSuffix(".app") else { return nil }
+        let entries = Set((try? fileManager.contentsOfDirectory(atPath: path)) ?? [])
+        let detected = Self.stackMarkers
+            .filter { marker in marker.files.contains { entries.contains($0) } || marker.extensions.contains { ext in entries.contains { $0.hasSuffix(ext) } } }
             .map { $0.label }
-        guard !stacks.isEmpty else { return nil }
+        let stacks = detected.isEmpty ? [entries.contains("index.html") ? "Static site" : "Other"] : detected
 
         let marker = Self.readTrimmed(path + "/.claude/starter-version")
         let legacy = fileManager.fileExists(atPath: path + "/.claude/hooks/guard-bash.mjs") ? "1.0" : nil
@@ -1286,12 +1288,21 @@ final class StarterModel: ObservableObject {
         log += "\(mark) \(title)\n\(output)\n\n"
     }
 
-    private static let stackMarkers: [(label: String, files: [String])] = [
-        ("PHP", ["composer.json"]),
-        ("Go", ["go.mod"]),
-        ("Python", ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile", "manage.py"]),
-        ("Node", ["package.json"]),
+    private static let stackMarkers: [(label: String, files: [String], extensions: [String])] = [
+        ("PHP", ["composer.json"], []),
+        ("Go", ["go.mod"], []),
+        ("Python", ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile", "manage.py"], []),
+        ("Node", ["package.json"], []),
+        ("Rust", ["Cargo.toml"], []),
+        ("Java", ["pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"], []),
+        (".NET", [], [".sln", ".csproj", ".fsproj"]),
+        ("Ruby", ["Gemfile"], []),
+        ("Dart", ["pubspec.yaml"], []),
+        ("Swift", ["Package.swift"], [".xcodeproj", ".xcworkspace"]),
+        ("Docker", ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"], []),
     ]
+
+    private static let ignoredFolders: Set<String> = ["node_modules", "vendor", "__pycache__", "venv", ".venv"]
 
     private static func nameList(_ targets: [Project]) -> String {
         let names = targets.prefix(12).map { "• \($0.name)" }
@@ -1721,7 +1732,7 @@ struct SidebarEmptyState: View {
 
     private var message: String {
         if model.projects.isEmpty {
-            return "A project is a folder with package.json, go.mod, composer.json or pyproject.toml."
+            return "Choose the folder that contains your projects. Every folder inside it is listed."
         }
         if !model.searchText.isEmpty { return "No project name contains “\(model.searchText)”." }
         return model.filter == .needsSetup

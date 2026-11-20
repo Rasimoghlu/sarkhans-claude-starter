@@ -8,6 +8,18 @@ paths:
   - "**/*.php"
   - "**/*.py"
   - "**/*.sql"
+  - "**/*.rs"
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.cs"
+  - "**/*.swift"
+  - "**/*.dart"
+  - "**/*.rb"
+  - "**/*.scala"
+  - "**/*.c"
+  - "**/*.cpp"
+  - "**/*.h"
+  - "**/*.hpp"
 ---
 # Performance rules (all languages)
 
