@@ -55,6 +55,8 @@
   .btn-amber:hover { background: #f5b257; }
 
   .hero { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center; padding: 48px 0 72px; }
+  h1, h2, h3, summary { text-wrap: balance; }
+  p, li, dd { text-wrap: pretty; }
   h1 { font-size: clamp(42px, 5.4vw, 68px); line-height: 1; letter-spacing: -0.04em; font-weight: 800; margin: 0 0 24px; }
   h1 span { display: block; color: var(--slate); font-weight: 600; }
   .lead { font-size: 20px; line-height: 1.5; color: var(--slate); max-width: 38ch; margin: 0; }
@@ -83,17 +85,17 @@
   }
   @keyframes appear { to { opacity: 1; transform: none; } }
 
-  .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); padding-bottom: 96px; }
+  .options { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--gap); padding-bottom: 96px; }
   .option { display: flex; flex-direction: column; background: var(--white); border-radius: var(--radius-panel); box-shadow: 0 0 0 1px var(--line); padding: 28px; }
   .option h2 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 6px; max-width: none; }
   .option > p { color: var(--slate); margin: 0 0 20px; }
   .option > p a { color: var(--ink); }
   .option .body { flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; }
   .option .actions { display: flex; align-items: center; gap: 16px; }
-  .commands { margin: 0; background: var(--plum); color: #ece6f8; border-radius: var(--radius-control); padding: 16px 18px; font: 400 13.5px/1.6 var(--mono); }
-  .commands code { white-space: normal; }
-  .commands span { display: block; padding-left: 2ch; text-indent: -2ch; overflow-wrap: anywhere; }
-  .commands span + span { margin-top: 6px; }
+  .option .actions .hint { color: var(--slate); font-size: 15px; white-space: nowrap; }
+  .option .actions .hint a { color: var(--ink); }
+  .commands { margin: 0; background: var(--plum); color: #ece6f8; border-radius: var(--radius-control); padding: 16px 18px; font: 400 13px/1.7 var(--mono); white-space: pre; overflow-x: auto; }
+  .commands span { display: block; }
   .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .facts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: var(--ink); }
   .facts li::before { content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--amber); }
@@ -123,6 +125,15 @@
   .column ol { padding-left: 20px; margin: 0 0 12px; }
   .column ol li { margin-bottom: 4px; }
   .step { display: block; font-size: 15px; font-weight: 700; color: var(--amber-deep); margin-bottom: 4px; }
+  .film { position: relative; margin: 0 0 48px; border-radius: var(--radius-panel); overflow: hidden; background: #0e1a2e; box-shadow: 0 40px 80px -40px rgba(14,26,46,.6); aspect-ratio: 16 / 9; }
+  .film img, .film video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .film .start { position: absolute; left: 5%; bottom: 36%; display: inline-flex; align-items: center; gap: 12px; height: var(--control-height); padding: 0 26px 0 20px; border: 0; border-radius: var(--radius-control); background: var(--amber); color: var(--ink); font: 700 17px var(--sans); cursor: pointer; box-shadow: 0 16px 40px -12px rgba(0,0,0,.5); }
+  .film .start:hover { background: #f5b257; }
+  .film .start svg { width: 22px; height: 22px; }
+  .film .controls { position: absolute; right: 20px; bottom: 20px; display: flex; gap: 8px; }
+  .film .controls[hidden] { display: none; }
+  .film .controls button { height: 40px; min-width: 112px; padding: 0 16px; border: 0; border-radius: var(--radius-control); background: rgba(14,26,46,.72); color: #fff; font: 600 14px var(--sans); cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .film .controls button:hover { background: rgba(14,26,46,.9); }
   .note { margin: 32px 0 0; padding: 18px 24px; border-left: 4px solid var(--amber); background: var(--white); border-radius: 0 var(--radius-control) var(--radius-control) 0; color: var(--slate); }
   .note strong { color: var(--ink); }
 
@@ -161,6 +172,14 @@
   footer a { text-decoration: none; }
   footer a:hover { color: var(--ink); }
 
+  @media (max-width: 1100px) {
+    .options { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .commands { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; }
+    .commands span { padding-left: 2ch; text-indent: -2ch; }
+    .option .actions .hint { white-space: normal; }
+  }
   @media (max-width: 920px) {
     .hero, .options, .modes, .team { grid-template-columns: 1fr; gap: var(--gap); }
     .hero { gap: 40px; }
@@ -176,6 +195,7 @@
     .table th, .table td { display: block; padding: 2px 0; border: 0; width: auto !important; }
     .compare td::before { content: attr(data-label) ": "; color: var(--slate); }
     .option .actions { flex-direction: column; align-items: stretch; }
+    .film .start { left: 50%; bottom: 16px; transform: translateX(-50%); white-space: nowrap; }
   }
 </style>
 </head>
@@ -201,24 +221,24 @@
       <header><span>your-project</span><span>guardrails on</span></header>
       <div class="event">
         <div class="tried">Claude runs <b>git push origin main</b></div>
-        <div class="stop"><i>Stopped</i><span>Never push to main. Push the feature branch and open a PR.</span></div>
+        <div class="stop"><i>Stopped</i><span>Never push to main. Use a branch and a PR.</span></div>
       </div>
       <div class="event">
         <div class="tried">Claude writes <b>import pad from "left-pad"</b></div>
-        <div class="stop"><i>Stopped</i><span>"left-pad" isn't in package.json. Check the real name, never guess.</span></div>
+        <div class="stop"><i>Stopped</i><span>left-pad isn't installed. Never guess.</span></div>
       </div>
       <div class="event">
         <div class="tried">Claude opens <b>.env</b></div>
-        <div class="stop"><i>Stopped</i><span>May contain secrets. Read .env.example instead.</span></div>
+        <div class="stop"><i>Stopped</i><span>May hold secrets. Use .env.example.</span></div>
       </div>
-      <div class="report"><strong>Third eye</strong><br>Fixed: unhandled promise in api/orders.ts:42<br>Not fixed: N+1 query on the reports page, needs your OK</div>
+      <div class="report"><strong>Third eye</strong><br>Fixed: unhandled promise, api/orders.ts:42<br>Open: N+1 query in reports, needs your OK</div>
     </div>
   </header>
 
   <div class="options" id="get">
     <div class="option">
       <h2>Claude Code plugin</h2>
-      <p>For Windows, Linux and macOS. Run these two commands in a terminal, then start Claude Code. Skills are named like /sarkhans-starter:verify.</p>
+      <p>For Windows, Linux and macOS. Run these two commands in a terminal.</p>
       <div class="body">
         <pre class="commands"><code><span>claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter</span><span>claude plugin install sarkhans-starter@sarkhans-claude-starter</span></code></pre>
       </div>
@@ -227,16 +247,18 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M13 4H5a1 1 0 0 0-1 1v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span>Copy commands</span>
         </button>
+        <span class="hint">Then start Claude Code.</span>
       </div>
     </div>
     <div class="option">
       <h2>Mac app</h2>
-      <p>For macOS 13 or newer. Sets up every project from one window and updates itself. macOS asks you to <a href="#install">allow it once</a>.</p>
+      <p>For macOS 13 or newer, Apple Silicon and Intel.</p>
       <div class="body">
         <ul class="facts">
-          <li>One click for all your projects, with the right rules for each stack</li>
-          <li>Work mode per project, and shared team rules</li>
-          <li>A weekly report of what the guardrails stopped</li>
+          <li>One click for all your projects</li>
+          <li>Work mode per project</li>
+          <li>Shared team rules</li>
+          <li>Weekly report of what was stopped</li>
         </ul>
       </div>
       <div class="actions">
@@ -244,6 +266,7 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v10m0 0 4-4m-4 4-4-4M4 16h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Download for Mac
         </a>
+        <span class="hint"><a href="#install">How to install</a></span>
       </div>
     </div>
   </div>
@@ -351,6 +374,17 @@
   <div class="wrap">
     <h2>Install the Mac app</h2>
     <p class="intro">You'll need Claude Code with a Claude Pro, Max, Team or Enterprise plan. The app installs Claude Code, Node.js and Git for you if they're missing.</p>
+    <figure class="film" id="film">
+      <img class="poster" src="media/install-poster.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1080">
+      <button class="start" type="button" id="film-start">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        <span>Watch the 15-second install</span>
+      </button>
+      <div class="controls" hidden>
+        <button type="button" id="film-play">Pause</button>
+        <button type="button" id="film-sound">Sound on</button>
+      </div>
+    </figure>
     <div class="columns">
       <div class="column">
         <span class="step">Step 1</span>
@@ -361,11 +395,11 @@
         <span class="step">Step 2</span>
         <h3>Allow it once</h3>
         <ol>
-          <li>Double-click the app, then click Done.</li>
-          <li>Open System Settings, then Privacy &amp; Security.</li>
-          <li>Under Security, click Open Anyway twice and confirm.</li>
+          <li>Open the app, press Done.</li>
+          <li>Go to Privacy &amp; Security.</li>
+          <li>Press Open Anyway twice.</li>
         </ol>
-        <p>On macOS 13 and 14: right-click the app, choose Open, then Open.</p>
+        <p>macOS 13 or 14: right-click, then Open.</p>
       </div>
       <div class="column">
         <span class="step">Step 3</span>
@@ -430,6 +464,35 @@
 </div>
 
 <script>
+  const filmFrame = document.getElementById("film");
+  const startButton = document.getElementById("film-start");
+  const filmControls = filmFrame.querySelector(".controls");
+  const playButton = document.getElementById("film-play");
+  const soundButton = document.getElementById("film-sound");
+  let film = null;
+  const syncButtons = () => {
+    playButton.textContent = film.paused ? "Play" : "Pause";
+    soundButton.textContent = film.muted ? "Sound on" : "Sound off";
+  };
+  startButton.addEventListener("click", () => {
+    film = document.createElement("video");
+    film.src = "media/install.mp4";
+    film.poster = "media/install-poster.jpg";
+    film.playsInline = true;
+    film.loop = true;
+    film.setAttribute("aria-label", "Fifteen-second film: drag the app into Applications, press Done, open Privacy and Security, press Open Anyway twice, and the app is ready.");
+    for (const event of ["play", "pause", "volumechange"]) film.addEventListener(event, syncButtons);
+    filmFrame.insertBefore(film, filmControls);
+    startButton.remove();
+    filmControls.hidden = false;
+    film.play().catch(syncButtons);
+    playButton.focus();
+  });
+  playButton.addEventListener("click", () => { if (film.paused) film.play(); else film.pause(); });
+  soundButton.addEventListener("click", () => {
+    film.muted = !film.muted;
+    if (!film.muted && film.paused) film.play();
+  });
   const commands = "claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter\nclaude plugin install sarkhans-starter@sarkhans-claude-starter";
   const copyButton = document.getElementById("copy-commands");
   const copyLabel = copyButton.querySelector("span");
