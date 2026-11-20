@@ -2,6 +2,13 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.7.0
+- **Guardrail report.** Each project panel shows what the rules stopped in the last 7 days: secrets, invented imports, git mistakes, comments, swallowed errors, design changes and more. The overview shows the weekly total. The log stays on your Mac.
+- **Team rules.** Settings → Team rules: pick a shared folder (for example a git repository) with your team's rules. Every set-up project gets them, and when the folder changes, projects update by themselves.
+- **Claude Code check.** Setup and the overview show whether Claude Code is installed, with an Install button that runs Anthropic's official installer.
+- **Claude Code plugin.** The rules, agents, skills and guardrails can now be installed as a plugin on Windows, Linux and macOS, without the app.
+- Project site with a permanent download link, MIT license, privacy note and issue forms.
+
 ## 4.6.0
 - **Faster everyday work.** Claude now makes small changes itself (up to 3 files per request) instead of starting an agent for every line. Bigger work still goes to the agent team with plans and reviews.
 - **Work mode per project:** Lite, Standard or Strict, in the project panel under Claude. Projects that used the old default move to Standard.

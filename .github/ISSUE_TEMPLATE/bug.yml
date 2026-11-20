@@ -1,0 +1,30 @@
+name: Something doesn't work
+description: Report a problem with the app, the rules or the plugin
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About → Version (or the plugin version)
+      placeholder: "4.7.0"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "macOS 27.2"
+  - type: textarea
+    id: log
+    attributes:
+      label: Activity log
+      description: In the app, open Activity (toolbar) and paste the lines around the problem. Remove anything private.
+      render: text

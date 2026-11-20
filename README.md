@@ -6,11 +6,20 @@ An Agentic Development Environment for Claude Code: one install adds an orchestr
 ### [Download Sarkhans Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
 macOS 13 or newer · Apple Silicon and Intel · always the latest version · [how to install](#install-on-a-mac)
 
+Project site: **https://sarkhandigitech.github.io/sarkhans-claude-starter/** · Not on a Mac? Use the [Claude Code plugin](#claude-code-plugin-windows-linux-macos).
+
+## What's inside
+- **Guardrails that block**, not just instructions: hooks stop comments in code, invented imports, pushes to main, AI mentions in commits, secret files and unsafe code.
+- **Work modes** per project (Lite / Standard / Strict) and a team of specialist agents for bigger work, with reviewers that keep project memory.
+- **Guardrail report**: the app shows what the rules stopped this week in each project.
+- **Team rules**: share one folder of rules with your team; every project gets them and updates when they change.
+- Third-eye reports, design lock, database review, kickoff for new projects, and about 2,800 tokens of rules per session.
+
 - What it does and how it works: [`claude-web-starter/README.md`](claude-web-starter/README.md)
 - Internals, CLI contract, Windows porting notes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ## Requirements
-- To use: macOS 13+, Claude Code. Node.js and Git can be installed from inside the app.
+- To use: macOS 13+ and Claude Code with a Claude Pro, Max, Team or Enterprise plan (the free plan doesn't include Claude Code). Claude Code, Node.js and Git can be installed from inside the app.
 - To build the app: Xcode Command Line Tools (`xcode-select --install`).
 
 ## Install on a Mac
@@ -37,11 +46,11 @@ After this, the app opens normally with a double-click. Updates install themselv
 
 ### 3. Set it up
 The app opens a short setup screen:
-- **Node.js** and **Git**: press the button if one is missing and finish the installer.
+- **Node.js**, **Git** and **Claude Code**: press the button if one is missing and finish the installer.
 - **Projects folder**: choose the folder with your projects.
 - **Claude's language**: the language Claude explains things in.
 
-Then select your projects and press **Set up**. You also need [Claude Code](https://docs.claude.com/en/docs/claude-code/overview).
+Then select your projects and press **Set up**. **Open in Claude Code** in a project's panel opens Terminal there and starts Claude.
 
 ### Updates
 The app checks for new versions when it opens, every 30 minutes, and when you switch back to it. When one is available, an **Update to x.y.z** button appears: it downloads the new version, replaces the app and restarts. If the app's folder needs admin rights, macOS asks for your password. Set-up projects get new rules automatically.
@@ -51,6 +60,17 @@ If you're comfortable with Terminal, this one line installs or reinstalls the la
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sarkhandigitech/sarkhans-claude-starter/main/install.sh | bash
 ```
+
+## Claude Code plugin (Windows, Linux, macOS)
+The rules, agents, skills and guardrails also ship as a Claude Code plugin, for people who don't use the Mac app:
+```bash
+claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin install sarkhans-starter@sarkhans-claude-starter
+```
+Skills are namespaced (`/sarkhans-starter:verify`). In projects set up with the app, the project's own copy wins and the plugin stays out of the way. The plugin in `plugins/` is generated: run `node scripts/build-plugin.mjs` after changing `claude-web-starter/template`.
+
+## Team rules
+Put shared rules in a folder your team syncs (a git repository works well): `rules/*.md` plus an optional `team.json` with `name`, `preset`, `responseLanguage` and `skills`. In the app: **Settings → Team rules → Use team rules…**. Every set-up project gets the rules as `.claude/rules/team-*.md`, and when the folder changes the projects update automatically. Example: [`examples/team-rules`](examples/team-rules).
 
 ## Publishing an update
 Releases are automatic. Every merge to `main` that changes `claude-web-starter/VERSION` builds the app on GitHub (Actions → **Release**) and publishes it on this repository's Releases page. The download link and everyone's **Update** button then point to it. The app checks for new versions when it opens, every 30 minutes, and when you switch back to it. After an update, set-up projects get the new rules automatically, but only when the rules actually changed. Merges that don't change the version publish nothing.
@@ -86,10 +106,17 @@ node claude-web-starter/install.mjs --help
 |---|---|
 | `claude-web-starter/` | installer (Node), project template, rules, skills, agents, hooks, stack packs, skill catalog |
 | `macos-app/` | SwiftUI app source (`Sources/`), launcher, Info.plist, icon, `build-app.sh`, `make-shareable.sh`, `update-repo.txt` |
-| `.github/workflows/` | automatic release when `VERSION` changes on `main` |
+| `plugins/`, `.claude-plugin/` | the generated Claude Code plugin and its marketplace |
+| `scripts/` | `build-plugin.mjs` and the plugin's own files |
+| `site/` | the project site (GitHub Pages) |
+| `examples/team-rules/` | a team rules folder to copy |
+| `.github/workflows/` | release when `VERSION` changes on `main`, build check on pull requests, site deploy |
 | `docs/` | architecture and porting guide |
 
 ## Contributing
 - Every release bumps `claude-web-starter/VERSION` (app and rules share one version number).
 - Test hooks with the stdin examples in `docs/ARCHITECTURE.md`.
 - Third-party skills from the catalog are downloaded from their own repositories at install time and keep their own licenses; they are not part of this repository.
+
+## License
+[MIT](LICENSE). Privacy: [PRIVACY.md](PRIVACY.md). Security reports: [SECURITY.md](SECURITY.md). Sarkhans Claude Starter is an independent project and isn't affiliated with Anthropic.
