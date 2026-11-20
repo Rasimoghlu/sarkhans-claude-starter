@@ -228,6 +228,24 @@
   .compare td.no { color: var(--faint); }
   .compare thead th:not(:first-child) { color: var(--ink); font-size: 15px; }
 
+  .attack { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: start; }
+  .attack-run { margin: 0; border-radius: var(--radius-panel); background: var(--plum); color: #e9e4f5; box-shadow: 0 40px 80px -40px rgba(43,31,69,.55); overflow: hidden; }
+  .attack-run::before { content: ""; display: block; height: 6px; background: repeating-linear-gradient(135deg, var(--amber) 0 14px, var(--plum) 14px 28px); }
+  .attack-run header { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; padding: 16px 24px 0; color: #a99bc9; font: 400 12.5px var(--mono); }
+  .attack-run ol { list-style: none; margin: 0; padding: 14px 24px 22px; font: 400 14px/1.6 var(--mono); }
+  .attack-run li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 9px 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .attack-run li:first-child { border-top: 0; }
+  .attack-run .tag { align-self: start; text-align: center; border-radius: 6px; padding: 1px 0; font-size: 12px; font-weight: 500; }
+  .attack-run .hit { background: var(--amber); color: var(--plum); }
+  .attack-run .held { background: rgba(127, 209, 168, .16); color: #9fe0bf; }
+  .attack-run .info { background: rgba(255,255,255,.08); color: #cfc6e6; }
+  .attack-run b { color: #fff; font-weight: 500; }
+  .attack-run small { display: block; color: #a99bc9; font-size: 12.5px; }
+  .attack-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 26px; }
+  .attack-points h3 { font-size: 20px; letter-spacing: -0.02em; margin: 0 0 4px; }
+  .attack-points p { margin: 0; color: var(--slate); }
+  .attack-points code { font: 14px var(--mono); color: var(--ink); white-space: nowrap; }
+  .attack-note { margin: 28px 0 0; color: var(--slate); font-size: 15px; }
   .columns { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--ink); }
   .column { padding: 28px 28px 8px; border-left: 1px solid var(--line); }
   .column:first-child { padding-left: 0; border-left: 0; }
@@ -338,6 +356,9 @@
     .option .actions .hint { white-space: normal; }
   }
   @media (max-width: 920px) {
+    .attack { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .attack-run li { grid-template-columns: 1fr; gap: 6px; }
+    .attack-run .tag { justify-self: start; padding: 1px 10px; }
     .story-grid, .modes-grid, .week-grid, .layers-grid, .options, .team { grid-template-columns: minmax(0, 1fr); gap: 40px; }
     .team-map { height: auto; display: grid; gap: 16px; }
     .team-lines { display: none; }
@@ -387,6 +408,7 @@
 <clipPath id="nv-lc450"><circle cx="450" cy="470" r="76"/></clipPath><clipPath id="nv-lc574"><circle cx="574" cy="470" r="76"/></clipPath></defs><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#nv-bg)"/><circle cx="760" cy="250" r="150" fill="url(#nv-moon)"/><circle cx="250" cy="230" r="5" fill="#fff" fill-opacity=".55"/><circle cx="318" cy="180" r="3" fill="#fff" fill-opacity=".55"/><circle cx="812" cy="420" r="4" fill="#fff" fill-opacity=".55"/><circle cx="214" cy="360" r="3" fill="#fff" fill-opacity=".55"/><g filter="url(#nv-sh)"><path d="M 452 262 C 368 262 352 300 352 372 L 352 452 C 352 506 328 532 276 538 C 328 544 352 570 352 624 L 352 700 C 352 772 368 806 452 806" fill="none" stroke="url(#nv-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="M 572 262 C 656 262 672 300 672 372 L 672 452 C 672 506 696 532 748 538 C 696 544 672 570 672 624 L 672 700 C 672 772 656 806 572 806" fill="none" stroke="url(#nv-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><circle cx="450" cy="470" r="76" fill="#120B22"/><circle cx="450" cy="470" r="64" fill="url(#nv-eye)"/><g class="pupil"><circle cx="450" cy="476" r="30" fill="#120B22"/><circle cx="436" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#nv-lc450)"><rect class="lid" x="370" y="390" width="160" height="160" fill="#2E2150"/></g><circle cx="574" cy="470" r="76" fill="#120B22"/><circle cx="574" cy="470" r="64" fill="url(#nv-eye)"/><g class="pupil"><circle cx="574" cy="476" r="30" fill="#120B22"/><circle cx="560" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#nv-lc574)"><rect class="lid" x="494" y="390" width="160" height="160" fill="#2E2150"/></g><path d="M 488 572 L 536 572 L 512 612 Z" fill="#F2A33A" stroke="#F2A33A" stroke-width="16" stroke-linejoin="round"/><rect x="430" y="664" width="164" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.5"/><rect x="456" y="712" width="112" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.32"/></g><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#nv-gloss)"/><rect x="102" y="102" width="820" height="820" rx="184" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="4"/></svg></span>Sarkhan’s Claude Starter</a>
     <div class="navlinks">
       <a href="#story">How it works</a>
+      <a href="#security">Security</a>
       <a href="#modes">Work modes</a>
       <a href="#get">Get it</a>
       <a href="#team">For teams</a>
@@ -478,6 +500,32 @@
         <tr><td>"Done" too early</td><td><span class="tried">Finishes with type errors</span><i class="chip">Stopped</i></td><td>Sent back to fix them before it can stop.</td></tr>
       </tbody>
     </table>
+  </div>
+</section>
+
+<section id="security" aria-label="Security testing">
+  <div class="wrap">
+    <h2>Test it like an attacker</h2>
+    <p class="intro">/security-audit reads your code for holes. /pentest goes further: it attacks your running app and shows you the exact request that got in. Then it makes sure that hole can’t come back.</p>
+    <div class="attack">
+      <figure class="attack-run" role="img" aria-label="Example /pentest run: two confirmed holes, two checks that held, and a regression test written for the first hole.">
+        <header><span>/pentest http://localhost:3000</span><span>example run</span></header>
+        <ol>
+          <li><span class="tag info">Scope</span><span>localhost, ends in 2 hours<small>14 endpoints mapped from the code, 2 test accounts</small></span></li>
+          <li><span class="tag hit">Confirmed</span><span><b>GET /api/notes/2</b> as Alice → 200, Bob’s private note<small>Another user’s data (IDOR), reproduced twice</small></span></li>
+          <li><span class="tag hit">Confirmed</span><span><b>PATCH /api/me {"role":"admin"}</b> → role: admin<small>Mass assignment, reproduced twice</small></span></li>
+          <li><span class="tag held">Held</span><span><b>GET /api/notes/1</b> without a session → 401<small>Authentication works</small></span></li>
+          <li><span class="tag held">Held</span><span><b>POST /login</b> ×30 → 429 after 10<small>Rate limiting works</small></span></li>
+          <li><span class="tag info">Test</span><span><b>tests/security/notes-idor.test.ts</b> fails now<small>Fixed only after you agree, then it passes</small></span></li>
+        </ol>
+      </figure>
+      <ol class="attack-points">
+        <li><h3>Only your app</h3><p>Your computer, or a staging server you name. A hook blocks nmap, sqlmap, nuclei, ZAP and every other security tool against any other host, and the scope ends by itself after 2 hours.</p></li>
+        <li><h3>Proof, not guesses</h3><p>A hole counts only when it’s reproduced twice, with the request and the response saved in <code>reports/pentest-&lt;date&gt;.md</code>. Everything else is marked as suspected or held.</p></li>
+        <li><h3>Every hole becomes a test</h3><p>Claude writes a failing test for each confirmed hole first, and fixes the cause only after you agree. The hole can’t quietly come back.</p></li>
+      </ol>
+    </div>
+    <p class="attack-note">It checks login, other users’ data, admin rights, injection, XSS, SSRF, open redirects, CSRF, rate limits, uploads, error pages and security headers. No load tests, nothing destructive, and secrets are never copied.</p>
   </div>
 </section>
 
@@ -627,6 +675,7 @@
         <tr><th scope="row">Stack detection and project commands</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
         <tr><th scope="row">Work mode per project</th><td data-label="Plugin">In .claude/hooks/config.json</td><td data-label="Mac app">A switch in the app</td></tr>
         <tr><th scope="row">Weekly report of what was stopped</th><td class="no" data-label="Plugin">No</td><td data-label="Mac app">Yes</td></tr>
+        <tr><th scope="row">Security audit and pentest</th><td data-label="Plugin">Yes</td><td data-label="Mac app">Yes</td></tr>
         <tr><th scope="row">Shared team rules</th><td data-label="Plugin">Yes, with /sarkhans-starter:team</td><td data-label="Mac app">Yes, per project with a click</td></tr>
         <tr><th scope="row">Updates</th><td data-label="Plugin">Through /plugin in Claude Code</td><td data-label="Mac app">Automatic</td></tr>
       </tbody>
