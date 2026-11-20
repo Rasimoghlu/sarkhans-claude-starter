@@ -33,6 +33,7 @@ and your personal rules in ~/.claude (CLAUDE.md section + no AI attribution).
   --language <name>      language Claude uses for explanations and reports (default English)
   --phase new|existing   set the project phase (new → /kickoff first; existing → design locked)
   --design locked|open   lock or unlock the visual design for Claude
+  --preset lite|standard|strict  how much the hooks steer Claude (default standard)
   --add-skill <id>       install a catalog skill/MCP into the project
   --remove-skill <id>    remove it again
   --no-recommended       don't add the recommended skills/MCP on a first install
@@ -45,10 +46,23 @@ if (args.includes("--help") || args.includes("-h")) {
   console.log(USAGE);
   process.exit(0);
 }
-const FLAG_VALUES = new Set(["--add-skill", "--remove-skill", "--phase", "--design", "--language", "--register-skill", "--pick", "--unregister-skill"]);
+const FLAG_VALUES = new Set(["--add-skill", "--remove-skill", "--phase", "--design", "--language", "--preset", "--register-skill", "--pick", "--unregister-skill"]);
 const target = args.find((a, i) => !a.startsWith("--") && !FLAG_VALUES.has(args[i - 1]));
 
 const log = (s) => console.log(s);
+
+const OBSOLETE_FILES = [
+  "hooks/stop-typecheck.mjs",
+  "rules/agents.md",
+  "rules/skills.md",
+  "rules/git.md",
+  "rules/principles.md",
+  "agents/verifier.md",
+  "agents/code-reviewer.md",
+];
+const LEGACY_CLAUDE_MD = /\n## 0\. How you work: Agentic Development Environment\n/;
+const LEGACY_CLAUDE_MD_END = "Stack-specific rules live in `.claude/rules/` (they load automatically for matching files).";
+const STARTER_CLAUDE_MD_LINE = "The working rules, agents and skills live in `.claude/` and load automatically.";
 
 const GLOBAL_BEGIN = "<!-- claude-starter:begin -->";
 const GLOBAL_END = "<!-- claude-starter:end -->";
@@ -149,7 +163,7 @@ function runUninstall() {
   }
   const claudeDir = join(root, ".claude");
   const packRules = ["node", "go", "php", "python", "docker"].flatMap((stack) => listFiles(join(here, "packs", stack, "rules")).map((f) => join("rules", f)));
-  const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "starter-hash", "hooks/stop-typecheck.mjs"])];
+  const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "starter-hash", ...OBSOLETE_FILES])];
   const removed = managed.filter((file) => existsSync(join(claudeDir, file)));
   removed.forEach((file) => rmSync(join(claudeDir, file), { force: true }));
   for (const id of installedCatalogIds(root)) {
@@ -160,7 +174,8 @@ function runUninstall() {
 
   const notes = [];
   const claudeMd = join(root, "CLAUDE.md");
-  if (existsSync(claudeMd)) {
+  const claudeMdText = existsSync(claudeMd) ? readFileSync(claudeMd, "utf8") : "";
+  if (claudeMdText.includes(STARTER_CLAUDE_MD_LINE) || LEGACY_CLAUDE_MD.test(claudeMdText)) {
     renameSync(claudeMd, join(root, "CLAUDE.md.bak"));
     notes.push("CLAUDE.md → CLAUDE.md.bak (your project description is kept there)");
   }
@@ -446,6 +461,16 @@ function setProjectSettings(rootDir, settings) {
 const phaseFlag = args.includes("--phase") ? args[args.indexOf("--phase") + 1] : null;
 const designFlag = args.includes("--design") ? args[args.indexOf("--design") + 1] : null;
 const languageFlag = args.includes("--language") ? args[args.indexOf("--language") + 1] : null;
+const presetFlag = args.includes("--preset") ? args[args.indexOf("--preset") + 1] : null;
+const PRESETS = {
+  lite: { preset: "lite", orchestratorMode: "advisory", directEditMaxFiles: 3, reportMinChangedLines: 80, requireSubagentEvidence: false },
+  standard: { preset: "standard", orchestratorMode: "balanced", directEditMaxFiles: 3, reportMinChangedLines: 30, requireSubagentEvidence: true },
+  strict: { preset: "strict", orchestratorMode: "strict", directEditMaxFiles: 0, reportMinChangedLines: 0, requireSubagentEvidence: true },
+};
+if (presetFlag && !PRESETS[presetFlag]) {
+  console.error("Use --preset lite|standard|strict");
+  process.exit(1);
+}
 if (args.includes("--language") && (!languageFlag || languageFlag.startsWith("--"))) {
   console.error("Use --language <name>, e.g. --language English");
   process.exit(1);
@@ -454,13 +479,14 @@ if ((phaseFlag && !["new", "existing"].includes(phaseFlag)) || (designFlag && ![
   console.error("Use --phase new|existing and --design locked|open");
   process.exit(1);
 }
-const settingsOnly = (phaseFlag || designFlag || languageFlag) && existsSync(join(resolve(target || "."), ".claude", "hooks", "config.json")) && !force;
+const settingsOnly = (phaseFlag || designFlag || languageFlag || presetFlag) && existsSync(join(resolve(target || "."), ".claude", "hooks", "config.json")) && !force;
 if (settingsOnly) {
   const settings = {};
   if (phaseFlag) settings.projectPhase = phaseFlag;
   if (designFlag) settings.designMode = designFlag;
   else if (phaseFlag) settings.designMode = phaseFlag === "new" ? "open" : "locked";
   if (languageFlag) settings.responseLanguage = languageFlag;
+  if (presetFlag) Object.assign(settings, PRESETS[presetFlag]);
   setProjectSettings(resolve(target), settings);
   log(`✔ ${resolve(target)}: ${Object.entries(settings).map(([key, value]) => `${key}=${value}`).join(" ")}`);
   process.exit(0);
@@ -712,8 +738,8 @@ for (const name of allPackRuleNames) {
   const rel = join(".claude", "rules", name);
   if (!selectedRules.has(rel) && existsSync(join(root, rel))) rmSync(join(root, rel), { force: true });
 }
-for (const obsolete of [".claude/hooks/stop-typecheck.mjs"]) {
-  if (existsSync(join(root, obsolete))) rmSync(join(root, obsolete), { force: true });
+for (const obsolete of OBSOLETE_FILES) {
+  if (existsSync(join(root, ".claude", obsolete))) rmSync(join(root, ".claude", obsolete), { force: true });
 }
 writeFileSync(join(root, ".claude", "starter-version"), VERSION + "\n");
 writeFileSync(join(root, ".claude", "starter-hash"), rulesHash() + "\n");
@@ -722,6 +748,8 @@ let phaseNote = "";
 try {
   const templateConfig = JSON.parse(readFileSync(projectConfigPath, "utf8"));
   const projectConfig = { ...templateConfig, ...(previousConfig || {}) };
+  if (presetFlag) Object.assign(projectConfig, PRESETS[presetFlag]);
+  else if (previousConfig && !previousConfig.preset) Object.assign(projectConfig, previousConfig.orchestratorMode === "advisory" ? PRESETS.lite : PRESETS.standard);
   if (languageFlag) projectConfig.responseLanguage = languageFlag;
   if (!projectConfig.responseLanguage) projectConfig.responseLanguage = "English";
   if (!previousConfig?.projectPhase || phaseFlag) {
@@ -733,7 +761,7 @@ try {
     if (designFlag) projectConfig.designMode = designFlag;
     phaseNote = `phase: ${projectConfig.projectPhase} (kept)`;
   }
-  phaseNote += ` · language: ${projectConfig.responseLanguage} · design: ${projectConfig.designMode}${projectConfig.projectPhase === "new" && !existsSync(join(root, ".claude", "KICKOFF.md")) ? " · run /kickoff first" : ""}`;
+  phaseNote += ` · language: ${projectConfig.responseLanguage} · preset: ${projectConfig.preset} · design: ${projectConfig.designMode}${projectConfig.projectPhase === "new" && !existsSync(join(root, ".claude", "KICKOFF.md")) ? " · run /kickoff first" : ""}`;
   if (dockerConfig) projectConfig.docker = { ...dockerConfig, services: { ...dockerConfig.services, ...(projectConfig.docker?.manualServices || {}) } };
   else delete projectConfig.docker;
   writeFileSync(projectConfigPath, JSON.stringify(projectConfig, null, 2) + "\n");
@@ -757,19 +785,50 @@ if (freshInstall && !args.includes("--no-recommended")) {
   }
 }
 
+const hasAgentsMd = fileExists("AGENTS.md");
+const agentsImport = hasAgentsMd ? "\n@AGENTS.md\n" : "";
 const md = readFileSync(join(here, "template", "CLAUDE.md"), "utf8")
   .replace("<PROJECT_NAME>", projectName)
+  .replace("<AGENTS_IMPORT>", agentsImport)
   .replace("<STACK_LINES>", stackLines.join("\n"))
   .replace("<COMMAND_LINES>", commandLines.join("\n"));
 
+function withAgentsImport(text) {
+  if (!hasAgentsMd || /^@AGENTS\.md\s*$/m.test(text)) return text;
+  const [title, ...rest] = text.split("\n");
+  return [title, "", "@AGENTS.md", ...rest].join("\n");
+}
+
+function migrateLegacyClaudeMd(text) {
+  const header = text.slice(0, text.search(LEGACY_CLAUDE_MD)).replace(/\n---\s*$/, "").trimEnd()
+    .split("\n").filter((line) => !/^- `\/(verify|ship|project-health|orchestrate)` — /.test(line)).join("\n").trimEnd();
+  const endIndex = text.indexOf(LEGACY_CLAUDE_MD_END);
+  const userTail = endIndex >= 0 ? text.slice(endIndex + LEGACY_CLAUDE_MD_END.length).trim() : "";
+  return `${header}\n\n${STARTER_CLAUDE_MD_LINE}\n${userTail ? `\n${userTail}\n` : ""}`;
+}
+
 const claudeMd = join(root, "CLAUDE.md");
-if (existsSync(claudeMd) && !overwriteClaudeMd) {
-  writeFileSync(join(root, "CLAUDE.starter.md"), md);
-  skipped.push("CLAUDE.md (wrote CLAUDE.starter.md instead)");
-} else {
+const currentClaudeMd = existsSync(claudeMd) ? readFileSync(claudeMd, "utf8") : null;
+if (currentClaudeMd === null || overwriteClaudeMd) {
   writeFileSync(claudeMd, md);
   copied.push("CLAUDE.md");
+} else if (LEGACY_CLAUDE_MD.test(currentClaudeMd)) {
+  writeFileSync(join(root, ".claude", "CLAUDE.md.before-4.6"), currentClaudeMd);
+  writeFileSync(claudeMd, withAgentsImport(migrateLegacyClaudeMd(currentClaudeMd)));
+  copied.push("CLAUDE.md (slimmed: the rules now live in .claude/rules/core.md; old copy in .claude/CLAUDE.md.before-4.6)");
+} else if (currentClaudeMd.includes(STARTER_CLAUDE_MD_LINE)) {
+  const next = withAgentsImport(currentClaudeMd);
+  if (next !== currentClaudeMd) {
+    writeFileSync(claudeMd, next);
+    copied.push("CLAUDE.md (now imports AGENTS.md)");
+  }
+} else {
+  skipped.push("CLAUDE.md (yours, kept as is — the starter rules load from .claude/rules/)");
+  if (hasAgentsMd && !/^@AGENTS\.md\s*$/m.test(currentClaudeMd)) {
+    todo.push("AGENTS.md exists, but Claude reads only CLAUDE.md when both exist. Add a line `@AGENTS.md` to CLAUDE.md to use both");
+  }
 }
+if (existsSync(join(root, "CLAUDE.starter.md"))) rmSync(join(root, "CLAUDE.starter.md"), { force: true });
 
 function appendMissing(file, entries, header) {
   const text = existsSync(file) ? readFileSync(file, "utf8") : "";
@@ -799,7 +858,8 @@ if (privateMode && hasGit) {
   if (tracked) todo.push(`CLAUDE.md/.claude are already committed in this repo, so git still tracks them. To hide them: git rm -r --cached CLAUDE.md .claude && git commit`);
 }
 if (privateMode && !hasGit) todo.push(`No git repo yet: after git init, install again so CLAUDE.md and .claude/ are hidden from git`);
-if (skipped.some((s) => s.startsWith("CLAUDE.md"))) todo.push(`Merge CLAUDE.starter.md into your CLAUDE.md, then delete it`);
-todo.push(`Open CLAUDE.md and fill in the one-line project description`);
+if (/<One sentence: what this app does/.test(existsSync(claudeMd) ? readFileSync(claudeMd, "utf8") : "")) {
+  todo.push(`Open CLAUDE.md and fill in the one-line project description`);
+}
 if (!privateMode) todo.push(`Commit .claude/ and CLAUDE.md so the whole team gets the same rules`);
 log(`\nNext steps:\n${todo.map((t, i) => `  ${i + 1}. ${t}`).join("\n")}\n`);

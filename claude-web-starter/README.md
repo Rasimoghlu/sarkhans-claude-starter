@@ -1,6 +1,6 @@
 # Sarkhans Claude Starter — rules, agents and hooks
 
-This folder is the part of Sarkhans Claude Starter that goes into your projects; the app installs it for you. One install turns any project (any language; extra support for TypeScript/Next.js, Go, PHP, Python, Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker) (TypeScript/Next.js, Go, PHP/Laravel/Symfony, Python/Django/FastAPI, Docker) into an Agentic Development Environment for Claude Code: an orchestrator that plans and delegates to specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
+This folder is the part of Sarkhans Claude Starter that goes into your projects; the app installs it for you. One install turns any project (any language; extra support for TypeScript/Next.js, Go, PHP, Python, Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker) into an Agentic Development Environment for Claude Code: Claude makes small changes itself and splits big work across specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
 
 ## Install
 
@@ -10,11 +10,12 @@ Terminal (the app keeps a copy of this folder in `~/claude-web-starter`):
 ```bash
 node ~/claude-web-starter/install.mjs ~/projects/my-project                       # install or update
 node ~/claude-web-starter/install.mjs ~/projects/my-project --language Azerbaijani # Claude's language for explanations
-node ~/claude-web-starter/install.mjs ~/projects/my-project --uninstall           # remove (CLAUDE.md → CLAUDE.md.bak)
+node ~/claude-web-starter/install.mjs ~/projects/my-project --preset strict        # lite | standard | strict
+node ~/claude-web-starter/install.mjs ~/projects/my-project --uninstall           # remove (the starter's CLAUDE.md → CLAUDE.md.bak)
 node ~/claude-web-starter/install.mjs --help
 ```
 
-An install does everything: detects the stacks, installs rules/skills/agents/hooks, hides `CLAUDE.md` and `.claude/` from git (`--shared` to commit them instead), and updates your personal rules in `~/.claude` (`--no-global` to skip). Re-running is safe; your settings in `.claude/hooks/config.json` are preserved.
+An install does everything: detects the stacks, writes a short `CLAUDE.md` (project, stack, commands — your own `CLAUDE.md` is never touched), installs rules/skills/agents/hooks, hides `CLAUDE.md` and `.claude/` from git (`--shared` to commit them instead), and updates your personal rules in `~/.claude` (`--no-global` to skip). Re-running is safe; your settings in `.claude/hooks/config.json` are preserved.
 
 Always start Claude Code inside the project folder: `cd ~/projects/my-project && claude`.
 
@@ -24,12 +25,24 @@ Always start Claude Code inside the project folder: `cd ~/projects/my-project &&
 ## How it works: three layers
 | Layer | What | Guarantee |
 |---|---|---|
-| Instructions | `CLAUDE.md`, `.claude/rules/*` — third eye, prohibitions, SOLID/KISS/YAGNI/DRY, testing, security, performance, git, design, database | The model follows them |
+| Instructions | `.claude/rules/core.md` (always loaded: work mode, third eye, prohibitions, git; the whole starter adds ≈2.8k tokens per session) + rules that load only for matching files (code quality and SOLID/KISS/YAGNI/DRY, testing, security, performance, design, database, stack rules) | The model follows them |
 | Workflows | skills (`/orchestrate`, `/kickoff`, `/new-feature`, `/verify`, `/ship`…) and agents | Followed step by step |
 | Enforcement | hooks in `.claude/hooks/` | Deterministic — blocks violations |
 
 ## Agentic Development Environment
-The main session is the **Orchestrator** and never edits code (a hook blocks it). Pipeline: intake → Explore → `architect` plan → specialists in parallel (`backend-dev`, `frontend-dev`, `db-engineer`, `implementer`, `test-writer`) → supervision of every result (scope via git diff, evidence re-checked, `verifier`) → `/verify` → `data-architect` / `code-reviewer` / `security-auditor` → fix loop → report with `### Agents` and `### Third eye`. Agents must end with `### Evidence` (hook-enforced). `orchestratorMode: "advisory"` lets the main session edit code.
+How much the hooks steer Claude is a **preset** (app: project panel → **Claude → Work mode**; terminal: `--preset`):
+
+| Preset | Claude edits code itself | Report required | Agent evidence |
+|---|---|---|---|
+| **Lite** | always | changes of 80+ lines | off |
+| **Standard** (default) | up to 3 code files per request, then it must hand the rest to agents | changes of 30+ lines | on |
+| **Strict** | never — every change goes through `/orchestrate` | every change | on |
+
+Bigger work runs through `/orchestrate`: Explore → `architect` plan → specialists in parallel (`backend-dev`, `frontend-dev`, `db-engineer`, `implementer`, `test-writer`) → `reviewer` checks each slice → `/verify` → `data-architect` / `reviewer` / `security-auditor` → fix loop → report with `### Agents` and `### Third eye`. Agents must end with `### Evidence` (hook-enforced). Schema changes always need a `data-architect` review, in every preset except Lite.
+
+`reviewer`, `architect`, `data-architect` and `security-auditor` keep a **project memory** (`.claude/agent-memory/`): conventions, decisions and recurring mistakes they learn carry over to the next session. A hook keeps them read-only everywhere else. `/security-audit` runs in its own agent context, so the long audit doesn't fill your conversation.
+
+If the project has an `AGENTS.md` (Cursor, Codex…), the starter's `CLAUDE.md` imports it, so Claude reads both.
 
 ## Design policy
 - **Existing project** (more than 3 commits): design is **locked** — Claude doesn't change colors, fonts, spacing, layout or component styles unless your message asks for it. A hook blocks style files (CSS/SCSS, Tailwind config, theme/tokens, `components/ui`); reviewers reject unrequested visual changes.
@@ -79,7 +92,7 @@ node ~/claude-web-starter/install.mjs --unregister-skill deploy-check
 Skills are copied into `.claude/skills/<name>` (review bundled scripts); MCP servers go into `.mcp.json` and Claude Code asks you to approve them.
 
 ## Settings — `.claude/hooks/config.json`
-`responseLanguage`, `projectPhase`, `designMode`, `orchestratorMode`, `checkDbDesign`, `docker`, `enforceCommentPolicy`, `checkImports`, `enforceEnvModule`, `requireThirdEyeReport`, `requireSubagentEvidence`, `blockNewDependencies`, `protectedBranches`, `maxNewFileLines`, `extraProtectedPaths`. Claude cannot edit this file.
+`responseLanguage`, `projectPhase`, `designMode`, `preset`, `orchestratorMode` (`balanced` / `strict` / `advisory`), `directEditMaxFiles`, `reportMinChangedLines`, `checkDbDesign`, `docker`, `enforceCommentPolicy`, `checkImports`, `enforceEnvModule`, `requireThirdEyeReport`, `requireSubagentEvidence`, `blockNewDependencies`, `protectedBranches`, `maxNewFileLines`, `extraProtectedPaths`. Claude cannot edit this file.
 
 ## Honest limits
-Instructions are not guarantees; hooks enforce what is measurable (regex and the project's own tools). Missing tools are skipped and shown as ⏭️ in `/verify`. Agent supervision is strengthened by evidence checks and the verifier, but your review is the final word.
+Instructions are not guarantees; hooks enforce what is measurable (regex and the project's own tools). Missing tools are skipped and shown as ⏭️ in `/verify`. Agent supervision is strengthened by evidence checks and the reviewer, but your review is the final word.

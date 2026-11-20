@@ -1,4 +1,20 @@
-# Design policy (always loaded)
+---
+paths:
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.sass"
+  - "**/*.less"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.vue"
+  - "**/*.svelte"
+  - "**/*.html"
+  - "**/*.twig"
+  - "**/*.blade.php"
+  - "**/tailwind.config.*"
+  - "**/templates/**"
+---
+# Design policy
 
 The project's phase and design mode are shown at session start (from `.claude/hooks/config.json`: `projectPhase`, `designMode`).
 
@@ -7,7 +23,7 @@ The project's phase and design mode are shown at session start (from `.claude/ho
 - Functional UI work (a new field, button, page, state) **reuses the existing look exactly**: existing components, existing classes/utilities, existing tokens, the same patterns as neighbouring screens.
 - Do not run design skills (`frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `emil-design-eng`) unless the user asked for a design change.
 - If you notice a design problem (contrast, broken layout, inconsistency), **report it in the Third-eye section and ask** — don't fix it silently. Accessibility *bugs* that break usage can be proposed as a fix, still with approval.
-- A hook blocks edits to style files (CSS/SCSS, Tailwind config, theme/token files, UI primitive folders) until the user's message asks for a design change. The verifier and code-reviewer reject unrequested visual changes in markup (class names, inline styles).
+- A hook blocks edits to style files (CSS/SCSS, Tailwind config, theme/token files, UI primitive folders) until the user's message asks for a design change. The reviewer rejects unrequested visual changes in markup (class names, inline styles).
 - When the user explicitly asks for a design change ("change the design", "make the buttons blue", "redesign", "make it look …" — in any language), the lock opens for that request: do exactly what was asked, nothing more.
 
 ## New project (`projectPhase: "new"`) — plan with the user first

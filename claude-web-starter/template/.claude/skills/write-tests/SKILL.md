@@ -1,11 +1,9 @@
 ---
 name: write-tests
-description: Write or improve behaviour-focused tests for a module, endpoint, feature or bug (regression test) using the project's existing test framework — in any language (Vitest/Jest/Playwright, Go testing, PHPUnit/Pest, pytest). Use when the user asks for tests, coverage, or a regression test, and after implementing behaviour that has no tests.
+description: Write or improve behaviour-focused tests for a module, endpoint, feature or bug (regression test) with the project's existing test framework.
 argument-hint: "[what to test]"
 ---
 # Write tests
-
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (test-writer) inside their briefs. The main session never edits code itself.
 
 Target: $ARGUMENTS
 

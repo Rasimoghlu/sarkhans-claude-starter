@@ -1,20 +1,38 @@
 import { isAbsolute, resolve, relative } from "node:path";
-import { readInput, loadConfig, block, ok, relPath, projectDir } from "./lib.mjs";
+import { readInput, loadConfig, block, ok, relPath, projectDir, readSessionState, writeSessionState } from "./lib.mjs";
 
 const CODE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs|go|php|py|vue|svelte|css|scss|sass|less|sql|html|twig|json|ya?ml|toml|ini|sh|rb|rs|java|kt|swift|graphql|prisma)$/i;
+const EDIT_TOOLS = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
+const READ_ONLY_AGENTS = {
+  reviewer: [".claude/agent-memory/"],
+  architect: [".claude/agent-memory/"],
+  "data-architect": [".claude/agent-memory/"],
+  "security-auditor": [".claude/agent-memory/", "reports/"],
+};
 
 const input = await readInput();
 const config = loadConfig();
-if ((config.orchestratorMode || "strict") !== "strict" || input.agent_id) ok();
-
 const tool = input.tool_name || "";
 const toolInput = input.tool_input || {};
+const editedPath = toolInput.file_path || toolInput.notebook_path || "";
+const mode = config.orchestratorMode || "balanced";
+
+if (input.agent_id) {
+  const allowed = READ_ONLY_AGENTS[input.agent_type];
+  if (allowed && EDIT_TOOLS.includes(tool)) {
+    const rel = relPath(editedPath);
+    if (!allowed.some((prefix) => rel.startsWith(prefix))) {
+      block(`BLOCKED (orchestrator-guard): ${input.agent_type} is read-only — it may write only ${allowed.join(" and ")}. Report the change as a finding instead.`);
+    }
+  }
+  ok();
+}
+if (mode === "advisory") ok();
+
 const HOW = [
-  "ADE: you are the Orchestrator — you don't change code yourself.",
-  "Delegate this change with the Agent tool to the right specialist: backend-dev, frontend-dev, db-engineer, implementer or test-writer.",
-  "Brief: goal + acceptance criteria, exact file scope, contracts, patterns to copy (file:line), rules, required `### Evidence`.",
-  "Then supervise: check scope with git diff, re-check its evidence, run the verifier.",
-  "(Only if the user explicitly asks you to edit directly: they can set \"orchestratorMode\": \"advisory\" in .claude/hooks/config.json.)",
+  "Delegate it with the Agent tool to the right specialist (backend-dev, frontend-dev, db-engineer, implementer or test-writer), or run /orchestrate for the whole task.",
+  "Brief: goal + acceptance criteria, exact file scope, contracts, patterns to copy (file:line), required `### Evidence`.",
+  "Then supervise: check scope with git diff, re-check its evidence, run the reviewer.",
 ].join("\n");
 
 function isProjectCodeFile(token) {
@@ -46,17 +64,37 @@ function bashWriteTarget(command) {
   return null;
 }
 
-if (["Edit", "Write", "MultiEdit", "NotebookEdit"].includes(tool)) {
-  const filePath = toolInput.file_path || toolInput.notebook_path || "";
-  const rel = relPath(filePath) || filePath;
-  if (/\.(md|mdx|txt)$/i.test(rel)) ok();
-  block(`BLOCKED (orchestrator-guard): ${rel}\n${HOW}`);
+function isDocument(rel) {
+  return /\.(md|mdx|txt)$/i.test(rel);
 }
 
-if (tool === "Bash") {
-  const command = String(toolInput.command || "");
-  const reason = bashWriteTarget(command);
-  if (reason) block(`BLOCKED (orchestrator-guard): \`${command.slice(0, 160)}\` — ${reason} from the main session.\n${HOW}`);
+if (mode === "strict") {
+  if (EDIT_TOOLS.includes(tool)) {
+    const rel = relPath(editedPath) || editedPath;
+    if (isDocument(rel)) ok();
+    block(`BLOCKED (orchestrator-guard, strict mode): ${rel}\nIn strict mode the main session doesn't change code itself.\n${HOW}`);
+  }
+  if (tool === "Bash") {
+    const command = String(toolInput.command || "");
+    const reason = bashWriteTarget(command);
+    if (reason) block(`BLOCKED (orchestrator-guard, strict mode): \`${command.slice(0, 160)}\` — ${reason} from the main session.\n${HOW}`);
+  }
+  ok();
 }
 
+if (!EDIT_TOOLS.includes(tool)) ok();
+const rel = relPath(editedPath);
+if (!rel || isDocument(rel) || rel.startsWith(".claude/") || !CODE_EXT.test(rel)) ok();
+
+const limit = Number(config.directEditMaxFiles ?? 3);
+const state = readSessionState("direct-edits");
+const files = state.session === input.session_id && Array.isArray(state.files) ? state.files : [];
+if (files.includes(rel)) ok();
+if (files.length >= limit) {
+  block(
+    `BLOCKED (orchestrator-guard): this request already changed ${files.length} code files directly (${files.join(", ")}); ${rel} would be one more.\n` +
+      `It has grown beyond a small change (limit: directEditMaxFiles = ${limit}). Finish it with agents so it gets planned and reviewed:\n${HOW}`,
+  );
+}
+writeSessionState("direct-edits", { session: input.session_id, files: [...files, rel] });
 ok();

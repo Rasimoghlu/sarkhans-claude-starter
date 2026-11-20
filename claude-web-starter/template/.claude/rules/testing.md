@@ -1,4 +1,29 @@
-# Testing rules (always loaded, every language)
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.mjs"
+  - "**/*.vue"
+  - "**/*.svelte"
+  - "**/*.go"
+  - "**/*.php"
+  - "**/*.py"
+  - "**/*.rs"
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.cs"
+  - "**/*.swift"
+  - "**/*.dart"
+  - "**/*.rb"
+  - "**/*.scala"
+  - "**/*.c"
+  - "**/*.cpp"
+  - "**/*.h"
+  - "**/*.hpp"
+---
+# Testing rules
 
 **No behaviour change without a test.** New feature → tests for it. Bug fix → a regression test that fails before the fix and passes after. Refactor → existing tests stay green (add characterization tests first if coverage is missing).
 

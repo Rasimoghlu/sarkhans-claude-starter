@@ -114,23 +114,42 @@ if (config.typecheckOnStop && state.lastGreen !== fingerprint) {
   save();
 }
 
-if (config.requireThirdEyeReport && state.lastReported !== fingerprint) {
+function changedLineCount() {
+  const tracked = run("git", ["diff", "HEAD", "--numstat"], { timeoutMs: 20_000 }).out.split(/\r?\n/)
+    .map((line) => line.split("\t"))
+    .reduce((sum, [added, removed]) => sum + (Number(added) || 0) + (Number(removed) || 0), 0);
+  const fresh = untracked.reduce((sum, file) => {
+    try {
+      return sum + readFileSync(join(projectDir, file), "utf8").split("\n").length;
+    } catch {
+      return sum;
+    }
+  }, 0);
+  return tracked + fresh;
+}
+
+const mode = config.orchestratorMode || "balanced";
+const reportThreshold = Number(config.reportMinChangedLines ?? (mode === "strict" ? 0 : 30));
+const schemaChanged = changed.some((f) => SCHEMA_FILE.test(f));
+const needsReport = config.requireThirdEyeReport && state.lastReported !== fingerprint
+  && (schemaChanged || reportThreshold <= 0 || changedLineCount() >= reportThreshold);
+
+if (needsReport) {
   const text = lastAssistantText(input);
   if (text === null) ok();
   const missing = [];
-  if ((config.orchestratorMode || "strict") === "strict" && !AGENTS_HEADING.test(text)) {
+  if (mode === "strict" && !AGENTS_HEADING.test(text)) {
     missing.push(
       "### Agents\n" +
         "| Agent | Task | Result | How it was verified |\n" +
         "|---|---|---|---|\n" +
-        "| <agent> | <slice> | ✅ / ❌ redone | <verifier result, commands + real output> |",
+        "| <agent> | <slice> | ✅ / ❌ redone | <reviewer verdict, commands + real output> |",
     );
   }
-  const schemaChanged = changed.some((f) => SCHEMA_FILE.test(f));
-  if (schemaChanged && (config.orchestratorMode || "strict") === "strict" && !/data-architect/i.test(text)) {
+  if (schemaChanged && mode !== "advisory" && !/data-architect/i.test(text)) {
     missing.push(
       "Schema/migration files changed, so the `data-architect` agent must review them before you finish (normalization, FKs, indexes, constraints, types).\n" +
-        "Run it, send its findings to db-engineer, then list it in the `### Agents` table with its verdict (APPROVE / CHANGES REQUESTED → fixed).",
+        "Run it, fix its findings (or send them to db-engineer), then name it with its verdict (APPROVE / CHANGES REQUESTED → fixed) in your report.",
     );
   }
   if (!THIRD_EYE_HEADING.test(text)) {

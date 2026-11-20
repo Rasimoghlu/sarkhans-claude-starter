@@ -1,4 +1,29 @@
-# Security rules (always loaded)
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.mjs"
+  - "**/*.vue"
+  - "**/*.svelte"
+  - "**/*.go"
+  - "**/*.php"
+  - "**/*.py"
+  - "**/*.rs"
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.cs"
+  - "**/*.swift"
+  - "**/*.dart"
+  - "**/*.rb"
+  - "**/*.scala"
+  - "**/*.c"
+  - "**/*.cpp"
+  - "**/*.h"
+  - "**/*.hpp"
+---
+# Security rules
 
 Security is never traded for speed or convenience. When in doubt, choose the safer option and tell me.
 

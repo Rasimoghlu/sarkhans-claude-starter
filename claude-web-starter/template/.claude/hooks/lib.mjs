@@ -8,6 +8,9 @@ export const projectDir = resolve(process.env.CLAUDE_PROJECT_DIR || process.cwd(
 
 const DEFAULT_CONFIG = {
   responseLanguage: "English",
+  orchestratorMode: "balanced",
+  directEditMaxFiles: 3,
+  reportMinChangedLines: 30,
   blockSecretFiles: true,
   blockProtectedWrites: true,
   blockDangerousCommands: true,

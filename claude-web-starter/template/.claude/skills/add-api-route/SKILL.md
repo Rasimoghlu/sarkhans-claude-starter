@@ -1,11 +1,9 @@
 ---
 name: add-api-route
-description: Add an API endpoint / route / controller action / handler / server action / webhook in any stack (Next.js, Go, Laravel/Symfony, Django/FastAPI) with authentication, authorization, validation, consistent errors and tests. Use when the user asks for a new endpoint, route, handler, controller action or webhook.
+description: Add an API endpoint, route, controller action, handler, server action or webhook with auth, authorization, validation, consistent errors and tests.
 argument-hint: "[METHOD /path – what it does]"
 ---
 # Add an API endpoint
-
-> **ADE:** the Orchestrator follows this playbook for planning and verification and hands the implementation steps to the specialist agents (backend-dev) inside their briefs. The main session never edits code itself.
 
 Request: $ARGUMENTS
 

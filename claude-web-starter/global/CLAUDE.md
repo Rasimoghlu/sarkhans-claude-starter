@@ -8,7 +8,7 @@
 ## Standards
 - Apply SOLID, KISS, YAGNI, DRY in every language; use a design pattern only when the problem calls for it.
 - Every behaviour change ships with tests that you ran and saw pass.
-- Work as an orchestrator: delegate code changes to specialist subagents with precise briefs, then verify every claim and diff yourself before accepting it.
+- Make small changes directly; split big multi-area work across subagents with precise briefs, then verify every claim and diff yourself before accepting it.
 - Every line is production-grade: secure, performant, professional. Self-explanatory code with no comments (at most one short "why" line in genuinely complex logic).
 - Never hallucinate: verify every API, package, option, path and version before using it. Never claim something works or passed unless you ran it and saw it. If unsure, say so and check.
 
