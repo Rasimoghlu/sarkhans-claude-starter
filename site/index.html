@@ -83,7 +83,7 @@
   section.track { padding: 0; border: 0; }
   .track { position: relative; }
   .stick { position: sticky; top: 0; height: 100vh; padding-top: var(--nav-height); overflow: hidden; display: flex; align-items: center; }
-  .scroll-ready #top { height: 150vh; }
+  .scroll-ready #top { height: 125vh; }
   .scroll-ready #story { height: 470vh; }
   .scroll-ready #agents { height: 230vh; }
   .scroll-ready #modes { height: 290vh; }
@@ -836,6 +836,7 @@
   const nav = $("#nav"), navMark = $("#nav-mark");
   const heroWrap = $("#hero-wrap"), heroSlot = $("#hero-slot"), heroOwl = $(".hero-owl");
   const heroCopy = $("#hero-copy"), heroGlow = $("#hero-glow");
+  const heroStick = $("#top .stick");
   let owlTimers = [], owlAway = false;
   function wakeOwl() {
     owlTimers.forEach(clearTimeout);
@@ -861,17 +862,15 @@
   }
 
   function renderHero(p) {
-    const u = span(p, 0, .95), t = u * u * (3 - 2 * u);
+    const u = span(p, 0, 1), t = u * u * (3 - 2 * u);
     const from = heroSlot.getBoundingClientRect(), to = navMark.getBoundingClientRect();
     const s = 1 + (to.width / from.width - 1) * t;
     heroOwl.style.transform = `translate(${(to.left - from.left) * t}px, ${(to.top - from.top) * t}px) scale(${s})`;
     const docked = t > .995;
     heroOwl.style.opacity = docked ? 0 : 1;
     nav.classList.toggle("docked", docked);
+    heroStick.style.zIndex = docked ? "10" : "";
     heroGlow.style.opacity = 1 - t;
-    heroCopy.style.opacity = 1 - span(p, .05, .7);
-    heroCopy.style.transform = `translateY(${-80 * span(p, 0, .8)}px)`;
-    heroCopy.style.visibility = p > .71 ? "hidden" : "";
     watchOwl(p < .06);
   }
 
@@ -1045,6 +1044,7 @@
     heroOwl.style.transform = "";
     heroOwl.style.opacity = "";
     heroCopy.style.cssText = "";
+    heroStick.style.zIndex = "";
     heroGlow.style.opacity = "";
     staticStory();
     staticLayers();
