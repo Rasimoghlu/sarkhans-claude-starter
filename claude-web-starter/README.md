@@ -1,10 +1,10 @@
-# Sarkhans Claude Starter — rules, agents and hooks
+# Sarkhan’s Claude Starter — rules, agents and hooks
 
-This folder is the part of Sarkhans Claude Starter that goes into your projects; the app installs it for you. One install turns any project (any language; extra support for TypeScript/Next.js, Go, PHP, Python, Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker) into an Agentic Development Environment for Claude Code: Claude makes small changes itself and splits big work across specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
+This folder is the part of Sarkhan’s Claude Starter that goes into your projects; the app installs it for you. One install turns any project (any language; extra support for TypeScript/Next.js, Go, PHP, Python, Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker) into an Agentic Development Environment for Claude Code: Claude makes small changes itself and splits big work across specialist agents, strict quality rules enforced by hooks, a "third eye" that reports and fixes problems, design and database guardrails, and a catalog of design skills and MCP servers.
 
 ## Install
 
-Easiest: install the **Sarkhans Claude Starter** app (download link in the [main README](../README.md)), choose your projects folder, select projects and press **Set up**. Projects with older rules show **Update available**.
+Easiest: install the **Sarkhan’s Claude Starter** app (download link in the [main README](../README.md)), choose your projects folder, select projects and press **Set up**. Projects with older rules show **Update available**.
 
 Terminal (the app keeps a copy of this folder in `~/claude-web-starter`):
 ```bash

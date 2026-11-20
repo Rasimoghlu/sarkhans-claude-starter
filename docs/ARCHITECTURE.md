@@ -1,4 +1,4 @@
-# Architecture & porting guide — Sarkhans Claude Starter
+# Architecture & porting guide — Sarkhan’s Claude Starter
 
 This document is for developers who maintain the starter or port the desktop app (e.g. to Windows).
 

@@ -6,8 +6,9 @@
   <key>CFBundleExecutable</key><string>ClaudeStarter</string>
   <key>CFBundleIdentifier</key><string>local.dev.claude-starter</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>Sarkhans Claude Starter</string>
-  <key>CFBundleDisplayName</key><string>Sarkhans Claude Starter</string>
+  <key>CFBundleName</key><string>Sarkhan’s Claude Starter</string>
+  <key>CFBundleDisplayName</key><string>Sarkhan’s Claude Starter</string>
+  <key>LSHasLocalizedDisplayName</key><true/>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>4.5.0</string>
   <key>CFBundleVersion</key><string>4.5.0</string>

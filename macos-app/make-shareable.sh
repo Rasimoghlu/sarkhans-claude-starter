@@ -2,6 +2,7 @@
 set -euo pipefail
 
 APP_NAME="Sarkhans Claude Starter"
+DISPLAY_NAME="Sarkhan’s Claude Starter"
 ARTIFACT="Sarkhans-Claude-Starter"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="${1:-}"
@@ -55,7 +56,7 @@ STAGE="$WORK/stage"
 APP="$STAGE/$APP_NAME.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$OUT"
 
-echo "→ $APP_NAME $VERSION"
+echo "→ $DISPLAY_NAME $VERSION"
 echo "→ Compiling for Apple Silicon…"
 xcrun swiftc -O -parse-as-library -target arm64-apple-macos13.0 "$SRC"/Sources/*.swift -o "$WORK/ui-arm64"
 echo "→ Compiling for Intel…"
@@ -63,10 +64,13 @@ xcrun swiftc -O -parse-as-library -target x86_64-apple-macos13.0 "$SRC"/Sources/
 xcrun lipo -create "$WORK/ui-arm64" "$WORK/ui-x86_64" -output "$APP/Contents/MacOS/ClaudeStarter"
 
 cp "$PLIST" "$APP/Contents/Info.plist"
-for pair in "CFBundleExecutable=ClaudeStarter" "CFBundleName=$APP_NAME" "CFBundleDisplayName=$APP_NAME" \
+for pair in "CFBundleExecutable=ClaudeStarter" "CFBundleName=$DISPLAY_NAME" "CFBundleDisplayName=$DISPLAY_NAME" \
             "CFBundleShortVersionString=$VERSION" "CFBundleVersion=$VERSION"; do
   plutil -replace "${pair%%=*}" -string "${pair#*=}" "$APP/Contents/Info.plist"
 done
+plutil -replace LSHasLocalizedDisplayName -bool true "$APP/Contents/Info.plist"
+mkdir -p "$APP/Contents/Resources/en.lproj"
+printf '"CFBundleName" = "%s";\n"CFBundleDisplayName" = "%s";\n' "$DISPLAY_NAME" "$DISPLAY_NAME" > "$APP/Contents/Resources/en.lproj/InfoPlist.strings"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 cp "$SRC/AppIcon.icns" "$SRC/claude-web-starter.zip" "$SRC/starter-version.txt" "$APP/Contents/Resources/"
 if [ -n "$UPDATE_REPO" ]; then
@@ -95,9 +99,9 @@ ln -s /Applications "$STAGE/Applications"
 
 write_readme() {
   {
-    echo "$APP_NAME $VERSION — INSTALL"
+    echo "$DISPLAY_NAME $VERSION — INSTALL"
     echo
-    echo "1. Drag \"$APP_NAME\" into the Applications folder."
+    echo "1. Drag \"$DISPLAY_NAME\" into the Applications folder."
     echo "   No admin rights on this Mac? Use the Applications folder in your home folder instead"
     echo "   (Finder → Go → Home; create a folder named Applications if it isn't there)."
     echo "2. Open it from Applications."
@@ -107,7 +111,7 @@ write_readme() {
       echo "   macOS 15 Sequoia / 26 Tahoe / 27 Golden Gate:"
       echo "   a) Double-click the app. In \"Not Opened\" click Done (not Move to Trash)."
       echo "   b) Apple menu → System Settings → Privacy & Security → scroll down to Security."
-      echo "   c) Next to \"$APP_NAME was blocked to protect your Mac\" click Open Anyway."
+      echo "   c) Next to the message that the app was blocked to protect your Mac, click Open Anyway."
       echo "   d) Click Open Anyway again and confirm with your password or Touch ID."
       echo "      The button stays for about an hour after a). If it's gone, do a) again."
       echo "   macOS 13 Ventura / 14 Sonoma: right-click the app → Open → Open."
@@ -127,7 +131,7 @@ DMG="$OUT/$ARTIFACT.dmg"
 build_dmg() {
   rm -f "$DMG"
   for attempt in 1 2 3; do
-    if hdiutil create -volname "$APP_NAME $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null; then
+    if hdiutil create -volname "$DISPLAY_NAME $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null; then
       return 0
     fi
     sleep 3

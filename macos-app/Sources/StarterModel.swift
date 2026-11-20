@@ -557,7 +557,7 @@ final class StarterModel: ObservableObject {
     func installClaudeCode() {
         runInTerminal(
             name: "Install Claude Code",
-            commands: "echo 'Installing Claude Code (official installer from claude.ai)…'; curl -fsSL https://claude.ai/install.sh | bash && echo && echo 'Done. Switch back to Sarkhans Claude Starter; it notices Claude Code by itself.'; exec /bin/zsh -li"
+            commands: "echo 'Installing Claude Code (official installer from claude.ai)…'; curl -fsSL https://claude.ai/install.sh | bash && echo && echo 'Done. Switch back to Sarkhan’s Claude Starter; it notices Claude Code by itself.'; exec /bin/zsh -li"
         )
     }
 
@@ -584,7 +584,7 @@ final class StarterModel: ObservableObject {
         runInTerminal(
             name: "Open \(project.name) in Claude Code",
             directory: project.path,
-            commands: "command -v claude >/dev/null && exec claude; echo; echo 'Claude Code is not installed yet. Install it from Sarkhans Claude Starter (Overview) or see https://code.claude.com/docs'; echo; exec /bin/zsh -li"
+            commands: "command -v claude >/dev/null && exec claude; echo; echo 'Claude Code is not installed yet. Install it from Sarkhan’s Claude Starter (Overview) or see https://code.claude.com/docs'; echo; exec /bin/zsh -li"
         )
     }
 
