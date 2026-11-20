@@ -53,6 +53,7 @@
   .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
   .brand-mark { width: 36px; height: 36px; flex: none; }
   .brand-mark .owl { display: block; transition: opacity .2s; }
+  .scroll-ready .nav:not(.docked) .brand-mark .owl { opacity: 0; }
   .navlinks { display: flex; gap: 28px; font-weight: 500; font-size: 15px; }
   .navlinks a { text-decoration: none; color: var(--slate); white-space: nowrap; }
   .navlinks a:hover { color: var(--ink); }
@@ -82,6 +83,7 @@
   section.track { padding: 0; border: 0; }
   .track { position: relative; }
   .stick { position: sticky; top: 0; height: 100vh; padding-top: var(--nav-height); overflow: hidden; display: flex; align-items: center; }
+  .scroll-ready #top { height: 150vh; }
   .scroll-ready #story { height: 470vh; }
   .scroll-ready #agents { height: 230vh; }
   .scroll-ready #modes { height: 290vh; }
@@ -89,6 +91,16 @@
   html:not(.scroll-ready) .stick { position: relative; height: auto; padding: calc(var(--nav-height) + 72px) 0 96px; }
   html:not(.scroll-ready) .track + .track .stick, html:not(.scroll-ready) section + .track .stick { padding-top: 96px; border-top: 1px solid var(--line); }
 
+  .hero-slot { pointer-events: auto; cursor: pointer; border-radius: 28%; }
+  .end-owl { cursor: pointer; }
+  .owl-say { position: fixed; left: 0; top: 0; z-index: 30; max-width: 280px; padding: 12px 16px; border-radius: 16px; background: var(--ink); color: #fff; font: 600 15px/1.4 var(--sans); text-align: left; text-wrap: pretty; box-shadow: 0 18px 40px -14px rgba(29, 21, 48, .55); opacity: 0; transform: translateY(8px) scale(.94); transform-origin: var(--origin, 0 100%); transition: opacity .18s, transform .28s cubic-bezier(.3, 1.4, .5, 1); pointer-events: none; }
+  .owl-say.on { opacity: 1; transform: none; }
+  .owl-say::after { content: ""; position: absolute; bottom: -6px; left: var(--tail, 22px); width: 14px; height: 14px; margin-left: -7px; background: var(--ink); border-radius: 3px; transform: rotate(45deg); }
+  #top .stick { z-index: 25; pointer-events: none; flex-direction: column; justify-content: center; gap: 40px; text-align: center; }
+  .hero-slot { position: relative; width: min(280px, 28vh); height: min(280px, 28vh); flex: none; }
+  .hero-slot .owl { width: 100%; height: 100%; }
+  .hero-glow { position: absolute; inset: -70px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 163, 58, .28), rgba(242, 163, 58, 0) 65%); }
+  .hero-owl { position: relative; display: block; transform-origin: 0 0; will-change: transform; }
   .hero-copy { display: flex; flex-direction: column; align-items: center; gap: 24px; pointer-events: auto; will-change: transform, opacity; }
   .hero-copy .lead { max-width: 46ch; }
   .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
@@ -336,6 +348,7 @@
     .column:first-child { border-top: 0; }
     .navlinks { display: none; }
     section { padding: 72px 0; }
+    .hero-slot { width: 200px; height: 200px; }
     .pipe { flex-direction: column; }
     .arrow { transform: rotate(90deg); }
     .files { flex-wrap: wrap; }
@@ -361,47 +374,6 @@
     html { scroll-behavior: auto; }
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
-
-  section.hero { padding: 0; border: 0; }
-  .hero-inner { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: calc(var(--nav-height) + 40px) 24px 72px; text-align: center; }
-
-  .perch { position: fixed; inset: 0; z-index: 25; pointer-events: none; }
-  .sway { position: absolute; inset: 0; }
-  .branch { position: absolute; left: 0; top: 0; overflow: visible; }
-  .branch .leaf { transform-box: view-box; }
-  .branch.shiver .leaf { animation: shiver .6s ease-out var(--d, 0s); }
-  .bird { position: absolute; left: 0; top: 0; width: 120px; height: 160px; transform-origin: 0 0; pointer-events: auto; cursor: pointer; }
-  .bird-inner { position: absolute; inset: 0; transform-origin: 50% 100%; }
-  .bird-body { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .bird-head { position: absolute; left: 6px; top: -4px; width: 108px; height: 108px; transform-origin: 54px 96px; will-change: transform; }
-  .bird-head svg { display: block; width: 100%; height: 100%; }
-  .bird-glow { position: absolute; left: -14px; top: -18px; width: 148px; height: 140px; border-radius: 50%; background: radial-gradient(closest-side, rgba(242, 163, 58, .55), rgba(242, 163, 58, 0)); opacity: 0; transition: opacity .3s; }
-  .bird.alert .bird-glow { opacity: 1; }
-  .bird .wing { transform-box: view-box; }
-  .bird .wing-l { transform-origin: 32px 90px; }
-  .bird .wing-r { transform-origin: 88px 90px; }
-  .bird .leg { transform-box: view-box; transition: transform .2s var(--ease); }
-  .bird .lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); transition: transform .09s ease-in; }
-  .bird.blink .lid { transform: scaleY(1); }
-
-  .bird.flying .wing-l { animation: flap-l .16s ease-in-out infinite alternate; }
-  .bird.flying .wing-r { animation: flap-r .16s ease-in-out infinite alternate; }
-  .bird.flying .leg { transform: translateY(-7px); }
-  .bird.landing .bird-inner { animation: land .42s var(--ease); }
-  .bird.hop .bird-inner { animation: hop .55s cubic-bezier(.3, .6, .4, 1); }
-
-  .owl-bubble { position: absolute; left: 0; top: 0; padding: 8px 14px; border-radius: 12px; background: var(--ink); color: #fff; font: 600 14px/1.3 var(--sans); white-space: nowrap; box-shadow: 0 12px 30px -10px rgba(29, 21, 48, .5); opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .3s var(--ease); }
-  .owl-bubble::before { content: ""; position: absolute; left: var(--tail, 50%); top: -6px; width: 12px; height: 12px; margin-left: -6px; background: var(--ink); border-radius: 2px; transform: rotate(45deg); }
-  .owl-bubble.on { opacity: 1; transform: none; }
-
-  @keyframes flap-l { from { transform: rotate(55deg); } to { transform: rotate(140deg); } }
-  @keyframes flap-r { from { transform: rotate(-55deg); } to { transform: rotate(-140deg); } }
-  @keyframes land { 0% { transform: none; } 35% { transform: translateY(6px) scale(1.06, .9); } 70% { transform: translateY(-2px) scale(.98, 1.03); } 100% { transform: none; } }
-  @keyframes hop { 0% { transform: none; } 15% { transform: translateY(4px) scale(1.05, .92); } 50% { transform: translateY(-30px); } 85% { transform: translateY(3px) scale(1.04, .94); } 100% { transform: none; } }
-  @keyframes shiver { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(7deg); } 55% { transform: rotate(-5deg); } 80% { transform: rotate(2deg); } }
-  @media (prefers-reduced-motion: reduce) {
-    .bird *, .branch * { animation: none !important; transition: none !important; }
-  }
 </style>
 </head>
 <body>
@@ -424,41 +396,19 @@
   </nav>
 </header>
 
-<div class="perch" aria-hidden="true">
-  <div class="sway" id="sway">
-    <svg class="branch" id="branch"></svg>
-    <div class="bird" id="bird">
-      <div class="bird-inner">
-        <div class="bird-glow"></div>
-        <svg class="bird-body" viewBox="0 0 120 160">
-          <defs>
-            <linearGradient id="bd-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#43306E"/><stop offset="1" stop-color="#1D1530"/></linearGradient>
-            <linearGradient id="bd-wing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A2C5A"/><stop offset="1" stop-color="#150E27"/></linearGradient>
-          </defs>
-          <path d="M50 138 L60 158 L70 138 Z" fill="#150E27"/>
-          <g class="leg"><path d="M50 138 V151" stroke="#F2A33A" stroke-width="5" stroke-linecap="round"/><path d="M42 155 Q50 148 58 155" fill="none" stroke="#C47A16" stroke-width="4" stroke-linecap="round"/></g>
-          <g class="leg"><path d="M70 138 V151" stroke="#F2A33A" stroke-width="5" stroke-linecap="round"/><path d="M62 155 Q70 148 78 155" fill="none" stroke="#C47A16" stroke-width="4" stroke-linecap="round"/></g>
-          <ellipse cx="60" cy="110" rx="34" ry="36" fill="url(#bd-body)"/>
-          <ellipse cx="60" cy="118" rx="21" ry="25" fill="#ECE8F5"/>
-          <path d="M51 108 q4 4 8 0 M61 108 q4 4 8 0 M46 118 q4 4 8 0 M56 118 q4 4 8 0 M66 118 q4 4 8 0 M51 128 q4 4 8 0 M61 128 q4 4 8 0" fill="none" stroke="#C9C2DA" stroke-width="2" stroke-linecap="round"/>
-          <g class="wing wing-l"><path d="M32 88 C17 100 15 126 28 142 C36 124 39 104 32 88 Z" fill="url(#bd-wing)"/><path d="M28 104 L24 122 M33 108 L30 128" stroke="#5E4C86" stroke-width="2" stroke-linecap="round"/></g>
-          <g class="wing wing-r"><path d="M88 88 C103 100 105 126 92 142 C84 124 81 104 88 88 Z" fill="url(#bd-wing)"/><path d="M92 104 L96 122 M87 108 L90 128" stroke="#5E4C86" stroke-width="2" stroke-linecap="round"/></g>
-        </svg>
-        <div class="bird-head" id="bird-head"><svg viewBox="0 0 1024 1024"><defs><linearGradient id="bd-gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient><filter id="bd-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity=".35"/></filter>
-<linearGradient id="bd-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#43306E"/><stop offset="1" stop-color="#150E27"/></linearGradient>
-<radialGradient id="bd-eye" cx=".38" cy=".35" r=".75"><stop offset="0" stop-color="#FFE3A3"/><stop offset=".55" stop-color="#F6A93B"/><stop offset="1" stop-color="#C9700F"/></radialGradient>
-<linearGradient id="bd-br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFC6E6"/></linearGradient>
-<radialGradient id="bd-moon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F2A33A" stop-opacity=".35"/><stop offset="1" stop-color="#F2A33A" stop-opacity="0"/></radialGradient>
-<clipPath id="bd-lc450"><circle cx="450" cy="470" r="76"/></clipPath><clipPath id="bd-lc574"><circle cx="574" cy="470" r="76"/></clipPath></defs><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bd-bg)"/><circle cx="760" cy="250" r="150" fill="url(#bd-moon)"/><circle cx="250" cy="230" r="5" fill="#fff" fill-opacity=".55"/><circle cx="318" cy="180" r="3" fill="#fff" fill-opacity=".55"/><circle cx="812" cy="420" r="4" fill="#fff" fill-opacity=".55"/><circle cx="214" cy="360" r="3" fill="#fff" fill-opacity=".55"/><g><path d="M 452 262 C 368 262 352 300 352 372 L 352 452 C 352 506 328 532 276 538 C 328 544 352 570 352 624 L 352 700 C 352 772 368 806 452 806" fill="none" stroke="url(#bd-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="M 572 262 C 656 262 672 300 672 372 L 672 452 C 672 506 696 532 748 538 C 696 544 672 570 672 624 L 672 700 C 672 772 656 806 572 806" fill="none" stroke="url(#bd-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><circle cx="450" cy="470" r="76" fill="#120B22"/><circle cx="450" cy="470" r="64" fill="url(#bd-eye)"/><g class="pupil"><circle cx="450" cy="476" r="30" fill="#120B22"/><circle cx="436" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#bd-lc450)"><rect class="lid" x="370" y="390" width="160" height="160" fill="#2E2150"/></g><circle cx="574" cy="470" r="76" fill="#120B22"/><circle cx="574" cy="470" r="64" fill="url(#bd-eye)"/><g class="pupil"><circle cx="574" cy="476" r="30" fill="#120B22"/><circle cx="560" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#bd-lc574)"><rect class="lid" x="494" y="390" width="160" height="160" fill="#2E2150"/></g><path d="M 488 572 L 536 572 L 512 612 Z" fill="#F2A33A" stroke="#F2A33A" stroke-width="16" stroke-linejoin="round"/><rect x="430" y="664" width="164" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.5"/><rect x="456" y="712" width="112" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.32"/></g><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#bd-gloss)"/><rect x="102" y="102" width="820" height="820" rx="184" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="4"/></svg></div>
-      </div>
-    </div>
-  </div>
-  <div class="owl-bubble" id="owl-bubble">Who pushed to main?</div>
-</div>
-
+<div class="owl-say" id="owl-say" role="status" aria-live="polite"></div>
 <main>
-<section class="hero" id="top" aria-label="Introduction">
-  <div class="hero-inner">
+<section class="track" id="top" aria-label="Introduction">
+  <div class="stick">
+    <div class="hero-slot" id="hero-slot" role="button" tabindex="0" aria-label="Click the owl to hear what it says">
+      <div class="hero-glow" id="hero-glow"></div>
+      <div id="hero-wrap"><svg class="owl hero-owl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="280" height="280" role="img" aria-label="Sarkhan’s Claude Starter logo, a night owl"><defs><linearGradient id="hr-gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient><filter id="hr-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity=".35"/></filter>
+<linearGradient id="hr-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#43306E"/><stop offset="1" stop-color="#150E27"/></linearGradient>
+<radialGradient id="hr-eye" cx=".38" cy=".35" r=".75"><stop offset="0" stop-color="#FFE3A3"/><stop offset=".55" stop-color="#F6A93B"/><stop offset="1" stop-color="#C9700F"/></radialGradient>
+<linearGradient id="hr-br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFC6E6"/></linearGradient>
+<radialGradient id="hr-moon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F2A33A" stop-opacity=".35"/><stop offset="1" stop-color="#F2A33A" stop-opacity="0"/></radialGradient>
+<clipPath id="hr-lc450"><circle cx="450" cy="470" r="76"/></clipPath><clipPath id="hr-lc574"><circle cx="574" cy="470" r="76"/></clipPath></defs><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#hr-bg)"/><circle cx="760" cy="250" r="150" fill="url(#hr-moon)"/><circle cx="250" cy="230" r="5" fill="#fff" fill-opacity=".55"/><circle cx="318" cy="180" r="3" fill="#fff" fill-opacity=".55"/><circle cx="812" cy="420" r="4" fill="#fff" fill-opacity=".55"/><circle cx="214" cy="360" r="3" fill="#fff" fill-opacity=".55"/><g filter="url(#hr-sh)"><path d="M 452 262 C 368 262 352 300 352 372 L 352 452 C 352 506 328 532 276 538 C 328 544 352 570 352 624 L 352 700 C 352 772 368 806 452 806" fill="none" stroke="url(#hr-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="M 572 262 C 656 262 672 300 672 372 L 672 452 C 672 506 696 532 748 538 C 696 544 672 570 672 624 L 672 700 C 672 772 656 806 572 806" fill="none" stroke="url(#hr-br)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><circle cx="450" cy="470" r="76" fill="#120B22"/><circle cx="450" cy="470" r="64" fill="url(#hr-eye)"/><g class="pupil"><circle cx="450" cy="476" r="30" fill="#120B22"/><circle cx="436" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#hr-lc450)"><rect class="lid" x="370" y="390" width="160" height="160" fill="#2E2150"/></g><circle cx="574" cy="470" r="76" fill="#120B22"/><circle cx="574" cy="470" r="64" fill="url(#hr-eye)"/><g class="pupil"><circle cx="574" cy="476" r="30" fill="#120B22"/><circle cx="560" cy="460" r="11" fill="#fff" fill-opacity=".95"/></g><g clip-path="url(#hr-lc574)"><rect class="lid" x="494" y="390" width="160" height="160" fill="#2E2150"/></g><path d="M 488 572 L 536 572 L 512 612 Z" fill="#F2A33A" stroke="#F2A33A" stroke-width="16" stroke-linejoin="round"/><rect x="430" y="664" width="164" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.5"/><rect x="456" y="712" width="112" height="22" rx="11" fill="#ECE8F5" fill-opacity="0.32"/></g><rect x="100" y="100" width="824" height="824" rx="186" fill="url(#hr-gloss)"/><rect x="102" y="102" width="820" height="820" rx="184" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="4"/></svg></div>
+    </div>
     <div class="hero-copy" id="hero-copy">
       <h1>Claude writes the code.<span>The starter checks it.</span></h1>
       <p class="lead">Rules Claude Code can't skip, a team of specialist agents, and a report on every change.</p>
@@ -883,7 +833,48 @@
     return run > 0 ? clamp(-el.getBoundingClientRect().top / run) : 0;
   };
 
-  const nav = $("#nav");
+  const nav = $("#nav"), navMark = $("#nav-mark");
+  const heroWrap = $("#hero-wrap"), heroSlot = $("#hero-slot"), heroOwl = $(".hero-owl");
+  const heroCopy = $("#hero-copy"), heroGlow = $("#hero-glow");
+  let owlTimers = [], owlAway = false;
+  function wakeOwl() {
+    owlTimers.forEach(clearTimeout);
+    heroWrap.classList.remove("blink");
+    if (reduce.matches) { heroWrap.classList.remove("asleep"); return; }
+    heroWrap.classList.add("asleep");
+    owlTimers = [
+      setTimeout(() => heroWrap.classList.remove("asleep"), 500),
+      setTimeout(() => heroWrap.classList.add("blink"), 1900),
+      setTimeout(() => heroWrap.classList.remove("blink"), 2050),
+    ];
+  }
+  function watchOwl(nearTop) {
+    if (!nearTop && !owlAway) {
+      owlAway = true;
+      owlTimers.forEach(clearTimeout);
+      heroWrap.classList.remove("blink");
+      heroWrap.classList.add("asleep");
+    } else if (nearTop && owlAway) {
+      owlAway = false;
+      wakeOwl();
+    }
+  }
+
+  function renderHero(p) {
+    const u = span(p, 0, .95), t = u * u * (3 - 2 * u);
+    const from = heroSlot.getBoundingClientRect(), to = navMark.getBoundingClientRect();
+    const s = 1 + (to.width / from.width - 1) * t;
+    heroOwl.style.transform = `translate(${(to.left - from.left) * t}px, ${(to.top - from.top) * t}px) scale(${s})`;
+    const docked = t > .995;
+    heroOwl.style.opacity = docked ? 0 : 1;
+    nav.classList.toggle("docked", docked);
+    heroGlow.style.opacity = 1 - t;
+    heroCopy.style.opacity = 1 - span(p, .05, .7);
+    heroCopy.style.transform = `translateY(${-80 * span(p, 0, .8)}px)`;
+    heroCopy.style.visibility = p > .71 ? "hidden" : "";
+    watchOwl(p < .06);
+  }
+
   const kw = (t) => [t, "k"], str = (t) => [t, "s"], tx = (t) => [t, ""];
   const STAGES = [
     {
@@ -1037,13 +1028,13 @@
     ledgerRows.forEach((row) => row.classList.toggle("in", row.getBoundingClientRect().top < line));
   }
 
-  const scenes = { story: renderStory, layers: renderLayers, agents: renderAgents, modes: renderModes };
+  const scenes = { top: renderHero, story: renderStory, layers: renderLayers, agents: renderAgents, modes: renderModes };
   const tracks = $$(".track");
   let ticking = false;
   function frame() {
     ticking = false;
     nav.classList.toggle("lined", scrollY > 8);
-    if (isStatic()) return;
+    if (isStatic()) return watchOwl(scrollY < innerHeight * .5);
     for (const t of tracks) scenes[t.id](progress(t));
     renderLedger();
   }
@@ -1051,6 +1042,10 @@
     const animated = !isStatic();
     root.classList.toggle("scroll-ready", animated);
     if (animated) return frame();
+    heroOwl.style.transform = "";
+    heroOwl.style.opacity = "";
+    heroCopy.style.cssText = "";
+    heroGlow.style.opacity = "";
     staticStory();
     staticLayers();
     renderAgents(1);
@@ -1064,6 +1059,7 @@
   reduce.addEventListener("change", setMode);
   narrow.addEventListener("change", setMode);
   setMode();
+  if (scrollY < innerHeight * .2) wakeOwl();
 
   const count = $("#count"), bars = $("#bars"), TOTAL = 37;
   if (!reduce.matches) {
@@ -1128,353 +1124,106 @@
 </script>
 <script>
 (() => {
-  const bird = document.getElementById("bird");
-  const head = document.getElementById("bird-head");
-  const pupils = [...head.querySelectorAll(".pupil")];
-  const branch = document.getElementById("branch");
-  const sway = document.getElementById("sway");
-  const bubble = document.getElementById("owl-bubble");
-  const nav = document.getElementById("nav");
+  const LINES = [
+    "Who pushed to main?",
+    "I read your .env. Kidding. I'm not allowed to.",
+    "That package doesn't exist. I checked. Twice.",
+    "// TODO: write fewer TODOs",
+    "Claude writes the code. I just stare at it.",
+    "Your tests passed. I saw it with my own eyes. All three of them.",
+    "No any. No @ts-ignore. No excuses.",
+    "Force-push? Not on my branch.",
+    "I never sleep. I just blink a lot.",
+    "Hoo reviewed this? Me.",
+    "Three files? Fine. A fourth one? Call the team.",
+    "\"It works on my machine\" is not a test result.",
+    "I don't do vibes. I do /verify.",
+    "Co-Authored-By: nobody. Your commits stay yours.",
+    "catch {} is where bugs go to hide. Not on my watch.",
+    "left-pad isn't installed. Never guess.",
+    "Claude asked if this is production-ready. I said: show me the tests.",
+    "I've seen things. Mostly console.log.",
+    "Your design is locked. Even Claude can't touch it.",
+    "Ship it? Run /ship. Don't just git push and pray.",
+    "Fun fact: I count every mistake I stop. It's my hobby.",
+    "A reviewer that never sleeps. That's the job description.",
+    "Claude is fast. I make sure it's also right.",
+    "If it's not in package.json, it's not real.",
+  ];
+
+  const bubble = document.getElementById("owl-say");
+  const heroSlot = document.getElementById("hero-slot");
+  const heroOwl = heroSlot.querySelector(".owl");
+  const endOwl = document.querySelector(".end-owl");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-  const BODY_W = 120, FEET = 154;
+  let queue = [], last = "", hideTimer = 0, shownAt = 0, blinkTimer = 0;
 
-  let W = innerWidth, scale = 1, length = 240, baseY = 400, edge = true;
-  let x = 0, landed = false, lastScrollY = scrollY, scrolling = false, reactUntil = 0;
-  let settleTimer = 0, blinkTimer = 0, bubbleTimer = 0, pointer = null;
-
-  const pose = { tilt: 0, nod: 0, lx: 0, ly: 0 };
-  const goal = { tilt: 0, nod: 0, lx: 0, ly: 0 };
-  let poseFrame = 0, poseTime = 0;
-
-  function renderPose() {
-    head.style.transform = `translate3d(0, ${pose.nod.toFixed(2)}px, 0) rotate(${pose.tilt.toFixed(2)}deg)`;
-    for (const pupil of pupils) pupil.setAttribute("transform", `translate(${pose.lx.toFixed(2)} ${pose.ly.toFixed(2)})`);
-  }
-
-  function animatePose(now) {
-    const dt = Math.min(64, now - (poseTime || now));
-    poseTime = now;
-    const headEase = 1 - Math.exp(-dt / 140), eyeEase = 1 - Math.exp(-dt / 70);
-    let moving = false;
-    for (const key of Object.keys(pose)) {
-      const ease = key === "lx" || key === "ly" ? eyeEase : headEase;
-      pose[key] += (goal[key] - pose[key]) * ease;
-      if (Math.abs(goal[key] - pose[key]) > 0.05) moving = true;
-      else pose[key] = goal[key];
+  function nextLine() {
+    if (!queue.length) {
+      queue = LINES.filter((line) => line !== last);
+      for (let i = queue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [queue[i], queue[j]] = [queue[j], queue[i]];
+      }
     }
-    renderPose();
-    poseFrame = moving ? requestAnimationFrame(animatePose) : 0;
-    if (!moving) poseTime = 0;
-  }
-
-  function setGoal(next) {
-    Object.assign(goal, next);
-    if (reduce.matches) {
-      Object.assign(pose, goal);
-      return renderPose();
-    }
-    if (!poseFrame) poseFrame = requestAnimationFrame(animatePose);
-  }
-
-  function random(seed) {
-    let state = seed;
-    return () => {
-      state = (state * 1664525 + 1013904223) % 4294967296;
-      return state / 4294967296;
-    };
-  }
-
-  function session(key) {
-    try {
-      const seen = sessionStorage.getItem(key) === "1";
-      sessionStorage.setItem(key, "1");
-      return seen;
-    } catch {
-      return false;
-    }
-  }
-
-  const k = (px) => clamp((W + 20 - px) / (length + 20), 0, 1);
-  const centerY = (px) => {
-    const t = k(px);
-    return baseY - 4 * t + 7 * t * t + 1.6 * Math.sin(t * 8.5) + 0.8 * Math.sin(t * 21);
-  };
-  const thickness = (px) => (edge ? 4 : 3) + (edge ? 16 : 13) * Math.pow(1 - k(px), 1.25);
-  const surfaceY = (px) => centerY(px) - thickness(px) / 2;
-  const tipX = () => W - length;
-
-  const GREENS = [["#5F8F5A", "#7FAE6E", "#C9DDB6"], ["#4C7A4B", "#6A9A5E", "#BFD6AA"], ["#6E9A55", "#93BA72", "#D8E7C3"]];
-  const AUTUMN = ["#D98A22", "#F2A33A", "#FBE0B0"];
-
-  function leaf(lx, ly, angle, size, colors, delay) {
-    const n = (v) => (v * size).toFixed(1);
-    return `<g class="leaf" style="transform-origin: ${lx.toFixed(1)}px ${ly.toFixed(1)}px; --d: ${delay.toFixed(2)}s"><g transform="translate(${lx.toFixed(1)} ${ly.toFixed(1)}) rotate(${angle.toFixed(1)})">`
-      + `<path d="M0 0 Q${n(-1.5)} ${n(0.2)} ${n(-2.4)} 0" stroke="#4A3122" stroke-width="1.2" fill="none"/>`
-      + `<path d="M${n(-2.2)} 0 C${n(-3.4)} ${n(-1.6)} ${n(-6.6)} ${n(-1.7)} ${n(-8.6)} 0 C${n(-6.6)} ${n(1.7)} ${n(-3.4)} ${n(1.6)} ${n(-2.2)} 0 Z" fill="${colors[0]}"/>`
-      + `<path d="M${n(-2.2)} 0 C${n(-3.4)} ${n(-1.6)} ${n(-6.6)} ${n(-1.7)} ${n(-8.6)} 0 Z" fill="${colors[1]}" opacity=".55"/>`
-      + `<path d="M${n(-2.4)} 0 L${n(-8.2)} 0" stroke="${colors[2]}" stroke-width=".9" opacity=".8"/>`
-      + [0.38, 0.55, 0.72].map((f) => `<path d="M${n(-8.6 * f)} 0 l${n(-1.1)} ${n(-0.9)} M${n(-8.6 * f)} 0 l${n(-1.1)} ${n(0.9)}" stroke="${colors[2]}" stroke-width=".6" opacity=".6"/>`).join("")
-      + "</g></g>";
-  }
-
-  function twig(rand, startK, up, reach) {
-    const px = W + 20 - (length + 20) * startK;
-    const py = centerY(px) + (up ? -thickness(px) * 0.3 : thickness(px) * 0.3);
-    const ex = px - reach * (0.75 + rand() * 0.3), ey = py + (up ? -1 : 1) * reach * (0.28 + rand() * 0.18);
-    const cx = px - reach * 0.35, cy = py + (up ? -1 : 1) * reach * 0.04;
-    let out = `<path d="M${px.toFixed(1)} ${py.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="url(#bark)" stroke-width="${(2.4 + rand() * 1.4).toFixed(1)}" fill="none" stroke-linecap="round"/>`;
-    const count = 3 + Math.floor(rand() * 2);
-    for (let i = 0; i < count; i++) {
-      const f = 0.4 + (i / count) * 0.6;
-      const palette = rand() < 0.18 ? AUTUMN : GREENS[Math.floor(rand() * GREENS.length)];
-      out += leaf(px + (ex - px) * f, py + (ey - py) * f, (up ? -150 : 150) + (i % 2 ? 1 : -1) * (35 + rand() * 40), 2.2 + rand() * 0.8, palette, rand() * 0.15);
-    }
-    return out + leaf(ex, ey, (up ? -160 : 160) + (rand() - 0.5) * 30, 2.5, GREENS[0], rand() * 0.15);
-  }
-
-  function blockedRects() {
-    return [...document.querySelectorAll(".brand, .navlinks a")].map((element) => element.getBoundingClientRect()).filter((r) => r.width > 0);
-  }
-
-  const halfWidth = () => 34 * scale + 10;
-
-  function layout() {
-    W = innerWidth;
-    const margin = (W - Math.min(1160, W - 48)) / 2;
-    edge = margin >= 60;
-    if (edge) {
-      scale = clamp((margin + 40) / 120, 0.82, 1.05);
-      baseY = Math.round(innerHeight * 0.6);
-      length = Math.round(Math.max(margin + 34, 128 * scale));
-      return;
-    }
-    scale = W < 720 ? 0.31 : 0.36;
-    baseY = (nav.getBoundingClientRect().height || 72) - 9;
-    const brand = document.querySelector(".brand").getBoundingClientRect();
-    const rightmost = Math.max(0, ...blockedRects().map((r) => r.right));
-    length = Math.min(W - rightmost >= halfWidth() * 2 + 12 ? clamp(W * 0.3, 260, 460) : W - brand.right - 30, W - 20);
-  }
-
-  function drawBranch() {
-    const rand = random(7);
-    branch.setAttribute("width", W);
-    branch.setAttribute("height", baseY + 90);
-    const steps = 70, top = [], bottom = [], highlight = [];
-    for (let i = 0; i <= steps; i++) {
-      const px = W + 20 - (length + 20) * (i / steps);
-      const half = thickness(px) / 2;
-      top.push(`${px.toFixed(1)},${(centerY(px) - half).toFixed(1)}`);
-      bottom.unshift(`${px.toFixed(1)},${(centerY(px) + half).toFixed(1)}`);
-      highlight.push(`${px.toFixed(1)},${(centerY(px) - half * 0.55).toFixed(1)}`);
-    }
-    let bark = "";
-    for (let i = 0; i < Math.round(length / 9); i++) {
-      const t = 0.02 + rand() * 0.88;
-      const px = W + 20 - (length + 20) * t, cy = centerY(px), half = thickness(px) / 2;
-      if (half < 2.4) continue;
-      const len = 6 + rand() * 14 * (1 - t * 0.6);
-      bark += `<path d="M${px.toFixed(1)} ${(cy + (rand() - 0.5) * half * 1.3).toFixed(1)} q${(-len / 2).toFixed(1)} ${((rand() - 0.5) * 2).toFixed(1)} ${(-len).toFixed(1)} ${((rand() - 0.5) * 1.5).toFixed(1)}" stroke="#3B2618" stroke-width="${(0.6 + rand() * 0.9).toFixed(2)}" fill="none" stroke-linecap="round" opacity="${(0.35 + rand() * 0.4).toFixed(2)}"/>`;
-    }
-    const knotX = W + 20 - (length + 20) * (edge ? 0.62 : 0.28), knotY = centerY(knotX), knotHalf = thickness(knotX) / 2;
-    const knot = `<ellipse cx="${knotX.toFixed(1)}" cy="${(knotY + knotHalf * 0.15).toFixed(1)}" rx="${(knotHalf * 0.9).toFixed(1)}" ry="${(knotHalf * 0.5).toFixed(1)}" fill="#3B2618" opacity=".55"/><ellipse cx="${(knotX + 1).toFixed(1)}" cy="${knotY.toFixed(1)}" rx="${(knotHalf * 0.45).toFixed(1)}" ry="${(knotHalf * 0.22).toFixed(1)}" fill="#8C6545" opacity=".7"/>`;
-    const twigs = edge ? twig(rand, 0.6, false, 40) + twig(rand, 0.82, true, 28) : twig(rand, 0.42, false, 46) + twig(rand, 0.72, false, 36);
-    const tx = tipX(), ty = centerY(tx);
-    const tipLeaves = leaf(tx + 2, ty, 172, 2.6, GREENS[1], 0.05) + leaf(tx + 6, ty + 1, 140, 2.2, GREENS[0], 0.1) + leaf(tx + 4, ty - 1, -150, 2.1, GREENS[2], 0);
-    branch.innerHTML = `<defs>
-      <linearGradient id="bark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A6243"/><stop offset=".55" stop-color="#6B4A35"/><stop offset="1" stop-color="#3E2A1D"/></linearGradient>
-      <filter id="branch-shadow" x="-5%" y="-50%" width="110%" height="250%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#1D1530" flood-opacity=".22"/></filter>
-    </defs>
-    <g filter="url(#branch-shadow)">${twigs}<polygon points="${top.join(" ")} ${bottom.join(" ")}" fill="url(#bark)"/>${knot}${bark}<polyline points="${highlight.join(" ")}" fill="none" stroke="#B08560" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>${tipLeaves}</g>`;
-    sway.style.transformOrigin = `${W + 20}px ${baseY}px`;
-  }
-
-  function place(px, py = surfaceY(px) - FEET * scale) {
-    bird.style.transform = `translate3d(${(px - (BODY_W / 2) * scale).toFixed(1)}px, ${py.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-  }
-
-  function freeAt(px, rects) {
-    const half = halfWidth();
-    return rects.every((r) => r.right < px - half || r.left > px + half);
-  }
-
-  function perchX() {
-    if (edge) return W - 46 * scale - 10;
-    const rects = blockedRects();
-    const free = [];
-    for (let px = W - 34 * scale - 14; px >= tipX() + 50; px -= 4) if (freeAt(px, rects)) free.push(px);
-    if (!free.length) return W - 40;
-    let best = [free[0], free[0]], run = [free[0], free[0]];
-    for (let i = 1; i < free.length; i++) {
-      run = run[1] - free[i] <= 4 ? [run[0], free[i]] : [free[i], free[i]];
-      if (run[0] - run[1] > best[0] - best[1]) best = run;
-    }
-    return (best[0] + best[1]) / 2;
-  }
-
-  function bounceBranch(strength) {
-    if (reduce.matches) return;
-    const angle = -strength * clamp(160 / Math.max(80, W + 20 - x), 0.6, 1.6);
-    sway.animate([
-      { transform: "rotate(0deg)" },
-      { transform: `rotate(${angle}deg)`, offset: 0.25 },
-      { transform: `rotate(${-angle * 0.45}deg)`, offset: 0.55 },
-      { transform: `rotate(${angle * 0.18}deg)`, offset: 0.8 },
-      { transform: "rotate(0deg)" },
-    ], { duration: 900, easing: "ease-out" });
-    branch.classList.remove("shiver");
-    void branch.getBoundingClientRect();
-    branch.classList.add("shiver");
+    last = queue.pop();
+    return last;
   }
 
   function blink(times = 1) {
-    bird.classList.add("blink");
+    document.body.classList.add("blink");
     setTimeout(() => {
-      bird.classList.remove("blink");
-      if (times > 1) setTimeout(() => blink(times - 1), 140);
-    }, 130);
+      document.body.classList.remove("blink");
+      if (times > 1) setTimeout(() => blink(times - 1), 150);
+    }, 140);
   }
 
   function scheduleBlink() {
     clearTimeout(blinkTimer);
     blinkTimer = setTimeout(() => {
-      if (!document.hidden && Date.now() > reactUntil) blink(Math.random() < 0.25 ? 2 : 1);
+      if (!document.hidden && !reduce.matches) blink(Math.random() < 0.25 ? 2 : 1);
       scheduleBlink();
-    }, 3500 + Math.random() * 4500);
+    }, 3000 + Math.random() * 4000);
   }
 
-  function lookAt(targetX, targetY, turn = false) {
-    const box = bird.getBoundingClientRect();
-    const dx = targetX - (box.left + box.width / 2), dy = targetY - (box.top + box.height * 0.32);
-    const distance = Math.hypot(dx, dy) || 1, reach = Math.min(1, distance / 220) * 26;
-    setGoal({ lx: (dx / distance) * reach, ly: (dy / distance) * reach, tilt: turn ? clamp(dx * 0.03, -14, 14) : clamp(dx * 0.008, -4, 4), nod: turn && dy > 0 ? 5 : 0 });
+  function hide() {
+    bubble.classList.remove("on");
   }
 
-  function followPointer() {
-    if (!landed || scrolling || Date.now() < reactUntil) return;
-    if (pointer) lookAt(pointer[0], pointer[1]);
-    else setGoal({ lx: 0, ly: 0, tilt: 0, nod: 0 });
-  }
-
-  function react(element, kind) {
-    if (!landed || reduce.matches) return;
-    const box = element.getBoundingClientRect();
-    const targetX = box.left + box.width / 2, targetY = box.top + box.height / 2;
-    if (kind === "alert") {
-      reactUntil = Date.now() + 1300;
-      lookAt(targetX, targetY, true);
-      bird.classList.add("alert");
-      setTimeout(() => {
-        bird.classList.remove("alert");
-        followPointer();
-      }, 1200);
-    } else if (kind === "nod") {
-      reactUntil = Date.now() + 1100;
-      lookAt(targetX, targetY);
-      [[9, 2], [0, 0], [7, -2], [0, 0]].forEach(([nod, tilt], i) => setTimeout(() => setGoal({ nod, tilt }), 120 + i * 220));
-      setTimeout(followPointer, 1150);
-    } else {
-      reactUntil = Date.now() + 700;
-      bird.classList.remove("hop");
-      void bird.getBoundingClientRect();
-      bird.classList.add("hop");
-      setTimeout(() => bounceBranch(1.4), 460);
-      setTimeout(() => bird.classList.remove("hop"), 600);
-    }
-  }
-
-  function watch(selector, kind) {
-    const element = document.querySelector(selector);
-    if (!element) return;
-    let wasOn = element.classList.contains("on");
-    new MutationObserver(() => {
-      const isOn = element.classList.contains("on");
-      if (isOn && !wasOn) react(element, kind);
-      wasOn = isOn;
-    }).observe(element, { attributes: true, attributeFilter: ["class"] });
-  }
-
-  function onScroll() {
-    const delta = scrollY - lastScrollY;
-    lastScrollY = scrollY;
-    if (!landed || reduce.matches || Math.abs(delta) < 2 || Date.now() < reactUntil) return;
-    scrolling = true;
-    setGoal(delta > 0 ? { lx: -10, ly: 26, tilt: -6, nod: 5 } : { lx: -6, ly: -22, tilt: 3, nod: -3 });
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(() => {
-      scrolling = false;
-      followPointer();
-    }, 320);
-  }
-
-  function showBubble() {
-    if (session("owl-bubble")) return blink(2);
-    const box = bird.getBoundingClientRect();
-    const width = bubble.offsetWidth;
-    const center = box.left + box.width / 2;
-    const left = clamp(center - width / 2, 8, W - width - 8);
+  function say(owl) {
+    const box = owl.getBoundingClientRect();
+    if (!box.width || getComputedStyle(owl).opacity === "0") return;
+    bubble.classList.remove("on");
+    bubble.textContent = nextLine();
+    const width = bubble.offsetWidth, height = bubble.offsetHeight;
+    const navBottom = document.getElementById("nav").getBoundingClientRect().bottom;
+    const roomRight = innerWidth - box.right > width * 0.7;
+    const anchorX = roomRight ? box.left + box.width * 0.82 : box.left + box.width * 0.18;
+    const left = Math.min(Math.max(roomRight ? anchorX - 22 : anchorX - width + 22, 12), innerWidth - width - 12);
+    const top = Math.max(box.top + box.height * 0.12 - height - 10, navBottom + 10);
     bubble.style.left = `${left}px`;
-    bubble.style.top = `${surfaceY(x) + 18}px`;
-    bubble.style.setProperty("--tail", `${center - left}px`);
+    bubble.style.top = `${top}px`;
+    bubble.style.setProperty("--tail", `${Math.min(Math.max(anchorX - left, 18), width - 18)}px`);
+    bubble.style.setProperty("--origin", `${anchorX - left}px 100%`);
+    void bubble.offsetWidth;
     bubble.classList.add("on");
-    clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(() => bubble.classList.remove("on"), 2600);
+    shownAt = scrollY;
+    blink();
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hide, 3800);
   }
 
-  function land() {
-    place(x);
-    landed = true;
-    scheduleBlink();
-    setTimeout(() => blink(2), 700);
-  }
-
-  function arrive() {
-    x = perchX();
-    if (reduce.matches || session("owl-arrived")) return land();
-    const endX = x - (BODY_W / 2) * scale, endY = surfaceY(x) - FEET * scale;
-    bird.classList.add("flying");
-    const flight = bird.animate([
-      { transform: `translate3d(${W + 40}px, ${endY - 260}px, 0) scale(${scale}) rotate(-18deg)` },
-      { transform: `translate3d(${endX - 90}px, ${endY + 40}px, 0) scale(${scale}) rotate(-6deg)`, offset: 0.55 },
-      { transform: `translate3d(${endX - 18}px, ${endY - 16}px, 0) scale(${scale}) rotate(6deg)`, offset: 0.85 },
-      { transform: `translate3d(${endX}px, ${endY}px, 0) scale(${scale}) rotate(0deg)` },
-    ], { duration: 1100, easing: "cubic-bezier(.25,.6,.3,1)", fill: "forwards" });
-    flight.onfinish = () => {
-      place(x);
-      flight.cancel();
-      bird.classList.remove("flying");
-      bird.classList.add("landing");
-      setTimeout(() => bird.classList.remove("landing"), 450);
-      bounceBranch(2.2);
-      land();
-    };
-  }
-
-  layout();
-  drawBranch();
-  place(-400, -400);
-  setTimeout(arrive, reduce.matches ? 0 : 350);
-
-  watch("#stamp", "alert");
-  watch("#eye-report", "nod");
-  watch("#done-pill", "hop");
-  bird.addEventListener("click", showBubble);
-  addEventListener("scroll", onScroll, { passive: true });
-  addEventListener("pointermove", (event) => {
-    pointer = [event.clientX, event.clientY];
-    followPointer();
+  heroSlot.addEventListener("click", () => say(heroOwl));
+  heroSlot.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    say(heroOwl);
+  });
+  endOwl.addEventListener("click", () => say(endOwl));
+  addEventListener("scroll", () => {
+    if (bubble.classList.contains("on") && Math.abs(scrollY - shownAt) > 60) hide();
   }, { passive: true });
-  document.addEventListener("pointerleave", () => {
-    pointer = null;
-    followPointer();
-  });
-  addEventListener("resize", () => {
-    layout();
-    drawBranch();
-    if (!landed) return;
-    x = perchX();
-    place(x);
-  });
+  scheduleBlink();
 })();
 </script>
 </body>
