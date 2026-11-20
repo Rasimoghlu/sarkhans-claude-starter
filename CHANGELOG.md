@@ -2,6 +2,12 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.9.0
+- **Pentest.** New `/pentest` skill: Claude tests your running app the way an attacker would (login, other users' data, admin rights, injection, XSS, SSRF, redirects, CSRF, rate limits, uploads, error pages, headers). A hole counts only with the real request and response that prove it, and each one becomes a failing test before it's fixed, after you agree. Findings go to `reports/pentest-<date>.md`.
+- **Safe by design.** A pentest reaches only your computer or a staging server you name. Security tools such as nmap, sqlmap, nuclei or ZAP are blocked against every other host, and the scope ends by itself after 2 hours.
+- `/security-audit` (reads the code) and `/pentest` (tests the running app) now appear side by side in the app and in the docs.
+- A ready GitHub workflow in `examples/github` runs Anthropic's security review on every pull request.
+
 ## 4.8.0
 - **A team per project.** Settings → Team rules can now hold several teams. Pick a default team for all your projects, and on any project's page choose another team or No team. Each team shows how many projects use it.
 - **Team rules in the plugin.** Plugin users on Windows, Linux and macOS can use team rules too: `/sarkhans-starter:team use <folder>` for the current project, `/sarkhans-starter:team set-default <folder>` for every project. You can also describe what you want in your own words. The team's work mode and language apply as well.

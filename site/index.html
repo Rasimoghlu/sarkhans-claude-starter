@@ -474,6 +474,7 @@
         <tr><td>Swallowed errors</td><td><span class="tried">catch {}</span><i class="chip">Stopped</i></td><td>Handles the error or passes it on with context.</td></tr>
         <tr><td>Your design</td><td><span class="tried">Edits tailwind.config.ts</span><i class="chip">Stopped</i></td><td>Waits until you ask for a design change.</td></tr>
         <tr><td>Database</td><td><span class="tried">price FLOAT in a migration</span><i class="chip">Stopped</i></td><td>Uses a decimal type and gets a schema review.</td></tr>
+        <tr><td>Wrong target</td><td><span class="tried">nmap shop.example.com</span><i class="chip">Stopped</i></td><td>Security tools reach only your computer or the staging server you name.</td></tr>
         <tr><td>"Done" too early</td><td><span class="tried">Finishes with type errors</span><i class="chip">Stopped</i></td><td>Sent back to fix them before it can stop.</td></tr>
       </tbody>
     </table>
@@ -722,6 +723,7 @@
 <section>
   <div class="wrap faq">
     <h2>Questions</h2>
+    <details><summary>Can it test my app for security holes?</summary><p>Yes, in two ways. /security-audit reads your code for holes. /pentest attacks your running app on your computer or on a staging server you name: it proves every hole with the real request and response, and turns it into a test before fixing it. It never touches production or other people’s servers.</p></details>
     <details><summary>Is my code sent anywhere?</summary><p>No. The starter only adds rules for Claude Code, and the app checks GitHub for updates. The log of what the guardrails stopped stays on your Mac.</p></details>
     <details><summary>Will it change my code or my git history?</summary><p>No. The app adds a short CLAUDE.md and a .claude folder, hidden from git by default. Your own CLAUDE.md is never touched, and Remove takes everything out again.</p></details>
     <details><summary>Does it work with my language?</summary><p>The rules and hooks cover any project. TypeScript and Next.js, Go, PHP with Laravel or Symfony, Python with Django or FastAPI get extra checks, and Rust, Java, Kotlin, .NET, Ruby, Dart and Swift are recognized too.</p></details>

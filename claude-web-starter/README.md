@@ -42,6 +42,8 @@ Bigger work runs through `/orchestrate`: Explore → `architect` plan → specia
 
 `reviewer`, `architect`, `data-architect` and `security-auditor` keep a **project memory** (`.claude/agent-memory/`): conventions, decisions and recurring mistakes they learn carry over to the next session. A hook keeps them read-only everywhere else. `/security-audit` runs in its own agent context, so the long audit doesn't fill your conversation.
 
+`/pentest` tests the running app the way an attacker would: authentication, IDOR, privilege, mass assignment, injection, XSS, SSRF, open redirects, CSRF, rate limits, uploads, error leaks, headers and CORS. It sends real requests and calls a finding confirmed only with the request and response that prove it; every confirmed hole becomes a failing regression test before it is fixed (after you agree). The target is limited by `.claude/scripts/pentest-scope.mjs` and a hook: this computer, or a staging server you name whose host says so (`staging`, `dev`, `test`, `qa`, `preview`, `sandbox`). Security tools (nmap, sqlmap, nuclei, ZAP, ffuf…) are blocked against any other host, and while a pentest runs, HTTP requests go only to the scope. The scope ends by itself after 2 hours.
+
 If the project has an `AGENTS.md` (Cursor, Codex…), the starter's `CLAUDE.md` imports it, so Claude reads both.
 
 ## Design policy
@@ -70,7 +72,7 @@ With a compose file, the installer maps services (e.g. Laravel Sail `laravel.tes
 Plus everywhere: secrets, env reads only in the config module, new files ≤ 400 lines, git rules (no commits on main/master, no AI mentions, no force push), no unapproved dependencies, no destructive DB/Docker commands, report sections.
 
 ## Skills
-- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/project-health`.
+- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
 - **Catalog** (`skills-catalog.json`): `frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `web-design-guidelines`, `emil-design-eng`, `vercel-react-best-practices`, plus the `playwright` and `context7` MCP servers.
 - **Recommended:** on a first install these are switched on automatically, based on the stack (skip with `--no-recommended`):
   - `context7` for every project;

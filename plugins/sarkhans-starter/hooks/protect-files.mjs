@@ -10,6 +10,9 @@ const filePath = toolInput.file_path || toolInput.notebook_path || toolInput.pat
 if (!filePath) ok();
 
 const name = basename(filePath);
+if (tool !== "Read" && tool !== "Grep" && tool !== "Glob" && /claude-hooks[\\/]pentest-scope/.test(filePath)) {
+  block("BLOCKED (protect-files): the pentest scope is changed only by .claude/scripts/pentest-scope.mjs, after the user has named the target.");
+}
 const rel = relPath(filePath);
 const isWrite = tool !== "Read" && tool !== "Grep" && tool !== "Glob";
 

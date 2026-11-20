@@ -66,7 +66,7 @@ const GUARDRAIL_CATEGORIES = [
   ["types", /\bany\b|ts-ignore|type: ignore|phpstan-ignore|nolint|noqa|loose comparison|strict_types|cast/i],
   ["errors", /swallow|empty `catch|except .*pass|err != nil/i],
   ["debug", /console\.log|print\(|var_dump|\bdd\(|fmt\.Print|debugger|debug output/i],
-  ["security", /sql|xss|injection|eval|shell=true|pickle|unserialize|tls|dangerouslysetinnerhtml|unescaped|csrf/i],
+  ["security", /pentest|sql|xss|injection|eval|shell=true|pickle|unserialize|tls|dangerouslysetinnerhtml|unescaped|csrf/i],
   ["database", /migration|foreign key|\bfk\b|normaliz|money|float|index|schema|data-architect/i],
 ];
 const HOOK_CATEGORIES = {

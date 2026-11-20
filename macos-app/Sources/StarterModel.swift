@@ -927,6 +927,7 @@ final class StarterModel: ObservableObject {
         "kickoff": "Plan a new project with you before any code is written.",
         "new-feature": "Build a feature end to end: plan, data, server, UI and tests.",
         "orchestrate": "Split a task across specialist agents and check every result.",
+        "pentest": "Attack your own running app on localhost or staging; every hole comes with proof and a test.",
         "project-health": "Scan the whole project for problems and fix the safe ones.",
         "security-audit": "Security audit (OWASP Top 10) with evidence and fixes.",
         "ship": "Commit, push and open a pull request, only when you ask.",
