@@ -2,6 +2,9 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.11.1
+- Projects set up with an early version of the starter now get the slim `CLAUDE.md` too. Before, their old copy of the rules stayed in place, including the old "report every problem" third-eye rule. Your project description, stack and commands are kept, and the old file is saved in `.claude/CLAUDE.md.before-4.6`.
+
 ## 4.11.0
 - **A quieter third eye.** Claude now reports only problems that matter: security holes, data loss, bugs that crash or give wrong results, a broken build, serious performance problems and vulnerable dependencies. No more style notes, naming tips or "might be a problem" guesses. Each finding names the file and line and what would go wrong. When nothing serious turns up, the section is one line: `No critical issues.`
 - **Rules stay in their projects.** The starter no longer writes rules into `~/.claude/CLAUDE.md`, so projects without the starter work like plain Claude Code again. Rules that earlier versions put there are removed on the next update, and your own text in that file is kept (backup: `~/.claude/CLAUDE.md.starter-backup`).
