@@ -48,4 +48,4 @@ Every change must not make latency, memory, query count or bundle size worse wit
 - Targets: LCP < 2.5s, INP < 200ms, CLS < 0.1.
 
 ## In your Third-eye report
-Mention any performance problem you noticed (N+1, missing pagination/indexes, missing timeouts, blocking I/O, oversized bundles) even if outside the task.
+Mention serious performance problems with real impact (N+1, unbounded queries, missing indexes on hot paths, missing timeouts, blocking I/O, oversized bundles) even if outside the task. No micro-optimizations.

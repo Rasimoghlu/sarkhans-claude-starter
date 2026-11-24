@@ -35,7 +35,7 @@ Size it first. One area and a few files → do it yourself, step by step. Severa
 5. UI (if any) following `styling-and-a11y.md` and the stack rules.
 6. Tests (follow `/write-tests` steps).
 
-Self-explanatory code, no comments. While working, note every problem you see in code you read (third eye) and fix the safe ones.
+Self-explanatory code, no comments. While working, note serious problems in code you read (third eye: security, data loss, wrong results, crashes, serious performance) and fix the safe ones.
 
 ## 5. Finish
 - `/verify` (full) until green. For non-trivial changes run the `reviewer` agent on the diff.

@@ -28,7 +28,7 @@ Get the change: `git diff --stat`, `git diff`, `git diff --staged`, untracked fi
 - **Standards** — naming, function/file size, errors with context, no comments (one short "why" line at most), no `any`/`Any`, no loose comparisons, no debug output.
 - **Tests** — changed behaviour covered, meaningful assertions, edge/error/authz cases.
 - **Scope & git hygiene** — unrelated changes, new dependencies, secrets or build output staged, any AI/Claude mention.
-Also report problems you notice in surrounding code the diff didn't touch, marked `[existing]`.
+Also report serious problems (blocker/major level only) in surrounding code the diff didn't touch, marked `[existing]`. No style or nitpicks for untouched code.
 
 ## Both modes
 **Design lock:** if `designMode` in `.claude/hooks/config.json` is `locked` and the task didn't ask for a design change, any visual change (class names, inline styles, colors, spacing, fonts, layout) is a blocker.

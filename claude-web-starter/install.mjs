@@ -11,25 +11,20 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const force = args.includes("--force");
-const globalOnly = args.includes("--global");
-const withGlobal = !args.includes("--no-global");
 const privateMode = !args.includes("--shared");
 const overwriteClaudeMd = args.includes("--overwrite-claude-md");
 const VERSION = readFileSync(join(here, "VERSION"), "utf8").trim();
 const uninstall = args.includes("--uninstall");
-const USAGE = `Usage: node install.mjs <project-dir> [--force] [--shared] [--no-global] [--overwrite-claude-md]
+const USAGE = `Usage: node install.mjs <project-dir> [--force] [--shared] [--overwrite-claude-md]
        node install.mjs <project-dir> --uninstall
-       node install.mjs --global
 
-By default an install does everything: project rules, hidden from git (private),
-and your personal rules in ~/.claude (CLAUDE.md section + no AI attribution).
+By default an install does everything inside the project, hidden from git (private).
+Nothing is written to ~/.claude, so projects without the starter are not affected.
 
   --force                update template files in .claude/ (CLAUDE.md is kept)
   --shared               commit-able install: don't hide CLAUDE.md and .claude/ from git
-  --no-global            don't touch ~/.claude
   --overwrite-claude-md  also replace an existing project CLAUDE.md
   --uninstall            remove the starter from the project (CLAUDE.md is kept as CLAUDE.md.bak)
-  --global               only install/update the personal rules in ~/.claude
   --list-skills          show the skill/MCP catalog (✔ = installed in <project-dir>)
   --language <name>      language Claude uses for explanations and reports (default English)
   --phase new|existing   set the project phase (new → /kickoff first; existing → design locked)
@@ -78,44 +73,28 @@ const STARTER_CLAUDE_MD_LINE = "The working rules, agents and skills live in `.c
 const GLOBAL_BEGIN = "<!-- claude-starter:begin -->";
 const GLOBAL_END = "<!-- claude-starter:end -->";
 
-function installGlobal() {
-  const dir = join(homedir(), ".claude");
-  mkdirSync(dir, { recursive: true });
-  const dest = join(dir, "CLAUDE.md");
-  const section = `${GLOBAL_BEGIN}\n${readFileSync(join(here, "global", "CLAUDE.md"), "utf8").trim()}\n${GLOBAL_END}`;
-  const current = existsSync(dest) ? readFileSync(dest, "utf8") : "";
-  const pattern = new RegExp(`${GLOBAL_BEGIN}[\\s\\S]*?${GLOBAL_END}\\n*`, "g");
-  let firstMatch = true;
-  const next = pattern.test(current)
-    ? current.replace(pattern, () => (firstMatch ? ((firstMatch = false), `${section}\n`) : ""))
-    : current.trim()
-      ? `${current.trimEnd()}\n\n${section}\n`
-      : `${section}\n`;
-  const notes = [];
-  if (next !== current) {
-    writeFileSync(dest, next);
-    notes.push(current ? "personal rules updated in ~/.claude/CLAUDE.md (your own text kept)" : "personal rules written to ~/.claude/CLAUDE.md");
-  }
+const LEGACY_GLOBAL_BLOCK = /^# Personal defaults \(all projects\)\n(?:(?!# )[^\n]*(?:\n|$))*/gm;
+const LEGACY_GLOBAL_SIGNATURE = "## You are my third eye";
 
-  const settingsPath = join(dir, "settings.json");
-  try {
-    const settings = existsSync(settingsPath) ? JSON.parse(readFileSync(settingsPath, "utf8")) : {};
-    const alreadySet = settings.attribution?.commit === "" && settings.attribution?.pr === "" && settings.includeCoAuthoredBy === false;
-    if (!alreadySet) {
-      settings.attribution = { commit: "", pr: "" };
-      settings.includeCoAuthoredBy = false;
-      writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
-      notes.push("AI attribution disabled in ~/.claude/settings.json");
-    }
-  } catch {
-    notes.push(`could not update ${settingsPath} (invalid JSON?) — add "attribution": {"commit": "", "pr": ""} by hand`);
-  }
-  log(notes.length ? `✔ Global: ${notes.join("; ")}` : "✔ Global: personal rules already up to date");
+function removeLegacyGlobalRules() {
+  const dest = join(homedir(), ".claude", "CLAUDE.md");
+  if (!existsSync(dest)) return;
+  const current = readFileSync(dest, "utf8").replace(/\r\n/g, "\n");
+  const next = current
+    .replace(new RegExp(`\\n*${GLOBAL_BEGIN}[\\s\\S]*?${GLOBAL_END}\\n*`, "g"), "\n\n")
+    .replace(LEGACY_GLOBAL_BLOCK, (block) => (block.includes(LEGACY_GLOBAL_SIGNATURE) ? "" : block))
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (next === current.trim()) return;
+  writeFileSync(`${dest}.starter-backup`, current);
+  if (next) writeFileSync(dest, `${next}\n`);
+  else rmSync(dest);
+  log("✔ Removed the starter's old global rules from ~/.claude/CLAUDE.md (backup: ~/.claude/CLAUDE.md.starter-backup) — the rules now apply only to projects with the starter installed");
 }
 
 function baseRulesHash() {
   const hash = createHash("sha256");
-  const sources = ["template", "packs", "global"]
+  const sources = ["template", "packs"]
     .flatMap((dir) => listFiles(join(here, dir)).map((file) => join(dir, file)))
     .filter((file) => !file.endsWith(".DS_Store"));
   for (const file of [...sources, "install.mjs"].sort()) {
@@ -238,11 +217,6 @@ if (args.includes("--rules-hash")) {
   process.exit(0);
 }
 
-if (globalOnly) {
-  installGlobal();
-  if (!target) process.exit(0);
-}
-
 const catalogOnly = args.includes("--register-skill") || args.includes("--unregister-skill");
 if (!target && !catalogOnly) {
   console.error(USAGE);
@@ -306,6 +280,7 @@ function runUninstall() {
   }
   const leftovers = existsSync(claudeDir) ? listFiles(claudeDir) : [];
 
+  removeLegacyGlobalRules();
   log(`\n✔ Claude starter removed from ${root}`);
   log(`  Removed ${removed.length} starter files from .claude/`);
   notes.forEach((note) => log(`  ${note}`));
@@ -981,7 +956,7 @@ if (privateMode && hasGit) {
 
 log(`\n✔ Claude starter v${VERSION} installed into ${root}${privateMode && hasGit ? " (private: hidden from git)" : ""}`);
 if (team || choice.source === "project") log(`  Team rules: ${teamLabel(team, choice)}${team ? `, ${team.rules.length} rule file${team.rules.length === 1 ? "" : "s"}` : ""}`);
-if (withGlobal && !globalOnly) installGlobal();
+removeLegacyGlobalRules();
 log(`  Stacks: ${stacks.join(", ")}`);
 if (phaseNote) log(`  Project ${phaseNote}`);
 if (recommendedNotes.length) log(`  Recommended skills/tools added: ${recommendedNotes.join(", ")}`);
