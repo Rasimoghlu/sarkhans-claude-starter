@@ -56,6 +56,20 @@ node "$INSTALLER" "$WORK/own" --uninstall >/dev/null
 [ -f "$WORK/own/CLAUDE.md" ] || fail "uninstall moved the user's CLAUDE.md"
 pass "user CLAUDE.md untouched"
 
+legacy=0
+for heading in "Skills first" "How you work: Agentic Development Environment"; do
+  legacy=$((legacy + 1))
+  make_project "legacy$legacy"
+  printf '# Project: legacy\n\nShop for tests.\n\n## Stack\n- Node\n\n## Commands\n- `npm test`\n- `/verify` — full quality gate\n\n---\n\n## 0. %s\nold\n\n## 1. YOU ARE MY THIRD EYE — highest-priority rule\nEvery problem you notice — even small.\n\n## 4. Engineering rules\n1. old\n\nStack-specific rules live in `.claude/rules/` (they load automatically for matching files).\n\n## Team notes\nkeep me\n' "$heading" > "$WORK/legacy$legacy/CLAUDE.md"
+  node "$INSTALLER" "$WORK/legacy$legacy" --no-recommended >/dev/null
+  md="$WORK/legacy$legacy/CLAUDE.md"
+  ! grep -q "YOU ARE MY THIRD EYE" "$md" || fail "legacy CLAUDE.md ($heading) not migrated"
+  grep -q "The working rules, agents and skills live in" "$md" || fail "migrated CLAUDE.md ($heading) lacks the starter line"
+  grep -q "Shop for tests." "$md" && grep -q "keep me" "$md" || fail "migration ($heading) lost the user's text"
+  [ -f "$WORK/legacy$legacy/.claude/CLAUDE.md.before-4.6" ] || fail "no backup of legacy CLAUDE.md ($heading)"
+done
+pass "legacy CLAUDE.md variants migrated"
+
 node "$INSTALLER" "$WORK/fresh" --preset strict >/dev/null
 [ "$(node -p "require('$WORK/fresh/.claude/hooks/config.json').orchestratorMode")" = "strict" ] || fail "--preset strict not applied"
 node "$INSTALLER" "$WORK/fresh" --preset standard >/dev/null

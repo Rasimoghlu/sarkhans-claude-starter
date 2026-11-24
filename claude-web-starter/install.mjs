@@ -66,7 +66,7 @@ const OBSOLETE_FILES = [
   "agents/verifier.md",
   "agents/code-reviewer.md",
 ];
-const LEGACY_CLAUDE_MD = /\n## 0\. How you work: Agentic Development Environment\n/;
+const LEGACY_CLAUDE_MD = /\n## 0\. [^\n]+\n(?=[\s\S]*\n## 1\. YOU ARE MY THIRD EYE)/;
 const LEGACY_CLAUDE_MD_END = "Stack-specific rules live in `.claude/rules/` (they load automatically for matching files).";
 const STARTER_CLAUDE_MD_LINE = "The working rules, agents and skills live in `.claude/` and load automatically.";
 
