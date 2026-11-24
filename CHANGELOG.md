@@ -2,6 +2,10 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.11.0
+- **A quieter third eye.** Claude now reports only problems that matter: security holes, data loss, bugs that crash or give wrong results, a broken build, serious performance problems and vulnerable dependencies. No more style notes, naming tips or "might be a problem" guesses. Each finding names the file and line and what would go wrong. When nothing serious turns up, the section is one line: `No critical issues.`
+- **Rules stay in their projects.** The starter no longer writes rules into `~/.claude/CLAUDE.md`, so projects without the starter work like plain Claude Code again. Rules that earlier versions put there are removed on the next update, and your own text in that file is kept (backup: `~/.claude/CLAUDE.md.starter-backup`).
+
 ## 4.10.0
 - **Modern Web Guidance by Google Chrome, on by default.** Every newly set-up web project (with a `package.json`, an `index.html` or a `composer.json`) gets Chrome's Modern Web Guidance skill: before writing UI code, Claude looks up current practice for accessibility, performance, security (CSP, sanitization, passkeys), forms, dialogs and layout, built with Firefox and Edge. In existing projects, turn it on under the project's skills.
 - The plugin now installs Modern Web Guidance together with itself.

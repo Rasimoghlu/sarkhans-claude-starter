@@ -9,17 +9,20 @@ The working mode is `orchestratorMode` in `.claude/hooks/config.json` (shown at 
 Agents cost time and tokens and start with zero context: don't spawn one for a question or a fix you can make directly. Agent output is a claim, not a fact — check the diff and re-run its evidence before you accept it. Schema/migration/model changes always get a `data-architect` review.
 
 ## Third eye — highest priority
-- Watch everything you read or touch: bugs, security holes, performance problems, type errors, dead code, vulnerable dependencies, missing tests, broken UX/accessibility. Report every problem you notice, even outside the task.
-- Fix safe problems along the way as small, separate changes. Ask first when the fix is risky: public behaviour/UI/API contract, DB schema or data, a new dependency, more than ~5 files outside the task, or you are not sure it is a bug.
-- A reply that changed code ends with this section (when you used agents, put an `### Agents` table — agent · task · result · how verified — before it):
+Signal over volume: one real bug beats ten nitpicks.
+- Report only serious problems in code you read or touch, even outside the task: security holes, data loss or corruption, bugs that crash or give wrong results on realistic input, broken types/build/tests, serious performance problems (N+1, unbounded queries, leaks, missing timeouts), vulnerable dependencies, accessibility bugs that block users.
+- Never report noise: style, naming, formatting, "could be cleaner" refactors, minor duplication, micro-optimizations, speculative "might be a problem if…", missing tests outside critical paths, or what a linter/hook already enforces. Small cleanups in code you are changing are just part of the work.
+- Every finding needs a `file:line` and a realistic failure scenario; if you can't name one, it isn't a finding.
+- Fix serious problems along the way as small, separate changes. Ask first when the fix is risky: public behaviour/UI/API contract, DB schema or data, a new dependency, more than ~5 files outside the task, or you are not sure it is a bug.
+- A reply that changed code ends with this section, most important first, at most 5 items, empty lines left out (when you used agents, put an `### Agents` table — agent · task · result · how verified — before it):
 
 ```
 ### Third eye
 - ✅ Found & fixed: <problem — file:line — what changed>
-- ⚠️ Found, not fixed: <problem — file:line — why — proposed fix>
-- 🔍 Not verified: <what and why>
+- ⚠️ Found, not fixed: <problem — file:line — impact — proposed fix>
+- 🔍 Unverified risk: <a real risk of this change you could not check, and why>
 ```
-Nothing found → `No problems found` plus what you checked.
+Nothing serious → the whole section is one line: `No critical issues.`
 
 ## Quality bar
 Production-grade: secure, fast, tested, readable. SOLID, KISS, YAGNI, DRY; a design pattern only when the problem calls for it (`code-quality.md`). Read the existing code first and follow its patterns — reuse beats reinvent. Every behaviour change ships with tests you ran and saw pass (`testing.md`). Validate input at every boundary, authenticate and authorize inside every handler, secrets never reach the client or logs (`security.md`). Done = `/sarkhans-starter:verify` green + tests + the Third-eye section. For anything bigger than a small fix, state a short plan first.

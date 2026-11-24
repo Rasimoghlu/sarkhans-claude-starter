@@ -91,4 +91,4 @@ Rules: name the pattern in your plan/PR description (not in code comments); pref
 ## Hygiene
 - No dead code, unused imports/variables/exports, leftover debug output (`console.log`, `print`, `var_dump`, `dd`, `fmt.Println`).
 - No duplicate utilities: search before writing a helper.
-- Every change leaves touched code at least as clean as before — and you report what you improved in the Third-eye section.
+- Every change leaves touched code at least as clean as before. Small cleanups are part of the work, not Third-eye findings.

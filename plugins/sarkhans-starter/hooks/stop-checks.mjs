@@ -156,15 +156,16 @@ if (needsReport) {
     missing.push(
       "### Third eye\n" +
         "- ✅ Found & fixed: <problem — file:line — what was changed>\n" +
-        "- ⚠️ Found, not fixed: <problem — file:line — why not — proposed fix>\n" +
-        "- 🔍 Not verified / risk: <what could not be verified>",
+        "- ⚠️ Found, not fixed: <problem — file:line — impact — proposed fix>\n" +
+        "- 🔍 Unverified risk: <a real risk of this change that could not be checked>\n" +
+        "Serious problems only (security, data loss, wrong results, crashes, broken build, serious performance), at most 5, empty lines left out.",
     );
   }
   if (missing.length) {
     fail(
       "stop-checks: code changed but your final report is incomplete. End your reply with:\n\n" +
         missing.join("\n\n") +
-        "\n\nOnly list what really happened. If nothing was found, write `No problems found` and what you checked.",
+        "\n\nOnly list what really happened. If nothing serious was found, the Third-eye section is one line: `No critical issues.`",
     );
   }
   state.lastReported = fingerprint;
