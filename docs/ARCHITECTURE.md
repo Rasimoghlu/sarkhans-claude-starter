@@ -11,7 +11,6 @@ sarkhans-claude-starter/
 │   ├── install.mjs              ← CLI (the only thing the desktop app talks to)
 │   ├── VERSION                  ← starter version (semver)
 │   ├── skills-catalog.json      ← design skills / MCP servers offered in the app
-│   ├── global/CLAUDE.md         ← personal rules merged into ~/.claude/CLAUDE.md
 │   ├── template/                ← copied into every project
 │   │   ├── CLAUDE.md            ← project rules (placeholders filled by the installer)
 │   │   └── .claude/
@@ -32,7 +31,7 @@ The desktop app is a thin UI over `install.mjs`. **All logic lives in the Node i
 
 | Command | Effect |
 |---|---|
-| `node install.mjs <dir>` | Install (first time) or refresh template files that don't exist yet. Detects stacks, writes CLAUDE.md, `.claude/`, config, `.git/info/exclude` entries, updates `~/.claude` (global rules + attribution off). |
+| `node install.mjs <dir>` | Install (first time) or refresh template files that don't exist yet. Detects stacks, writes CLAUDE.md, `.claude/`, config, `.git/info/exclude` entries. Writes nothing to `~/.claude`; removes the rules older versions left in `~/.claude/CLAUDE.md` (backup: `~/.claude/CLAUDE.md.starter-backup`). |
 | `node install.mjs <dir> --force` | Update all template files; keeps CLAUDE.md and the user's config values. |
 | `node install.mjs <dir> --uninstall` | Remove starter files and catalog skills; CLAUDE.md → CLAUDE.md.bak. |
 | `--language <name>` | Set `responseLanguage` (alone = settings-only change; with install = initial value). |
@@ -42,10 +41,10 @@ The desktop app is a thin UI over `install.mjs`. **All logic lives in the Node i
 | `--register-skill <src> [--pick <name>]` | Add the user's own skill to `~/.claude-starter/my-skills.json`. `src` = local folder, `owner/repo`, or GitHub URL (`/tree/<branch>/<path>` allowed). Exit code **3** + JSON `{"choices":[{name,description}]}` on stdout when the source has several skills → call again with `--pick`. |
 | `--unregister-skill <id>` | Remove one of the user's own skills from the list (project copies stay). |
 | `--list-skills` | Print catalog with ✔ for installed items. |
-| `--rules-hash` | Print the 16-character fingerprint of the rules (template, packs, global rules, installer). |
-| `--shared`, `--no-global`, `--overwrite-claude-md`, `--global`, `--help` | See `--help`. |
+| `--rules-hash` | Print the 16-character fingerprint of the rules (template, packs, installer). |
+| `--shared`, `--overwrite-claude-md`, `--help` | See `--help`. |
 
-Exit code `0` = success, non-zero = failure (message on stderr). Run installs **sequentially** — several processes updating `~/.claude/CLAUDE.md` at once can race.
+Exit code `0` = success, non-zero = failure (message on stderr). Run installs **sequentially** — several processes touching the same project or `~/.claude-starter` at once can race.
 
 ## Files the app reads (per project)
 

@@ -15,7 +15,7 @@ node ~/claude-web-starter/install.mjs ~/projects/my-project --uninstall         
 node ~/claude-web-starter/install.mjs --help
 ```
 
-An install does everything: detects the stacks, writes a short `CLAUDE.md` (project, stack, commands — your own `CLAUDE.md` is never touched), installs rules/skills/agents/hooks, hides `CLAUDE.md` and `.claude/` from git (`--shared` to commit them instead), and updates your personal rules in `~/.claude` (`--no-global` to skip). Re-running is safe; your settings in `.claude/hooks/config.json` are preserved.
+An install does everything: detects the stacks, writes a short `CLAUDE.md` (project, stack, commands — your own `CLAUDE.md` is never touched), installs rules/skills/agents/hooks, hides `CLAUDE.md` and `.claude/` from git (`--shared` to commit them instead). Nothing is written to `~/.claude`, so projects without the starter are not affected. Re-running is safe; your settings in `.claude/hooks/config.json` are preserved.
 
 Always start Claude Code inside the project folder: `cd ~/projects/my-project && claude`.
 

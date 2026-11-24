@@ -30,7 +30,17 @@ node "$INSTALLER" "$WORK/fresh" --no-recommended >/dev/null
 [ -f "$WORK/fresh/.claude/rules/core.md" ] || fail "core.md missing"
 grep -q "The working rules, agents and skills live in" "$WORK/fresh/CLAUDE.md" || fail "CLAUDE.md not written"
 [ "$(node -p "require('$WORK/fresh/.claude/hooks/config.json').preset")" = "standard" ] || fail "default preset is not standard"
+[ ! -e "$HOME/.claude" ] || fail "install wrote to ~/.claude"
 pass "fresh install"
+
+mkdir -p "$HOME/.claude"
+printf '# Personal defaults (all projects)\n\n## You are my third eye\n- old rule\n\n# Mine\nkeep me\n\n<!-- claude-starter:begin -->\n# Personal defaults (all projects)\n## You are my third eye\n<!-- claude-starter:end -->\n' > "$HOME/.claude/CLAUDE.md"
+node "$INSTALLER" "$WORK/fresh" --no-recommended >/dev/null
+[ "$(cat "$HOME/.claude/CLAUDE.md")" = "$(printf '# Mine\nkeep me')" ] || fail "old global starter rules not removed"
+[ -f "$HOME/.claude/CLAUDE.md.starter-backup" ] || fail "no backup of ~/.claude/CLAUDE.md"
+[ ! -e "$HOME/.claude/settings.json" ] || fail "install wrote ~/.claude/settings.json"
+rm -rf "$HOME/.claude"
+pass "old global rules removed, nothing written to ~/.claude"
 
 make_project agents
 echo "# Agent notes" > "$WORK/agents/AGENTS.md"
