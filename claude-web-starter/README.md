@@ -77,7 +77,7 @@ Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift get their own rules file (
 | Debug output / stubs | `dbg!`, `todo!`, `unimplemented!` | `printStackTrace()` | | `binding.pry`, `byebug` | `print` | `print` (outside CLI tools) |
 | Skipped tests | `#[ignore]` | `@Disabled`, `@Ignore` | `Skip =`, `[Ignore]` | `xit`, `skip`, `pending` | `skip:` | |
 | Security | TLS off | | TLS off | `VERIFY_NONE` | | |
-| Format on edit | rustfmt | ktlint (Kotlin) | | | dart format | swift-format / SwiftFormat |
+| Format on edit | rustfmt | ktlint (Kotlin, when `.editorconfig` sets it up) | | | dart format | swift-format / SwiftFormat (when the project has its config) |
 | `/verify` | build, clippy, test | Maven/Gradle | build, test | RuboCop, RSpec/Minitest | analyze, test | SwiftPM build, test |
 
 Plus everywhere: secrets, env reads only in the config module, new files ≤ 400 lines, git rules (no commits on main/master, no AI mentions, no force push), no unapproved dependencies, no destructive DB/Docker commands, report sections.

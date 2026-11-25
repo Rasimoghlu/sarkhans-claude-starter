@@ -38,5 +38,5 @@ paths:
 - Never `@Disabled`/`@Ignore` a failing test to get a green run (a hook flags it).
 
 ## Tooling (/sarkhans-starter:verify)
-`/sarkhans-starter:verify` runs `./mvnw -q -B verify` (Maven) or `./gradlew build` (Gradle), using the wrapper when the project has one. Kotlin files are formatted on edit with `ktlint` when it is installed.
+`/sarkhans-starter:verify` runs `./mvnw -q -B verify` (Maven) or `./gradlew build` (Gradle), using the wrapper when the project has one. Kotlin files are formatted on edit with `ktlint` when it is installed and the project's `.editorconfig` configures it.
 New dependencies in `pom.xml`/`build.gradle(.kts)` need the user's approval.

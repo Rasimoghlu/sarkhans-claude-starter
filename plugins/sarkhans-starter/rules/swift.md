@@ -32,5 +32,5 @@ paths:
 - Never disable or skip a failing test (`.disabled`, `XCTSkip`) to get a green run.
 
 ## Tooling (hooks and /sarkhans-starter:verify)
-The hook formats edited files with `swift-format` or `swiftformat` when installed; follow `.swiftlint.yml` if the project has one. `/sarkhans-starter:verify` runs `swift build` and `swift test` for Swift packages. Xcode app projects: build and test with `xcodebuild -scheme <scheme> test` (ask for the scheme and simulator if unclear).
+The hook formats edited files with `swift-format` or `swiftformat` when the tool is installed and the project has its config (`.swift-format` / `.swiftformat`); follow `.swiftlint.yml` if the project has one. `/sarkhans-starter:verify` runs `swift build` and `swift test` for Swift packages. Xcode app projects: build and test with `xcodebuild -scheme <scheme> test` (ask for the scheme and simulator if unclear).
 New packages (SwiftPM dependencies, CocoaPods, Carthage) need the user's approval.

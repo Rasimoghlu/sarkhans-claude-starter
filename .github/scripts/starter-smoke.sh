@@ -84,6 +84,13 @@ const cases = [
   ["src/lib.rs", "#[cfg(test)]\nmod tests {\n  fn t() { todo!() }\n}", 0],
   ["lib/main.dart", "try { a(); } on FormatException {}", 1],
   ["Tests/AppTests/Helpers.swift", "print(1)", 0],
+  ["MyAppTests/Helpers/StubServer.swift", "print(1)", 0],
+  ["src/orders.rs", "fn create() { todo!() }", 1],
+  ["src/orders.rs", "fn create() { todo!() }\n#[cfg(test)]\nmod tests {\n  fn t() { unimplemented!() }\n}", 1],
+  ["lib/loggable.dart", "mixin Loggable on State<MyWidget> {}", 0],
+  ["spec/models/order_spec.rb", "pending.update!(status: :paid)", 0],
+  ["app/services/billing.rb", "begin; charge!; rescue => e; end", 1],
+  ["lib/tasks/db.rake", "binding.pry", 1],
 ];
 for (const [rel, text, expected] of cases) {
   const lang = L.languageOf(rel);
