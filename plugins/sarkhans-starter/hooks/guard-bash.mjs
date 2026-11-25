@@ -138,7 +138,7 @@ function checkGit() {
     if (push) {
       const targetsProtected = PROTECTED.some((b) => new RegExp(`(^|[\\s:+])${b}(\\s|$)`).test(push[1]));
       if (onProtected || targetsProtected) {
-        block(`BLOCKED (guard-bash): never push to ${PROTECTED.join("/")}. Push the feature branch (\`git push -u origin <branch>\`) and open a PR (/ship).`);
+        block(`BLOCKED (guard-bash): never push to ${PROTECTED.join("/")}. Push the feature branch (\`git push -u origin <branch>\`) and open a PR (/open-pr).`);
       }
     }
 

@@ -1,9 +1,9 @@
 ---
-name: ship
-description: 'Use when the user asks to commit, push, open a PR or ship: branch off main, run /sarkhans-starter:verify and the reviewer, clean commits, push, open a PR. Never merges.'
+name: open-pr
+description: 'Use when the user asks to commit, push, open a PR or ship a change: branch off main, run /verify and the reviewer, clean commits, push, open a PR. Never merges.'
 argument-hint: "[optional: short description of the change]"
 ---
-# Ship
+# Open PR
 
 Change: $ARGUMENTS
 
@@ -18,8 +18,8 @@ Follow every step in order. Stop and report if any step fails — never skip one
 - If already on a feature branch, stay on it.
 
 ## 3. Quality gate
-- Run `/sarkhans-starter:verify` (full, without `--quick`). Everything must pass. Fix failures at the root cause — directly when small, otherwise through the owning specialist; never weaken checks.
-- Run the `reviewer` agent in review mode on the whole diff. Fix every `blocker` and `major` finding (directly or through the owning specialist), then re-run `/sarkhans-starter:verify`.
+- Run `/verify` (full, without `--quick`). Everything must pass. Fix failures at the root cause — directly when small, otherwise through the owning specialist; never weaken checks.
+- Run the `reviewer` agent in review mode on the whole diff. Fix every `blocker` and `major` finding (directly or through the owning specialist), then re-run `/verify`.
 
 ## 4. Commit
 - Group changes into logical commits. Third-eye side-fixes get their own commit (`fix:` / `perf:` / `security:` / `refactor:`).

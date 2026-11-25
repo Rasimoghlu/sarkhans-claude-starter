@@ -65,6 +65,7 @@ const OBSOLETE_FILES = [
   "rules/principles.md",
   "agents/verifier.md",
   "agents/code-reviewer.md",
+  "skills/ship/SKILL.md",
 ];
 const LEGACY_CLAUDE_MD = /\n## 0\. [^\n]+\n(?=[\s\S]*\n## 1\. YOU ARE MY THIRD EYE)/;
 const LEGACY_CLAUDE_MD_END = "Stack-specific rules live in `.claude/rules/` (they load automatically for matching files).";
@@ -853,6 +854,8 @@ for (const name of allPackRuleNames) {
 }
 for (const obsolete of OBSOLETE_FILES) {
   if (existsSync(join(root, ".claude", obsolete))) rmSync(join(root, ".claude", obsolete), { force: true });
+  const parent = dirname(join(root, ".claude", obsolete));
+  if (existsSync(parent) && readdirSync(parent).length === 0) rmSync(parent, { recursive: true });
 }
 const choice = teamChoice(readStarterSettings(), root);
 let team = null;
