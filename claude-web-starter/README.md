@@ -69,10 +69,21 @@ With a compose file, the installer maps services (e.g. Laravel Sail `laravel.tes
 | Format & lint | Prettier, ESLint | gofmt/goimports | `php -l`, Pint/CS-Fixer | ruff/black, py_compile |
 | Before "done" | `tsc` | `go build` + `go vet` | `php -l` + PHPStan | py_compile + mypy |
 
+Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift get their own rules file (`rust.md`, `java-kotlin.md`, `dotnet.md`, `ruby.md`, `dart-flutter.md`, `swift.md`), the comment rules and these checks:
+
+| Check | Rust | Java/Kotlin | .NET | Ruby | Dart/Flutter | Swift |
+|---|---|---|---|---|---|---|
+| Swallowed errors | | empty `catch` | empty `catch` | empty `rescue`, `rescue nil` | empty `catch` | empty `catch` |
+| Debug output / stubs | `dbg!`, `todo!`, `unimplemented!` | `printStackTrace()` | | `binding.pry`, `byebug` | `print` | `print` (outside CLI tools) |
+| Skipped tests | `#[ignore]` | `@Disabled`, `@Ignore` | `Skip =`, `[Ignore]` | `xit`, `skip`, `pending` | `skip:` | |
+| Security | TLS off | | TLS off | `VERIFY_NONE` | | |
+| Format on edit | rustfmt | ktlint (Kotlin) | | | dart format | swift-format / SwiftFormat |
+| `/verify` | build, clippy, test | Maven/Gradle | build, test | RuboCop, RSpec/Minitest | analyze, test | SwiftPM build, test |
+
 Plus everywhere: secrets, env reads only in the config module, new files ≤ 400 lines, git rules (no commits on main/master, no AI mentions, no force push), no unapproved dependencies, no destructive DB/Docker commands, report sections.
 
 ## Skills
-- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
+- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/fix-bug`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
 - **Catalog** (`skills-catalog.json`): `frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `web-design-guidelines`, `emil-design-eng`, `vercel-react-best-practices`, `modern-web-guidance` (Google Chrome, on by default for web projects: anything with a `package.json`, an `index.html` or a `composer.json`), plus the `playwright` and `context7` MCP servers.
 - **Recommended:** on a first install these are switched on automatically, based on the stack (skip with `--no-recommended`):
   - `context7` for every project;

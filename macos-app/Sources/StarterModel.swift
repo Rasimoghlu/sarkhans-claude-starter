@@ -925,6 +925,7 @@ final class StarterModel: ObservableObject {
     private static let builtinSummaries: [String: String] = [
         "add-api-route": "Add an API endpoint with auth, validation, error handling and tests.",
         "db-change": "Change the database schema safely: migration, models and tests.",
+        "fix-bug": "Fix a bug: reproduce it, prove it with a failing test, fix the cause.",
         "kickoff": "Plan a new project with you before any code is written.",
         "new-feature": "Build a feature end to end: plan, data, server, UI and tests.",
         "orchestrate": "Split a task across specialist agents and check every result.",
