@@ -33,6 +33,73 @@ grep -q "The working rules, agents and skills live in" "$WORK/fresh/CLAUDE.md" |
 [ ! -e "$HOME/.claude" ] || fail "install wrote to ~/.claude"
 pass "fresh install"
 
+check_stack_rules() {
+  local name="$1" rule="$2"
+  shift 2
+  mkdir -p "$WORK/$name"
+  for file in "$@"; do mkdir -p "$WORK/$name/$(dirname "$file")"; touch "$WORK/$name/$file"; done
+  node "$INSTALLER" "$WORK/$name" --no-recommended >/dev/null
+  [ -f "$WORK/$name/.claude/rules/$rule" ] || fail "$rule not installed for $name"
+  [ ! -f "$WORK/$name/.claude/rules/go.md" ] || fail "unrelated stack rules installed for $name"
+}
+check_stack_rules rust-app rust.md Cargo.toml
+check_stack_rules maven-app java-kotlin.md pom.xml
+check_stack_rules gradle-app java-kotlin.md build.gradle.kts
+check_stack_rules dotnet-app dotnet.md Api.sln
+check_stack_rules ruby-app ruby.md Gemfile
+check_stack_rules flutter-app dart-flutter.md pubspec.yaml
+check_stack_rules swift-package swift.md Package.swift
+check_stack_rules ios-app swift.md App.xcodeproj/project.pbxproj
+rm "$WORK/rust-app/Cargo.toml"
+node "$INSTALLER" "$WORK/rust-app" --no-recommended >/dev/null
+[ ! -f "$WORK/rust-app/.claude/rules/rust.md" ] || fail "rust.md not removed after the stack went away"
+printf '# Our Rust notes\nkeep me\n' > "$WORK/rust-app/.claude/rules/rust.md"
+node "$INSTALLER" "$WORK/rust-app" --no-recommended --force >/dev/null
+grep -q "Our Rust notes" "$WORK/rust-app/.claude/rules/rust.md" || fail "user's own rust.md was removed"
+node "$INSTALLER" "$WORK/rust-app" --uninstall >/dev/null 2>&1 || true
+grep -q "Our Rust notes" "$WORK/rust-app/.claude/rules/rust.md" || fail "user's own rust.md was removed on uninstall"
+node "$INSTALLER" "$WORK/ios-app" --uninstall >/dev/null 2>&1 || true
+[ ! -f "$WORK/ios-app/.claude/rules/swift.md" ] || fail "swift.md left behind after uninstall"
+pass "rules for Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift"
+
+node --input-type=module -e '
+const L = await import(process.argv[1]);
+const cases = [
+  ["src/main.rs", "dbg!(x);\nlet v = todo!();", 2],
+  ["src/main.rs", "let x = y.unwrap_or(1);", 0],
+  ["src/main/java/App.java", "try { a(); } catch (Exception e) {}", 1],
+  ["Api/Http.cs", "[Fact(Skip = \"flaky\")]", 1],
+  ["lib/main.dart", "print(1);\ndebugPrint(2);", 1],
+  ["Sources/App/View.swift", "print(1)", 1],
+  ["Sources/tool/main.swift", "print(1)", 0],
+  ["app/models/user.rb", "binding.pry\nx = a rescue nil", 2],
+  ["Api/Svc.cs", "try\n{\n    Run();\n}\ncatch (Exception)\n{\n}", 1],
+  ["app/src/main/java/com/x/User.kt", "data class User(@Ignore val tmp: String)", 0],
+  ["src/test/java/AppTest.java", "@Disabled", 1],
+  ["Api/CsvRow.cs", "[Ignore] public string Tmp { get; set; }", 0],
+  ["Api.Tests/SvcTests.cs", "[Ignore]", 1],
+  ["app/models/user.rb", "def age\n  Integer(raw) rescue 0\nend", 0],
+  ["app/models/user.rb", "begin\n  a\nrescue => e\nend", 1],
+  ["spec/models/order_spec.rb", "pending = create(:order)\nskip \"later\"", 1],
+  ["src/lib.rs", "#[cfg(test)]\nmod tests {\n  fn t() { todo!() }\n}", 0],
+  ["lib/main.dart", "try { a(); } on FormatException {}", 1],
+  ["Tests/AppTests/Helpers.swift", "print(1)", 0],
+  ["MyAppTests/Helpers/StubServer.swift", "print(1)", 0],
+  ["src/orders.rs", "fn create() { todo!() }", 1],
+  ["src/orders.rs", "fn create() { todo!() }\n#[cfg(test)]\nmod tests {\n  fn t() { unimplemented!() }\n}", 1],
+  ["lib/loggable.dart", "mixin Loggable on State<MyWidget> {}", 0],
+  ["spec/models/order_spec.rb", "pending.update!(status: :paid)", 0],
+  ["app/services/billing.rb", "begin; charge!; rescue => e; end", 1],
+  ["lib/tasks/db.rake", "binding.pry", 1],
+];
+for (const [rel, text, expected] of cases) {
+  const lang = L.languageOf(rel);
+  const found = L.codeProblems({ lang, rel, written: text, writtenLines: L.analyze(text, lang), fileText: text, tool: "Edit", ctx: L.fileContext(rel, lang, text), config: {} });
+  if (found.length !== expected) { console.error(rel, JSON.stringify(found)); process.exit(1); }
+}
+' "$ROOT/claude-web-starter/template/.claude/hooks/languages.mjs" || fail "language guardrails"
+pass "guardrails for Rust, Java/Kotlin, .NET, Ruby, Dart and Swift"
+
 mkdir -p "$HOME/.claude"
 printf '# Personal defaults (all projects)\n\n## You are my third eye\n- old rule\n\n# Mine\nkeep me\n\n<!-- claude-starter:begin -->\n# Personal defaults (all projects)\n## You are my third eye\n<!-- claude-starter:end -->\n' > "$HOME/.claude/CLAUDE.md"
 node "$INSTALLER" "$WORK/fresh" --no-recommended >/dev/null

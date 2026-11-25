@@ -73,6 +73,13 @@ const OTHER_STACKS = [
     detect: (dir) => hasFile(dir, "Package.swift"),
     commands: () => [step("build", "swift", ["build"]), step("test", "swift", ["test"], { slow: true })],
   },
+  {
+    id: "swift",
+    label: "Swift (Xcode project)",
+    detect: (dir) => !hasFile(dir, "Package.swift") && hasExtension(dir, ".xcodeproj", ".xcworkspace"),
+    commands: () => [],
+    skipReason: "Xcode project: build and test with `xcodebuild -scheme <scheme> test` (see swift.md)",
+  },
 ];
 
 export function detectOtherStacks(dir) {
@@ -80,6 +87,7 @@ export function detectOtherStacks(dir) {
     id: stack.id,
     label: stack.label,
     commands: stack.commands(dir),
+    skipReason: stack.skipReason || null,
   }));
 }
 

@@ -12,15 +12,23 @@ export function languageOf(filePath) {
   if (name.endsWith(".php")) return "php";
   if (name.endsWith(".py")) return "python";
   if (/\.(rs|java|kt|kts|cs|swift|dart|scala|c|h|cc|cpp|cxx|hpp|m|mm)$/.test(name)) return "clike";
-  if (/\.(rb|sh|bash|zsh)$/.test(name)) return "hash";
+  if (/\.(rb|rake|sh|bash|zsh)$/.test(name)) return "hash";
   return null;
 }
+
+const DIALECTS = { rs: "rust", java: "java", kt: "kotlin", kts: "kotlin", cs: "csharp", dart: "dart", swift: "swift", rb: "ruby", rake: "ruby" };
+
+export function dialectOf(filePath) {
+  return DIALECTS[basename(filePath).toLowerCase().split(".").pop()] || null;
+}
+
+const EMPTY_CATCH = /\bcatch\b[^{;]*\{\s*\}/;
 
 export function fileContext(rel, lang, fileText) {
   const name = basename(rel);
   const isTest =
     /\.(test|spec)\.[cm]?[jt]sx?$/.test(name) || /_test\.go$/.test(name) || /^test_.*\.py$|_test\.py$|^conftest\.py$/.test(name) ||
-    /Test\.php$/.test(name) || /(^|\/)(tests?|e2e|__tests__|spec)\//.test(rel) ||
+    /Test\.php$/.test(name) || /(^|\/)(tests?|e2e|__tests__|spec)\//i.test(rel) || /\.Tests?\//.test(rel) || /(^|\/)\w*(UI)?Tests?\//.test(rel) ||
     /Tests?\.(java|kt|cs|swift)$/.test(name) || /_(spec|test)\.(rb|dart|rs)$/.test(name) || /(^|\/)src\/test\//.test(rel);
   const isScript = /(^|\/)(scripts|bin|tools)\//.test(rel) || /\.config\.[cm]?[jt]s$/.test(name) ||
     /^(manage|setup|__main__|cli|wsgi|asgi)\.py$/.test(name) || /(^|\/)management\/commands\//.test(rel);
@@ -242,9 +250,53 @@ export function codeProblems({ lang, rel, written, writtenLines, fileText, tool,
     ],
   };
 
+  const dialect = dialectOf(rel);
+  const isSwiftCli = dialect === "swift" && (/(^|\/)main\.swift$/.test(rel) || /^\s*import\s+ArgumentParser\b/m.test(fileText));
+  const rustTestStart = dialect === "rust" ? fileText.indexOf("#[cfg(test)]") : -1;
+  const inRustTestModule = (line) => rustTestStart >= 0 && fileText.indexOf(line.raw.trim()) > rustTestStart;
+  const dialectChecks = {
+    rust: [
+      [/\bdbg!\s*\(/, "`dbg!` — remove debug output; use `tracing` for logging", true],
+      [/\b(todo|unimplemented)!\s*\(/, "`todo!()`/`unimplemented!()` — finish the implementation instead of leaving a stub", notTest && ((line) => !inRustTestModule(line))],
+      [/#\[ignore\b/, "`#[ignore]` — never skip tests to make the suite pass", true],
+      [/\bdanger_accept_invalid_(certs|hostnames)\s*\(\s*true/, "TLS verification disabled (`danger_accept_invalid_certs`)", true],
+    ],
+    java: [
+      [/\.printStackTrace\s*\(\s*\)/, "`printStackTrace()` — log with the project logger (SLF4J) and handle or rethrow", true],
+      [/@(Disabled|Ignore)\b/, "`@Disabled`/`@Ignore` — never skip tests to make the suite pass", ctx.isTest],
+    ],
+    kotlin: [
+      [/\.printStackTrace\s*\(\s*\)/, "`printStackTrace()` — log with the project logger and handle or rethrow", true],
+      [/@(Disabled|Ignore)\b/, "`@Disabled`/`@Ignore` — never skip tests to make the suite pass", ctx.isTest],
+      [/\bGlobalScope\.(launch|async)\b/, "`GlobalScope` — use a structured scope (coroutineScope, viewModelScope, an injected CoroutineScope)", notTest],
+    ],
+    csharp: [
+      [/ServerCertificateCustomValidationCallback\s*=.*=>\s*true|DangerousAcceptAnyServerCertificateValidator/, "TLS certificate validation disabled", true],
+      [/\[\s*(Fact|Theory)\s*\(\s*Skip\s*=/, "skipped test — never skip tests to make the suite pass", true],
+      [/\[\s*Ignore\b/, "skipped test — never skip tests to make the suite pass", ctx.isTest],
+    ],
+    dart: [
+      [/(^|[^\w.])print\s*\(/, "`print` in app code — use the project logger", appCode],
+      [/\bskip\s*:\s*(true|"")/, "skipped test — never skip tests to make the suite pass", ctx.isTest],
+    ],
+    swift: [
+      [/(^|[^\w.])(print|debugPrint|dump)\s*\(/, "`print` in app code — use `os.Logger` (or the project logger)", appCode && !isSwiftCli],
+    ],
+    ruby: [
+      [/\bbinding\.(pry|irb)\b|^\s*(byebug|debugger)\b/, "debugger left in code (`binding.pry`/`byebug`/`debugger`)", true],
+      [/\bVERIFY_NONE\b/, "TLS verification disabled (`VERIFY_NONE`)", true],
+      [/\brescue\s+nil\b/, "`rescue nil` swallows every error — rescue a specific error and handle it", true],
+      [/^\s*(xit|xdescribe|xcontext|xspecify|skip|pending)(?=\s*$|\s*\(|\s+("|:|do\b|\{))/,"skipped test — never skip tests to make the suite pass", ctx.isTest],
+    ],
+  }[dialect] || [];
+
   for (const line of writtenLines) {
     if (!line.code) continue;
     for (const [pattern, label, enabled] of lineChecks[lang] || []) if (enabled && pattern.test(line.code)) add(label, line.raw);
+    for (const [pattern, label, enabled] of dialectChecks) {
+      const active = typeof enabled === "function" ? enabled(line) : enabled;
+      if (active && pattern.test(line.code)) add(label, line.raw);
+    }
   }
   for (const line of written.split(/\r?\n/)) {
     for (const [pattern, label] of DIRECTIVE_REASON_CHECKS[lang] || []) if (pattern.test(line)) add(label, line);
@@ -253,6 +305,9 @@ export function codeProblems({ lang, rel, written, writtenLines, fileText, tool,
   const code = writtenLines.map((l) => l.code).join("\n");
   if ((lang === "ts" || lang === "php") && /catch\s*(\([^)]*\))?\s*\{\s*\}/.test(code)) add("Empty `catch {}` — never swallow errors. Handle, rethrow with context, or return a typed error.");
   if (lang === "ts" && /\.catch\(\s*(\(\s*\w*\s*\)|\w+)\s*=>\s*(\{\s*\}|null|undefined|void 0)\s*\)/.test(code)) add("`.catch(() => {})` swallows errors — handle or propagate them.");
+  if (["java", "kotlin", "csharp", "dart", "swift"].includes(dialect) && EMPTY_CATCH.test(code)) add("Empty `catch {}` — never swallow errors. Handle, rethrow with context, or return a typed error.");
+  if (dialect === "dart" && /\}\s*on\s+[\w.]+(<[^>]*>)?\s*\{\s*\}/.test(code)) add("Empty `on X {}` handler — never swallow errors. Handle, rethrow with context, or return a typed failure.");
+  if (dialect === "ruby" && (/^\s*rescue\b[^\n]*\n\s*end\b/m.test(code) || /(^|;)\s*rescue\b[^\n;]*;\s*end\b/m.test(code))) add("Empty `rescue` — never swallow errors. Rescue a specific error and handle or re-raise it.");
   if (lang === "go" && /if\s+err\s*!=\s*nil\s*\{\s*\}/.test(code)) add("Empty `if err != nil {}` — handle or return the error with context.");
   if (lang === "python" && /except[^\n:]*:\s*(\n\s*)?(pass|\.\.\.)\s*(\n|$)/.test(code)) add("`except ...: pass` swallows errors — handle, log with context, or re-raise.");
   if (lang === "ts" && /dangerouslySetInnerHTML/.test(code) && !/sanitize|DOMPurify/i.test(fileText)) add("`dangerouslySetInnerHTML` without sanitization (DOMPurify) in this file — XSS risk.");
@@ -381,6 +436,16 @@ export function importProblems(lang, written, filePath) {
   return found.map((p) => `${p} Either it is hallucinated (check the real name/API) or it must be created/approved first — never guess.`);
 }
 
+function rustEdition(filePath) {
+  const top = resolve(projectDir);
+  for (let dir = dirname(resolve(filePath)); dir.startsWith(top); dir = dirname(dir)) {
+    const edition = readFileSafe(join(dir, "Cargo.toml")).match(/^\s*edition\s*=\s*"(\d{4})"/m)?.[1];
+    if (edition) return edition;
+    if (dir === top || dirname(dir) === dir) break;
+  }
+  return "2021";
+}
+
 export function formatAndLint(lang, filePath, config) {
   const problems = [];
   const report = (label, out) => problems.push(`${label}:\n${tail(out, 25).replace(/^/gm, "      ")}`);
@@ -415,6 +480,30 @@ export function formatAndLint(lang, filePath, config) {
     const fixer = config.formatOnEdit && lang === "php" && !pint && findTool("php-cs-fixer", { localOnly: true });
     if (pint) runStack("php", { host: findTool("php") ? pint : null, container: "vendor/bin/pint" }, [filePath], { timeoutMs: 60_000 });
     else if (fixer) runStack("php", { host: findTool("php") ? fixer : null, container: "vendor/bin/php-cs-fixer" }, ["fix", filePath, "--quiet"], { timeoutMs: 60_000 });
+  }
+
+  const dialect = dialectOf(filePath);
+  if (config.formatOnEdit && dialect) {
+    const quiet = { timeoutMs: 30_000 };
+    if (dialect === "rust") {
+      const rustfmt = findTool("rustfmt");
+      const declaresModules = /^\s*(#\[[^\]]*\]\s*)*(pub(\([^)]*\))?\s+)?mod\s+\w+\s*;/m.test(readFileSafe(filePath));
+      if (rustfmt && !declaresModules) run(rustfmt, ["--edition", rustEdition(filePath), filePath], quiet);
+    }
+    if (dialect === "dart") {
+      const dart = findTool("dart");
+      if (dart) run(dart, ["format", filePath], quiet);
+    }
+    if (dialect === "swift") {
+      const swiftFormat = existsSync(join(projectDir, ".swift-format")) && findTool("swift-format");
+      const swiftformat = !swiftFormat && existsSync(join(projectDir, ".swiftformat")) && findTool("swiftformat");
+      if (swiftFormat) run(swiftFormat, ["format", "--in-place", filePath], quiet);
+      else if (swiftformat) run(swiftformat, ["--quiet", filePath], quiet);
+    }
+    if (dialect === "kotlin") {
+      const ktlint = /ktlint/.test(readFileSafe(join(projectDir, ".editorconfig"))) && findTool("ktlint");
+      if (ktlint) run(ktlint, ["-F", filePath], quiet);
+    }
   }
 
   if (lang === "python") {

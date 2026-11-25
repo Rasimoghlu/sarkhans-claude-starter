@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync, appendFileSync, statSync, rmSync, renameSync, cpSync, mkdtempSync } from "node:fs";
-import { join, resolve, dirname, relative } from "node:path";
+import { join, resolve, dirname, relative, basename } from "node:path";
 import { homedir, tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -225,6 +225,24 @@ if (!target && !catalogOnly) {
 
 const root = resolve(target || ".");
 
+function packStacks() {
+  return readdirSync(join(here, "packs"), { withFileTypes: true }).filter((entry) => entry.isDirectory() && existsSync(join(here, "packs", entry.name, "rules"))).map((entry) => entry.name);
+}
+
+function firstHeading(file) {
+  try {
+    return readFileSync(file, "utf8").match(/^# .*$/m)?.[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+function isStarterPackRule(file) {
+  const name = basename(file);
+  const heading = firstHeading(file);
+  return Boolean(heading) && packStacks().some((stack) => existsSync(join(here, "packs", stack, "rules", name)) && firstHeading(join(here, "packs", stack, "rules", name)) === heading);
+}
+
 function listFiles(dir, base = dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const full = join(dir, entry.name);
@@ -253,10 +271,11 @@ function runUninstall() {
     process.exit(1);
   }
   const claudeDir = join(root, ".claude");
-  const packRules = ["node", "go", "php", "python", "docker"].flatMap((stack) => listFiles(join(here, "packs", stack, "rules")).map((f) => join("rules", f)));
+  const packRules = packStacks().flatMap((stack) => listFiles(join(here, "packs", stack, "rules")).map((f) => join("rules", f)));
   const managed = [...new Set([...listFiles(join(here, "template", ".claude")), ...packRules, "starter-version", "starter-hash", ...OBSOLETE_FILES])];
   const teamRules = existsSync(join(claudeDir, "rules")) ? readdirSync(join(claudeDir, "rules")).filter((file) => file.startsWith("team-")).map((file) => join("rules", file)) : [];
-  const removed = [...managed, ...teamRules].filter((file) => existsSync(join(claudeDir, file)));
+  const packRuleSet = new Set(packRules);
+  const removed = [...managed, ...teamRules].filter((file) => existsSync(join(claudeDir, file)) && (!packRuleSet.has(file) || isStarterPackRule(join(claudeDir, file))));
   removed.forEach((file) => rmSync(join(claudeDir, file), { force: true }));
   for (const id of installedCatalogIds(root)) {
     const item = catalog.find((entry) => entry.id === id);
@@ -607,7 +626,11 @@ const stackLines = [];
 const commandLines = [];
 const packFiles = [];
 const todo = [];
-const pack = (stack, file) => packFiles.push([join(here, "packs", stack, "rules", file), join(".claude", "rules", file)]);
+const pack = (stack, file) => {
+  const entry = [join(here, "packs", stack, "rules", file), join(".claude", "rules", file)];
+  if (!packFiles.some(([, dest]) => dest === entry[1])) packFiles.push(entry);
+};
+const OTHER_STACK_RULES = { rust: "rust.md", java: "java-kotlin.md", dotnet: "dotnet.md", ruby: "ruby.md", dart: "dart-flutter.md", swift: "swift.md" };
 
 const pkg = readJsonFile("package.json");
 const composer = readJsonFile("composer.json");
@@ -757,7 +780,9 @@ if (composeFile) {
 const otherStacks = detectOtherStacks(root);
 for (const other of otherStacks) {
   stackLines.push(`- **${other.label}**`);
+  if (OTHER_STACK_RULES[other.id]) pack(other.id, OTHER_STACK_RULES[other.id]);
   if (other.commands.length) commandLines.push(`- ${other.commands.map(commandText).join(" · ")}`);
+  else if (other.skipReason) commandLines.push(`- ${other.skipReason}`);
 }
 if (!stacks.some((s) => s !== "docker") && !otherStacks.length) {
   if (isStaticSite(root)) {
@@ -773,7 +798,7 @@ const projectName = pkg?.name || composer?.name || goMod.match(/^module\s+(\S+)/
   || readTextFile("pyproject.toml").match(/^name\s*=\s*["']([^"']+)/m)?.[1] || root.split(/[\\/]/).pop();
 
 const copied = [], skipped = [];
-const allPackRuleNames = new Set(["node", "go", "php", "python", "docker"].flatMap((stack) => listFiles(join(here, "packs", stack, "rules"))));
+const allPackRuleNames = new Set(packStacks().flatMap((stack) => listFiles(join(here, "packs", stack, "rules"))));
 function copyDir(src, dest) {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
@@ -794,7 +819,7 @@ try {
 
 function detectPhase() {
   const commits = Number(spawnSync("git", ["rev-list", "--count", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim() || 0);
-  const SKIP = new Set(["node_modules", "vendor", ".git", ".venv", "venv", "dist", "build", ".next", "storage", "bootstrap", "public", "coverage", ".claude"]);
+  const SKIP = new Set(["node_modules", "vendor", ".git", ".venv", "venv", "dist", "build", ".next", "storage", "bootstrap", "public", "coverage", ".claude", "target", "bin", "obj", ".build", "Pods", ".dart_tool"]);
   let files = 0;
   const walk = (dir, depth) => {
     if (depth > 6 || files > 400) return;
@@ -802,7 +827,7 @@ function detectPhase() {
       if (SKIP.has(entry.name)) continue;
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full, depth + 1);
-      else if (/\.(tsx?|jsx?|vue|svelte|go|php|py|css|scss|html|twig)$/.test(entry.name)) files += 1;
+      else if (/\.(tsx?|jsx?|vue|svelte|go|php|py|css|scss|html|twig|rs|java|kt|cs|fs|rb|erb|dart|swift)$/.test(entry.name)) files += 1;
     }
   };
   walk(root, 0);
@@ -814,7 +839,7 @@ const freshInstall = !existsSync(join(root, ".claude", "starter-version"));
 copyDir(join(here, "template", ".claude"), join(root, ".claude"));
 for (const [src, destRel] of packFiles) {
   const dest = join(root, destRel);
-  if (existsSync(dest) && !force) skipped.push(destRel);
+  if (existsSync(dest) && (!force || !isStarterPackRule(dest))) skipped.push(destRel);
   else {
     mkdirSync(dirname(dest), { recursive: true });
     copyFileSync(src, dest);
@@ -824,7 +849,7 @@ for (const [src, destRel] of packFiles) {
 const selectedRules = new Set(packFiles.map(([, destRel]) => destRel));
 for (const name of allPackRuleNames) {
   const rel = join(".claude", "rules", name);
-  if (!selectedRules.has(rel) && existsSync(join(root, rel))) rmSync(join(root, rel), { force: true });
+  if (!selectedRules.has(rel) && existsSync(join(root, rel)) && isStarterPackRule(join(root, rel))) rmSync(join(root, rel), { force: true });
 }
 for (const obsolete of OBSOLETE_FILES) {
   if (existsSync(join(root, ".claude", obsolete))) rmSync(join(root, ".claude", obsolete), { force: true });

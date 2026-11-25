@@ -42,4 +42,4 @@ Existing project (`designMode: locked`): don't change the visual design unless t
 Explanations, questions, plans and reports go to the user in `responseLanguage` (shown at session start). Code, identifiers, commits, branches, PR text and report headings stay in English.
 
 ## Commands
-`/verify` quality gate · `/ship` branch → verify → review → commit → PR · `/orchestrate` big tasks · `/new-feature` · `/db-change` · `/write-tests` · `/project-health` full scan · `/security-audit` reads the code · `/pentest` attacks the running app (local or staging only) · `/kickoff` new project.
+`/verify` quality gate · `/ship` branch → verify → review → commit → PR · `/orchestrate` big tasks · `/new-feature` · `/fix-bug` reproduce → failing test → fix · `/db-change` · `/write-tests` · `/project-health` full scan · `/security-audit` reads the code · `/pentest` attacks the running app (local or staging only) · `/kickoff` new project.

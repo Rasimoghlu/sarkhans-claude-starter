@@ -2,6 +2,13 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.12.0
+- **New `/fix-bug` skill.** Tell Claude what's broken and it works through it step by step: reproduce the bug, write a test that fails because of it, find the real cause, make the smallest fix, then run the test and the full checks again. No more "fixed" without proof, and no fixes that only hide the error. The report names the cause, the fix and any other places with the same mistake.
+- **Rules for Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift.** Projects in these languages now get their own rules file, set up automatically: error handling, async and concurrency, the main frameworks (Spring, ASP.NET Core and EF Core, Rails, Flutter, SwiftUI, Axum, Vapor), safe SQL and tests. Claude writes code the way experienced developers in that language expect.
+- **Guardrails for these languages.** Hooks now stop swallowed errors (empty `catch`, `rescue nil`), debug output and leftover stubs (`dbg!`, `todo!`, `binding.pry`, `printStackTrace`, `print`), skipped tests and disabled TLS checks. Edited Rust, Kotlin, Dart and Swift files are formatted automatically when the formatter is installed.
+- **Xcode projects are recognized.** iOS and macOS apps without a `Package.swift` now get the Swift rules, and `/verify` explains how to build them with `xcodebuild`.
+- Existing projects without git history in these languages are no longer mistaken for new projects.
+
 ## 4.11.1
 - Projects set up with an early version of the starter now get the slim `CLAUDE.md` too. Before, their old copy of the rules stayed in place, including the old "report every problem" third-eye rule. Your project description, stack and commands are kept, and the old file is saved in `.claude/CLAUDE.md.before-4.6`.
 

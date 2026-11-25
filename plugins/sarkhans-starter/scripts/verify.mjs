@@ -104,7 +104,7 @@ if (stacks.includes("python")) {
 
 const otherStacks = detectOtherStacks(projectDir);
 for (const other of otherStacks) {
-  if (!other.commands.length) skip(other.id, "all", "no build or test setup found");
+  if (!other.commands.length) skip(other.id, "all", other.skipReason || "no build or test setup found");
   for (const command of other.commands) {
     const host = /[\\/]/.test(command.tool) ? command.tool : findTool(command.tool);
     if (!host) skip(other.id, command.name, `${command.tool} not installed`);
