@@ -7,7 +7,7 @@ claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
 claude plugin install sarkhans-starter@sarkhans-claude-starter
 ```
 
-- Skills are namespaced: `/sarkhans-starter:verify`, `/sarkhans-starter:ship`, `/sarkhans-starter:orchestrate`, …
+- Skills are namespaced: `/sarkhans-starter:verify`, `/sarkhans-starter:open-pr`, `/sarkhans-starter:orchestrate`, …
 - The core rules are added at the start of every session; detailed rules are read from the plugin's `rules/` folder when Claude works on matching files.
 - `/sarkhans-starter:pentest http://localhost:3000` tests your running app like an attacker, only on this computer or a staging server you name. Every confirmed hole comes with the request that proves it and a regression test.
 - Installing this plugin also installs Google Chrome's [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) plugin (Apache-2.0): current web platform practice for HTML, CSS, accessibility, performance and security. You can turn it off on its own in `/plugin`.

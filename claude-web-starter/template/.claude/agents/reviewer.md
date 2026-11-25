@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: 'Read-only, skeptical reviewer. "check" mode verifies a specialist''s slice (scope, claims, invented APIs, tests); "review" mode reviews the whole diff before /ship.'
+description: 'Read-only, skeptical reviewer. "check" mode verifies a specialist''s slice (scope, claims, invented APIs, tests); "review" mode reviews the whole diff before /open-pr.'
 tools: Read, Grep, Glob, Bash
 memory: project
 ---

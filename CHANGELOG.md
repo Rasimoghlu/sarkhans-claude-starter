@@ -3,6 +3,7 @@
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
 ## 4.12.0
+- **`/ship` is now `/open-pr`.** Claude Code now has its own built-in `/ship` command, so the starter's skill got a new name. It works the same way: branch, checks, review, commits, push and a pull request, never a merge. Projects are switched over on the next update.
 - **New `/fix-bug` skill.** Tell Claude what's broken and it works through it step by step: reproduce the bug, write a test that fails because of it, find the real cause, make the smallest fix, then run the test and the full checks again. No more "fixed" without proof, and no fixes that only hide the error. The report names the cause, the fix and any other places with the same mistake.
 - **Rules for Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift.** Projects in these languages now get their own rules file, set up automatically: error handling, async and concurrency, the main frameworks (Spring, ASP.NET Core and EF Core, Rails, Flutter, SwiftUI, Axum, Vapor), safe SQL and tests. Claude writes code the way experienced developers in that language expect.
 - **Guardrails for these languages.** Hooks now stop swallowed errors (empty `catch`, `rescue nil`), debug output and leftover stubs (`dbg!`, `todo!`, `binding.pry`, `printStackTrace`, `print`), skipped tests and disabled TLS checks. Edited Rust, Kotlin, Dart and Swift files are formatted automatically when the formatter is installed.

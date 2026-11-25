@@ -26,7 +26,7 @@ Always start Claude Code inside the project folder: `cd ~/projects/my-project &&
 | Layer | What | Guarantee |
 |---|---|---|
 | Instructions | `.claude/rules/core.md` (always loaded: work mode, third eye, prohibitions, git; the whole starter adds ≈2.8k tokens per session) + rules that load only for matching files (code quality and SOLID/KISS/YAGNI/DRY, testing, security, performance, design, database, stack rules) | The model follows them |
-| Workflows | skills (`/orchestrate`, `/kickoff`, `/new-feature`, `/verify`, `/ship`…) and agents | Followed step by step |
+| Workflows | skills (`/orchestrate`, `/kickoff`, `/new-feature`, `/verify`, `/open-pr`…) and agents | Followed step by step |
 | Enforcement | hooks in `.claude/hooks/` | Deterministic — blocks violations |
 
 ## Agentic Development Environment
@@ -83,7 +83,7 @@ Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter and Swift get their own rules file (
 Plus everywhere: secrets, env reads only in the config module, new files ≤ 400 lines, git rules (no commits on main/master, no AI mentions, no force push), no unapproved dependencies, no destructive DB/Docker commands, report sections.
 
 ## Skills
-- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/fix-bug`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/ship`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
+- **Built-in (always on):** the skills in `template/.claude/skills` — `/orchestrate`, `/kickoff`, `/new-feature`, `/fix-bug`, `/add-api-route`, `/db-change`, `/write-tests`, `/verify`, `/open-pr`, `/ui-review`, `/security-audit`, `/pentest`, `/project-health`.
 - **Catalog** (`skills-catalog.json`): `frontend-design`, `impeccable`, `ui-ux-pro-max`, `design-taste-frontend`, `web-design-guidelines`, `emil-design-eng`, `vercel-react-best-practices`, `modern-web-guidance` (Google Chrome, on by default for web projects: anything with a `package.json`, an `index.html` or a `composer.json`), plus the `playwright` and `context7` MCP servers.
 - **Recommended:** on a first install these are switched on automatically, based on the stack (skip with `--no-recommended`):
   - `context7` for every project;
