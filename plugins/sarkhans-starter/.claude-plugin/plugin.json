@@ -1,12 +1,12 @@
 {
   "name": "sarkhans-starter",
-  "version": "4.12.0",
+  "version": "4.12.1",
   "description": "Guardrails, rules, specialist agents and skills for professional work with Claude Code: third-eye reports, no invented APIs, safe git, design lock, database review.",
   "author": {
-    "name": "sarkhandigitech"
+    "name": "Rasimoghlu"
   },
-  "homepage": "https://github.com/sarkhandigitech/sarkhans-claude-starter",
-  "repository": "https://github.com/sarkhandigitech/sarkhans-claude-starter",
+  "homepage": "https://github.com/Rasimoghlu/sarkhans-claude-starter",
+  "repository": "https://github.com/Rasimoghlu/sarkhans-claude-starter",
   "license": "MIT",
   "dependencies": [
     "modern-web-guidance"

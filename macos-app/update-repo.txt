@@ -1,2 +1,2 @@
 # Repository the app checks for updates (owner/repo). Release builds set this automatically.
-sarkhandigitech/sarkhans-claude-starter
+Rasimoghlu/sarkhans-claude-starter

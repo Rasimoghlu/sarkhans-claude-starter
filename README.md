@@ -4,20 +4,20 @@
 
 Rules Claude Code can't skip, a team of specialist agents, and a report on every change — for projects in any language, with extra support for TypeScript/Next.js, Go, PHP (Laravel/Symfony), Python (Django/FastAPI), Rust, Java/Kotlin, .NET, Ruby, Dart/Flutter, Swift and Docker.
 
-Project site: **https://sarkhandigitech.github.io/sarkhans-claude-starter/**
+Project site: **https://rasimoghlu.github.io/sarkhans-claude-starter/**
 
 ## Get it
 
 ### Option 1: Claude Code plugin (Windows, Linux, macOS)
 Run these two commands in a terminal, then start Claude Code:
 ```bash
-claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin marketplace add Rasimoghlu/sarkhans-claude-starter
 claude plugin install sarkhans-starter@sarkhans-claude-starter
 ```
 The rules, agents, skills and guardrails then work in every project. Skills are named like `/sarkhans-starter:verify`. [More about the plugin](#claude-code-plugin-windows-linux-macos)
 
 ### Option 2: Mac app
-### [Download Sarkhan’s Claude Starter for Mac](https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
+### [Download Sarkhan’s Claude Starter for Mac](https://github.com/Rasimoghlu/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.dmg)
 macOS 13 or newer, Apple Silicon and Intel, always the latest version. [How to install](#install-on-a-mac).
 
 The app adds what the plugin can't: one-click setup for all your projects with the right rules for each stack, a work mode per project, team rules you pick with a click, a weekly report of what the guardrails stopped, and automatic updates.
@@ -74,13 +74,13 @@ The app checks for new versions when it opens, every 30 minutes, and when you sw
 ### For developers: install from Terminal
 If you're comfortable with Terminal, this one line installs or reinstalls the latest version without the approval step:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sarkhandigitech/sarkhans-claude-starter/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Rasimoghlu/sarkhans-claude-starter/main/install.sh | bash
 ```
 
 ## Claude Code plugin (Windows, Linux, macOS)
 The rules, agents, skills and guardrails also ship as a Claude Code plugin, for people who don't use the Mac app:
 ```bash
-claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin marketplace add Rasimoghlu/sarkhans-claude-starter
 claude plugin install sarkhans-starter@sarkhans-claude-starter
 ```
 Skills are namespaced (`/sarkhans-starter:verify`). In projects set up with the app, the project's own copy wins and the plugin stays out of the way. The plugin in `plugins/` is generated: run `node scripts/build-plugin.mjs` after changing `claude-web-starter/template`.

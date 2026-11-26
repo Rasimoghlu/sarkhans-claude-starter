@@ -2,6 +2,9 @@
 
 Each section becomes the release notes that people see in the app and on the Releases page. Write them for users.
 
+## 4.12.1
+- **The project has a new home: [github.com/Rasimoghlu/sarkhans-claude-starter](https://github.com/Rasimoghlu/sarkhans-claude-starter).** The project site is now at [rasimoghlu.github.io/sarkhans-claude-starter](https://rasimoghlu.github.io/sarkhans-claude-starter/). The app checks for updates there, and the download links, install command and plugin marketplace point to the new address. Old links keep redirecting, but if you added the plugin marketplace, add it again with `claude plugin marketplace add Rasimoghlu/sarkhans-claude-starter`.
+
 ## 4.12.0
 - **`/ship` is now `/open-pr`.** Claude Code now has its own built-in `/ship` command, so the starter's skill got a new name. It works the same way: branch, checks, review, commits, push and a pull request, never a merge. Projects are switched over on the next update.
 - **New `/fix-bug` skill.** Tell Claude what's broken and it works through it step by step: reproduce the bug, write a test that fails because of it, find the real cause, make the smallest fix, then run the test and the full checks again. No more "fixed" without proof, and no fixes that only hide the error. The report names the cause, the fix and any other places with the same mistake.

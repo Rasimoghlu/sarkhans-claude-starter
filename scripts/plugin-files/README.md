@@ -3,7 +3,7 @@
 The rules, agents, skills and guardrail hooks of Sarkhan’s Claude Starter as a Claude Code plugin, for people who don't use the Mac app.
 
 ```bash
-claude plugin marketplace add sarkhandigitech/sarkhans-claude-starter
+claude plugin marketplace add Rasimoghlu/sarkhans-claude-starter
 claude plugin install sarkhans-starter@sarkhans-claude-starter
 ```
 
