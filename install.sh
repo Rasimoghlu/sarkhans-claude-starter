@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="Sarkhans Claude Starter"
-DOWNLOAD_URL="https://github.com/sarkhandigitech/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.zip"
+DOWNLOAD_URL="https://github.com/Rasimoghlu/sarkhans-claude-starter/releases/latest/download/Sarkhans-Claude-Starter.zip"
 
 fail() {
   echo "✖ $1" >&2
