@@ -1,6 +1,6 @@
 {
   "name": "sarkhans-starter",
-  "version": "4.12.0",
+  "version": "4.12.1",
   "description": "Guardrails, rules, specialist agents and skills for professional work with Claude Code: third-eye reports, no invented APIs, safe git, design lock, database review.",
   "author": {
     "name": "Rasimoghlu"
