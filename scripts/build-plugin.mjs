@@ -65,7 +65,7 @@ function build(destination) {
     name: PLUGIN_NAME,
     version: VERSION,
     description: DESCRIPTION,
-    author: { name: "Rasimoghlu" },
+    author: { name: "Sarkhan" },
     homepage: "https://github.com/Rasimoghlu/sarkhans-claude-starter",
     repository: "https://github.com/Rasimoghlu/sarkhans-claude-starter",
     license: "MIT",
@@ -92,7 +92,7 @@ function marketplace() {
   return JSON.stringify({
     name: MARKETPLACE_NAME,
     description: "Sarkhan’s Claude Starter for Claude Code",
-    owner: { name: "Rasimoghlu" },
+    owner: { name: "Sarkhan" },
     plugins: [{ name: PLUGIN_NAME, source: `./plugins/${PLUGIN_NAME}`, description: DESCRIPTION, version: VERSION }, WEB_GUIDANCE],
   }, null, 2) + "\n";
 }
